@@ -1,0 +1,8 @@
+node_modules/
+.expo/
+dist/
+static-build/
+server_dist/
+.metro-cache/
+*.tsbuildinfo
+.cache/
