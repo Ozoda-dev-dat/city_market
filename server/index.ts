@@ -237,6 +237,8 @@ function setupErrorHandler(app: express.Application) {
   setupErrorHandler(app);
 
   const port = parseInt(process.env.PORT || "5000", 10);
+  // Only start the landing page server if we are not running NestJS or if we want them side-by-side
+  // For this setup, we'll keep the landing page on 5000 and NestJS on 5001
   server.listen(
     {
       port,
