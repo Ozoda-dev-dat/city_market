@@ -49,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {'productId': product['id'], 'quantity': 1}
     ]);
     if (result != null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Order created: ${result['id']}')),
       );
@@ -68,8 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Card(
                   margin: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: Text(product['name'] ?? 'Product'),
-                    subtitle: Text('\$${product['price'] ?? '0.00'}'),
+                    title: Text(product['name']?.toString() ?? 'Product'),
+                    subtitle: Text('\$${product['price']?.toString() ?? '0.00'}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.add_shopping_cart),
                       onPressed: () => _placeOrder(product),
