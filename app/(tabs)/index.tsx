@@ -2,10 +2,13 @@ import { StyleSheet, Text, View, Platform, Pressable, ScrollView } from "react-n
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useState } from "react";
 import Colors from "@/constants/colors";
 import { useI18n } from "@/core/i18n/i18n-context";
 import { Config } from "../src/lib/config";
+import { useAddressStore } from "@/src/lib/address-store";
+import { AddressModal } from "@/components/AddressModal";
+import { AppText } from "@/components/ui";
 
 function DevBanner() {
   if (!Config.IS_DEV) return null;
@@ -33,6 +36,9 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { t, locale } = useI18n();
   const topInset = Platform.OS === "web" ? 67 : insets.top;
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const addressText = useAddressStore((state) => state.addressText);
 
   return (
     <View style={styles.container}>
@@ -42,14 +48,30 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>{t.home.title}</Text>
-            <Text style={styles.subtitle}>{t.home.subtitle}</Text>
-          </View>
+          <Pressable 
+            style={styles.addressSelector}
+            onPress={() => setModalVisible(true)}
+          >
+            <View>
+              <View style={styles.locationLabelRow}>
+                <AppText variant="caption" style={styles.locationLabel}>Delivery to</AppText>
+                <Ionicons name="chevron-down" size={14} color={Colors.textSecondary} />
+              </View>
+              <AppText variant="body" style={styles.addressText} numberOfLines={1}>
+                {addressText || "Select address"}
+              </AppText>
+            </View>
+          </Pressable>
+          
           <Pressable style={styles.profileBtn}>
             <Ionicons name="person-circle-outline" size={36} color={Colors.textSecondary} />
           </Pressable>
         </View>
+
+        <AddressModal 
+          visible={modalVisible} 
+          onClose={() => setModalVisible(false)} 
+        />
 
         <Pressable style={styles.searchBar}>
           <Ionicons name="search" size={20} color={Colors.textSecondary} />
@@ -135,6 +157,25 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: "center",
     justifyContent: "center",
+  },
+  addressSelector: {
+    flex: 1,
+    marginRight: 12,
+  },
+  locationLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  locationLabel: {
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  addressText: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    marginTop: 2,
   },
   searchBar: {
     flexDirection: "row",
