@@ -5,6 +5,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import Colors from "@/constants/colors";
 import { useI18n } from "@/core/i18n/i18n-context";
+import { Config } from "../src/lib/config";
+
+function DevBanner() {
+  if (!Config.IS_DEV) return null;
+  return (
+    <View style={styles.devBanner}>
+      <Text style={styles.devBannerText}>DEV: {Config.API_BASE_URL}</Text>
+    </View>
+  );
+}
 
 function CategoryCard({ icon, label, color }: { icon: string; label: string; color: string }) {
   return (
@@ -26,6 +36,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <DevBanner />
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingTop: topInset + 16, paddingBottom: Platform.OS === "web" ? 118 : 100 }]}
         showsVerticalScrollIndicator={false}
@@ -229,5 +240,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     color: Colors.textSecondary,
+  },
+  devBanner: {
+    backgroundColor: "#FFEB3B",
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
+  devBannerText: {
+    fontSize: 10,
+    color: "#000",
+    fontWeight: "bold",
   },
 });
