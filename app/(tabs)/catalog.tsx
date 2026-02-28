@@ -13,8 +13,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
-import { PRODUCTS, CATEGORIES, formatPrice } from "@/constants/data";
+import { CATEGORIES, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
+import { useProducts } from "@/context/ProductsContext";
 
 export default function CatalogScreen() {
   const insets = useSafeAreaInsets();
@@ -22,9 +23,10 @@ export default function CatalogScreen() {
   const [activeCategory, setActiveCategory] = useState<string | null>(params.category ?? null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc">("default");
+  const { products: allProducts } = useProducts();
 
   const filtered = useMemo(() => {
-    let products = PRODUCTS;
+    let products = allProducts;
     if (activeCategory) {
       products = products.filter((p) => p.category === activeCategory);
     }

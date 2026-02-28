@@ -13,8 +13,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
-import { PRODUCTS, formatPrice } from "@/constants/data";
+import { formatPrice } from "@/constants/data";
 import { useCart } from "@/context/CartContext";
+import { useProducts } from "@/context/ProductsContext";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -29,7 +30,8 @@ export default function ProductDetailScreen() {
   const { items, addToCart, updateQuantity } = useCart();
   const [liked, setLiked] = useState(false);
 
-  const product = PRODUCTS.find((p) => p.id === id);
+  const { products } = useProducts();
+  const product = products.find((p) => p.id === id);
   const cartItem = items.find((i) => i.product.id === id);
   const qty = cartItem?.quantity ?? 0;
 
@@ -55,7 +57,7 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const related = PRODUCTS.filter(
+  const related = products.filter(
     (p) => p.category === product.category && p.id !== product.id
   ).slice(0, RELATED_LIMIT);
 

@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useCart } from "@/context/CartContext";
@@ -157,6 +158,19 @@ export default function ProfileScreen() {
           </View>
         </View>
       ))}
+
+      <Pressable style={styles.adminCard} onPress={() => router.push("/admin")}>
+        <View style={styles.adminCardLeft}>
+          <View style={styles.adminIconContainer}>
+            <Ionicons name="shield-checkmark" size={22} color="#fff" />
+          </View>
+          <View>
+            <Text style={styles.adminCardTitle}>Admin Panel</Text>
+            <Text style={styles.adminCardSub}>Manage products, orders & more</Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+      </Pressable>
 
       <Text style={styles.sectionTitle}>Settings</Text>
 
@@ -465,5 +479,42 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 8,
     marginBottom: 8,
+  },
+  adminCard: {
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  adminCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  adminIconContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  adminCardTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 16,
+    color: "#fff",
+  },
+  adminCardSub: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
   },
 });

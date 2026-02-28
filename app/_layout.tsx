@@ -7,6 +7,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { CartProvider } from "@/context/CartContext";
+import { ProductsProvider } from "@/context/ProductsContext";
 import {
   useFonts,
   Poppins_400Regular,
@@ -30,6 +31,7 @@ function RootLayoutNav() {
           headerTintColor: "#fff",
         }}
       />
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -53,6 +55,7 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <ProductsProvider>
         <CartProvider>
           <GestureHandlerRootView>
             <KeyboardProvider>
@@ -60,6 +63,7 @@ export default function RootLayout() {
             </KeyboardProvider>
           </GestureHandlerRootView>
         </CartProvider>
+        </ProductsProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

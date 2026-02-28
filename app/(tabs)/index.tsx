@@ -20,8 +20,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
-import { PRODUCTS, CATEGORIES, BANNERS, formatPrice } from "@/constants/data";
+import { CATEGORIES, BANNERS, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
+import { useProducts } from "@/context/ProductsContext";
 
 const { width } = Dimensions.get("window");
 
@@ -73,8 +74,9 @@ export default function HomeScreen() {
   const scrollRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
 
-  const featuredProducts = PRODUCTS.filter((p) => p.badge === "hot" || p.badge === "new");
-  const saleProducts = PRODUCTS.filter((p) => p.badge === "sale");
+  const { products } = useProducts();
+  const featuredProducts = products.filter((p) => p.badge === "hot" || p.badge === "new");
+  const saleProducts = products.filter((p) => p.badge === "sale");
 
   useEffect(() => {
     const interval = setInterval(() => {
