@@ -9,167 +9,162 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
 import { useCart } from "@/context/CartContext";
 import { useProducts } from "@/context/ProductsContext";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
 
-const RELATED_LIMIT = 4;
+const BADGE_CONFIG = {
+  sale: { label: "Chegirma", color: "#EF4444" },
+  new: { label: "Yangi", color: "#3B82F6" },
+  hot: { label: "Ommabop", color: "#F97316" },
+};
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const { items, addToCart, updateQuantity } = useCart();
-  const [liked, setLiked] = useState(false);
-
   const { products } = useProducts();
   const product = products.find((p) => p.id === id);
-  const cartItem = items.find((i) => i.product.id === id);
-  const qty = cartItem?.quantity ?? 0;
+  const { addToCart, items, updateQuantity, removeFromCart } = useCart();
+  const [liked, setLiked] = useState(false);
+  const likeScale = useSharedValue(1);
+  const cartItemCount = items.find((i) => i.product.id === id)?.quantity ?? 0;
+  const btnScale = useSharedValue(1);
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const heartScale = useSharedValue(1);
-  const heartStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: heartScale.value }],
-  }));
-
-  const addScale = useSharedValue(1);
-  const addStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: addScale.value }],
-  }));
+  const likeAnim = useAnimatedStyle(() => ({ transform: [{ scale: likeScale.value }] }));
+  const btnAnim = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
 
   if (!product) {
     return (
-      <View style={styles.notFound}>
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
         <Ionicons name="alert-circle-outline" size={48} color={Colors.textMuted} />
-        <Text style={styles.notFoundText}>Product not found</Text>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>Go Back</Text>
+        <Text style={styles.notFound}>Mahsulot topilmadi</Text>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Text style={styles.backBtnText}>Orqaga</Text>
         </Pressable>
       </View>
     );
   }
 
-  const related = products.filter(
+  const badgeCfg = product.badge ? BADGE_CONFIG[product.badge] : null;
+  const relatedProducts = products.filter(
     (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, RELATED_LIMIT);
-
-  const discount = product.originalPrice
-    ? Math.round((1 - product.price / product.originalPrice) * 100)
-    : 0;
+  ).slice(0, 4);
 
   const handleAddToCart = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    addScale.value = withSpring(0.9, {}, () => {
-      addScale.value = withSpring(1);
-    });
+    btnScale.value = withSequence(withSpring(0.94), withSpring(1));
     addToCart(product);
   };
 
   const handleLike = () => {
+    setLiked(!liked);
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    heartScale.value = withSpring(1.3, {}, () => {
-      heartScale.value = withSpring(1);
-    });
-    setLiked((prev) => !prev);
+    likeScale.value = withSequence(withSpring(1.3), withSpring(1));
   };
-
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 + bottomPad }}>
-        <LinearGradient
-          colors={["#E8F5EE", "#F5F8F3"]}
-          style={styles.imageSection}
-        >
-          <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-            <Pressable style={styles.iconBtn} onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={20} color={Colors.text} />
-            </Pressable>
-            <Animated.View style={heartStyle}>
-              <Pressable style={styles.iconBtn} onPress={handleLike}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
+        <View style={[styles.hero, { paddingTop: topPad + 60 }]}>
+          <Text style={styles.heroEmoji}>{product.image}</Text>
+          {badgeCfg && (
+            <View style={[styles.heroBadge, { backgroundColor: badgeCfg.color }]}>
+              <Text style={styles.heroBadgeText}>{badgeCfg.label}</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.infoCard}>
+          <View style={styles.infoHeader}>
+            <View style={styles.namePriceBlock}>
+              <Text style={styles.productName}>{product.name}</Text>
+              {product.brand && <Text style={styles.productBrand}>{product.brand}</Text>}
+              <View style={styles.ratingRow}>
+                <Ionicons name="star" size={14} color="#F59E0B" />
+                <Text style={styles.ratingText}>{product.rating}</Text>
+                <Text style={styles.ratingCount}>(128 ta sharh)</Text>
+              </View>
+            </View>
+            <Animated.View style={likeAnim}>
+              <Pressable onPress={handleLike} style={styles.likeBtn}>
                 <Ionicons
                   name={liked ? "heart" : "heart-outline"}
-                  size={20}
-                  color={liked ? Colors.error : Colors.text}
+                  size={22}
+                  color={liked ? "#EF4444" : Colors.textMuted}
                 />
               </Pressable>
             </Animated.View>
           </View>
 
-          <Text style={styles.productEmoji}>{product.image}</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>{formatPrice(product.price)}</Text>
+            <Text style={styles.unit}>/ {product.unit}</Text>
+            {product.originalPrice && (
+              <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
+            )}
+            {product.originalPrice && (
+              <View style={styles.savingBadge}>
+                <Text style={styles.savingText}>
+                  -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+                </Text>
+              </View>
+            )}
+          </View>
 
-          {product.badge && (
-            <View style={[styles.badge, styles[`badge_${product.badge}`]]}>
-              <Text style={styles.badgeText}>
-                {product.badge === "sale"
-                  ? `-${discount}%`
-                  : product.badge.toUpperCase()}
+          {product.weight && (
+            <View style={styles.metaRow}>
+              <Ionicons name="scale-outline" size={14} color={Colors.textMuted} />
+              <Text style={styles.metaText}>Og'irlik: {product.weight}</Text>
+              <View style={styles.metaDivider} />
+              <Ionicons
+                name={product.inStock ? "checkmark-circle" : "close-circle"}
+                size={14}
+                color={product.inStock ? Colors.primary : Colors.error}
+              />
+              <Text style={[styles.metaText, { color: product.inStock ? Colors.primary : Colors.error }]}>
+                {product.inStock ? "Mavjud" : "Mavjud emas"}
               </Text>
             </View>
           )}
-        </LinearGradient>
 
-        <View style={styles.details}>
-          <View style={styles.nameRow}>
-            <Text style={styles.productName}>{product.name}</Text>
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={12} color="#F59E0B" />
-              <Text style={styles.ratingText}>{product.rating}</Text>
-            </View>
-          </View>
+          <View style={styles.divider} />
 
-          {product.brand && (
-            <Text style={styles.brand}>{product.brand}</Text>
-          )}
-
-          <View style={styles.metaRow}>
-            {product.weight && (
-              <View style={styles.metaChip}>
-                <Ionicons name="scale-outline" size={13} color={Colors.textSecondary} />
-                <Text style={styles.metaText}>{product.weight}</Text>
-              </View>
-            )}
-            <View style={styles.metaChip}>
-              <Ionicons name="cube-outline" size={13} color={Colors.textSecondary} />
-              <Text style={styles.metaText}>{product.unit}</Text>
-            </View>
-            <View style={[styles.metaChip, { backgroundColor: Colors.primaryLight }]}>
-              <Ionicons name="checkmark-circle" size={13} color={Colors.primary} />
-              <Text style={[styles.metaText, { color: Colors.primary }]}>In Stock</Text>
-            </View>
-          </View>
-
-          <Text style={styles.sectionLabel}>Description</Text>
+          <Text style={styles.descTitle}>Tavsif</Text>
           <Text style={styles.description}>{product.description}</Text>
 
-          {related.length > 0 && (
+          {relatedProducts.length > 0 && (
             <>
-              <Text style={styles.sectionLabel}>You might also like</Text>
+              <View style={styles.divider} />
+              <Text style={styles.descTitle}>Sizga ham yoqishi mumkin</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.relatedScroll}>
-                {related.map((item) => (
+                {relatedProducts.map((rp) => (
                   <Pressable
-                    key={item.id}
+                    key={rp.id}
                     style={styles.relatedCard}
-                    onPress={() => router.replace({ pathname: "/product/[id]", params: { id: item.id } })}
+                    onPress={() => router.push({ pathname: "/product/[id]", params: { id: rp.id } })}
                   >
-                    <View style={styles.relatedImageBox}>
-                      <Text style={styles.relatedEmoji}>{item.image}</Text>
+                    <View style={styles.relatedImageContainer}>
+                      <Text style={styles.relatedEmoji}>{rp.image}</Text>
                     </View>
-                    <Text style={styles.relatedName} numberOfLines={2}>{item.name}</Text>
-                    <Text style={styles.relatedPrice}>{formatPrice(item.price)}</Text>
+                    <Text style={styles.relatedName} numberOfLines={1}>{rp.name}</Text>
+                    <Text style={styles.relatedPrice}>{formatPrice(rp.price)}</Text>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -178,42 +173,52 @@ export default function ProductDetailScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, { paddingBottom: bottomPad + 8 }]}>
-        <View style={styles.priceBlock}>
-          <Text style={styles.priceLabel}>Price</Text>
-          <Text style={styles.price}>{formatPrice(product.price)}</Text>
-          {product.originalPrice && (
-            <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
-          )}
-        </View>
+      <View style={[styles.header, { top: topPad + 8 }]}>
+        <Pressable style={styles.iconBtn} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={22} color={Colors.text} />
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => router.push("/(tabs)/cart")}>
+          <Ionicons name="cart-outline" size={22} color={Colors.text} />
+        </Pressable>
+      </View>
 
-        {qty === 0 ? (
-          <Animated.View style={[styles.addBtnWrapper, addStyle]}>
-            <Pressable style={styles.addBtn} onPress={handleAddToCart}>
+      <View style={[styles.footer, { paddingBottom: Platform.OS === "web" ? 34 : insets.bottom + 8 }]}>
+        {cartItemCount === 0 ? (
+          <Animated.View style={[{ flex: 1 }, btnAnim]}>
+            <Pressable
+              style={[styles.addToCartBtn, !product.inStock && styles.addToCartDisabled]}
+              onPress={handleAddToCart}
+              disabled={!product.inStock}
+            >
               <Ionicons name="cart-outline" size={20} color="#fff" />
-              <Text style={styles.addBtnText}>Add to Cart</Text>
+              <Text style={styles.addToCartText}>
+                {product.inStock ? "Savatga qo'shish" : "Mavjud emas"}
+              </Text>
             </Pressable>
           </Animated.View>
         ) : (
-          <View style={styles.qtyLarge}>
-            <Pressable
-              style={styles.qtyBtnLg}
-              onPress={() => {
-                if (Platform.OS !== "web") {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                updateQuantity(product.id, qty - 1);
-              }}
-            >
-              <Ionicons name="remove" size={22} color={Colors.primary} />
-            </Pressable>
-            <Text style={styles.qtyLargeText}>{qty}</Text>
-            <Pressable
-              style={styles.qtyBtnLg}
-              onPress={handleAddToCart}
-            >
-              <Ionicons name="add" size={22} color={Colors.primary} />
-            </Pressable>
+          <View style={styles.cartControls}>
+            <Text style={styles.totalText}>
+              {formatPrice(product.price * cartItemCount)}
+            </Text>
+            <View style={styles.qtyRow}>
+              <Pressable
+                style={styles.qtyBtn}
+                onPress={() => {
+                  if (cartItemCount === 1) removeFromCart(product.id);
+                  else updateQuantity(product.id, cartItemCount - 1);
+                }}
+              >
+                <Ionicons name="remove" size={18} color="#fff" />
+              </Pressable>
+              <Text style={styles.qtyText}>{cartItemCount}</Text>
+              <Pressable
+                style={styles.qtyBtn}
+                onPress={() => updateQuantity(product.id, cartItemCount + 1)}
+              >
+                <Ionicons name="add" size={18} color="#fff" />
+              </Pressable>
+            </View>
           </View>
         )}
       </View>
@@ -226,178 +231,216 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  imageSection: {
-    height: 320,
+  hero: {
     alignItems: "center",
     justifyContent: "center",
+    paddingBottom: 40,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.card,
     position: "relative",
   },
-  topBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-  },
-  iconBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  productEmoji: {
+  heroEmoji: {
     fontSize: 100,
   },
-  badge: {
+  heroBadge: {
     position: "absolute",
-    bottom: 20,
-    right: 20,
+    right: 24,
+    bottom: 24,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
-  badge_sale: { backgroundColor: Colors.accent },
-  badge_new: { backgroundColor: "#3B82F6" },
-  badge_hot: { backgroundColor: "#EF4444" },
-  badgeText: {
+  heroBadgeText: {
     fontFamily: "Poppins_700Bold",
     fontSize: 12,
     color: "#fff",
   },
-  details: {
-    padding: 20,
+  header: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  nameRow: {
+  iconBtn: {
+    width: 42,
+    height: 42,
+    backgroundColor: Colors.card,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  infoCard: {
+    backgroundColor: Colors.background,
+    padding: 20,
+    paddingTop: 24,
+  },
+  infoHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 4,
+    marginBottom: 12,
+  },
+  namePriceBlock: {
+    flex: 1,
+    paddingRight: 12,
+    gap: 4,
   },
   productName: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 24,
+    fontSize: 22,
     color: Colors.text,
-    flex: 1,
-    lineHeight: 30,
-    marginRight: 12,
+    lineHeight: 28,
   },
-  ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#FFFBEB",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  ratingText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 13,
-    color: "#F59E0B",
-  },
-  brand: {
+  productBrand: {
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
     color: Colors.textSecondary,
-    marginBottom: 14,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  ratingText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
+    color: Colors.text,
+  },
+  ratingCount: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  likeBtn: {
+    width: 44,
+    height: 44,
+    backgroundColor: Colors.card,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+    flexWrap: "wrap",
+  },
+  price: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 26,
+    color: Colors.text,
+  },
+  unit: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginLeft: -4,
+  },
+  originalPrice: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
+    color: Colors.textMuted,
+    textDecorationLine: "line-through",
+  },
+  savingBadge: {
+    backgroundColor: "#FEF2F2",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  savingText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 12,
+    color: "#EF4444",
   },
   metaRow: {
     flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
-    marginBottom: 20,
-  },
-  metaChip: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    backgroundColor: Colors.card,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
+    gap: 6,
+    marginBottom: 12,
   },
   metaText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 12,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
     color: Colors.textSecondary,
   },
-  sectionLabel: {
+  metaDivider: {
+    width: 1,
+    height: 14,
+    backgroundColor: Colors.divider,
+    marginHorizontal: 6,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.divider,
+    marginVertical: 18,
+  },
+  descTitle: {
     fontFamily: "Poppins_700Bold",
     fontSize: 16,
     color: Colors.text,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   description: {
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
     color: Colors.textSecondary,
     lineHeight: 22,
-    marginBottom: 24,
   },
   relatedScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
+    marginHorizontal: -4,
   },
   relatedCard: {
+    width: 110,
     backgroundColor: Colors.card,
     borderRadius: 14,
-    padding: 12,
-    width: 110,
-    marginRight: 10,
+    padding: 10,
+    marginHorizontal: 4,
+    alignItems: "center",
+    gap: 6,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    alignItems: "center",
   },
-  relatedImageBox: {
+  relatedImageContainer: {
     width: 60,
     height: 60,
     backgroundColor: "#F8FBF8",
-    borderRadius: 12,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 6,
   },
   relatedEmoji: {
     fontSize: 32,
   },
   relatedName: {
     fontFamily: "Poppins_500Medium",
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.text,
     textAlign: "center",
-    lineHeight: 16,
-    marginBottom: 4,
   },
   relatedPrice: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.primary,
   },
-  bottomBar: {
+  footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    paddingHorizontal: 16,
+    paddingTop: 12,
     backgroundColor: Colors.card,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     shadowColor: "#000",
@@ -406,90 +449,72 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 10,
   },
-  priceBlock: {
-    gap: 2,
-  },
-  priceLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  price: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 22,
-    color: Colors.text,
-  },
-  originalPrice: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: Colors.textMuted,
-    textDecorationLine: "line-through",
-  },
-  addBtnWrapper: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  addBtn: {
+  addToCartBtn: {
     backgroundColor: Colors.primary,
     borderRadius: 16,
-    paddingVertical: 15,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
-  addBtnText: {
+  addToCartDisabled: {
+    backgroundColor: Colors.textMuted,
+  },
+  addToCartText: {
     fontFamily: "Poppins_700Bold",
     fontSize: 16,
     color: "#fff",
   },
-  qtyLarge: {
-    flex: 1,
-    marginLeft: 16,
+  cartControls: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.primaryLight,
+    justifyContent: "space-between",
+    backgroundColor: Colors.primary,
     borderRadius: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    gap: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  qtyBtnLg: {
-    width: 38,
-    height: 38,
-    backgroundColor: Colors.card,
-    borderRadius: 12,
+  totalText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 18,
+    color: "#fff",
+  },
+  qtyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  qtyBtn: {
+    width: 32,
+    height: 32,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  qtyLargeText: {
+  qtyText: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 22,
-    color: Colors.primary,
-    minWidth: 30,
+    fontSize: 18,
+    color: "#fff",
+    minWidth: 28,
     textAlign: "center",
   },
   notFound: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  notFoundText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 18,
     color: Colors.text,
+    marginTop: 12,
   },
   backBtn: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
-    marginTop: 8,
+    marginTop: 12,
   },
   backBtnText: {
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 15,
     color: "#fff",
   },

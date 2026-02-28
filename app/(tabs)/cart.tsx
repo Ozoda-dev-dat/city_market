@@ -115,9 +115,9 @@ export default function CartScreen() {
           <View style={styles.successIcon}>
             <Ionicons name="checkmark" size={40} color="#fff" />
           </View>
-          <Text style={styles.successTitle}>Order Placed!</Text>
+          <Text style={styles.successTitle}>Buyurtma qabul qilindi!</Text>
           <Text style={styles.successSubtitle}>
-            Your order has been placed successfully. We'll deliver it soon!
+            Buyurtmangiz muvaffaqiyatli qabul qilindi. Tez orada yetkazib beramiz!
           </Text>
           <Pressable
             style={styles.successBtn}
@@ -126,7 +126,7 @@ export default function CartScreen() {
               router.push("/(tabs)/index");
             }}
           >
-            <Text style={styles.successBtnText}>Continue Shopping</Text>
+            <Text style={styles.successBtnText}>Xaridni davom ettirish</Text>
           </Pressable>
         </View>
       </View>
@@ -136,15 +136,15 @@ export default function CartScreen() {
   if (items.length === 0) {
     return (
       <View style={[styles.container, { paddingTop: topPad }]}>
-        <Text style={[styles.title, { paddingHorizontal: 16, marginBottom: 0, paddingTop: 12 }]}>My Cart</Text>
+        <Text style={[styles.title, { paddingHorizontal: 16, marginBottom: 0, paddingTop: 12 }]}>Mening savatim</Text>
         <View style={styles.emptyState}>
           <View style={styles.emptyIcon}>
             <Ionicons name="cart-outline" size={40} color={Colors.primary} />
           </View>
-          <Text style={styles.emptyTitle}>Your cart is empty</Text>
-          <Text style={styles.emptySubtitle}>Add products from the catalog to get started</Text>
+          <Text style={styles.emptyTitle}>Savatingiz bo'sh</Text>
+          <Text style={styles.emptySubtitle}>Boshlash uchun katalogdan mahsulot qo'shing</Text>
           <Pressable style={styles.shopBtn} onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.shopBtnText}>Browse Products</Text>
+            <Text style={styles.shopBtnText}>Mahsulotlarni ko'rish</Text>
           </Pressable>
         </View>
       </View>
@@ -154,14 +154,14 @@ export default function CartScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Cart</Text>
+        <Text style={styles.title}>Mening savatim</Text>
         <Pressable onPress={() => {
           if (Platform.OS !== "web") {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           }
           clearCart();
         }}>
-          <Text style={styles.clearText}>Clear all</Text>
+          <Text style={styles.clearText}>Barchasini tozalash</Text>
         </Pressable>
       </View>
 
@@ -179,35 +179,35 @@ export default function CartScreen() {
         ))}
 
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Order Summary</Text>
+          <Text style={styles.summaryTitle}>Buyurtma xulosasi</Text>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal ({totalItems} items)</Text>
+            <Text style={styles.summaryLabel}>Jami ({totalItems} ta mahsulot)</Text>
             <Text style={styles.summaryValue}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <View style={styles.deliveryLabel}>
-              <Text style={styles.summaryLabel}>Delivery</Text>
+              <Text style={styles.summaryLabel}>Yetkazib berish</Text>
               {delivery === 0 && (
                 <View style={styles.freeBadge}>
-                  <Text style={styles.freeBadgeText}>FREE</Text>
+                  <Text style={styles.freeBadgeText}>BEPUL</Text>
                 </View>
               )}
             </View>
             <Text style={[styles.summaryValue, delivery === 0 && styles.freeValue]}>
-              {delivery === 0 ? "Free" : formatPrice(delivery)}
+              {delivery === 0 ? "Bepul" : formatPrice(delivery)}
             </Text>
           </View>
           {delivery > 0 && (
             <View style={styles.deliveryHint}>
               <Ionicons name="information-circle-outline" size={14} color={Colors.primary} />
               <Text style={styles.deliveryHintText}>
-                Add {formatPrice(100000 - totalPrice)} more for free delivery
+                Bepul yetkazib berish uchun yana {formatPrice(100000 - totalPrice)} qo'shing
               </Text>
             </View>
           )}
           <View style={styles.divider} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalLabel}>Jami to'lov</Text>
             <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
           </View>
         </View>
@@ -215,12 +215,12 @@ export default function CartScreen() {
 
       <View style={[styles.checkoutContainer, { paddingBottom: bottomPad + 8 }]}>
         <View style={styles.totalRow}>
-          <Text style={styles.checkoutLabel}>Total</Text>
+          <Text style={styles.checkoutLabel}>Jami</Text>
           <Text style={styles.checkoutTotal}>{formatPrice(finalTotal)}</Text>
         </View>
         <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
           <Ionicons name="bag-check-outline" size={20} color="#fff" />
-          <Text style={styles.checkoutBtnText}>Place Order</Text>
+          <Text style={styles.checkoutBtnText}>Buyurtma berish</Text>
         </Pressable>
       </View>
     </View>

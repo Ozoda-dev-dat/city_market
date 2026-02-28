@@ -18,13 +18,13 @@ import { useProducts } from "@/context/ProductsContext";
 import { Product, CATEGORIES } from "@/constants/data";
 
 const BADGE_OPTIONS = [
-  { value: "", label: "None" },
-  { value: "new", label: "New" },
-  { value: "hot", label: "Hot" },
-  { value: "sale", label: "Sale" },
+  { value: "", label: "Yo'q" },
+  { value: "new", label: "Yangi" },
+  { value: "hot", label: "Ommabop" },
+  { value: "sale", label: "Chegirma" },
 ];
 
-const UNIT_OPTIONS = ["kg", "pcs", "L", "g", "dozen", "pack"];
+const UNIT_OPTIONS = ["kg", "dona", "L", "g", "o'nlik", "paket"];
 
 const EMOJI_OPTIONS = [
   "🍎", "🍊", "🍋", "🍇", "🍓", "🍌", "🍉", "🥭",
@@ -95,16 +95,16 @@ export default function AddProductScreen() {
 
   const validate = () => {
     if (!name.trim()) {
-      return "Product name is required";
+      return "Mahsulot nomi majburiy";
     }
     if (!price.trim() || isNaN(Number(price)) || Number(price) <= 0) {
-      return "Valid price is required";
+      return "To'g'ri narx kiriting";
     }
     if (originalPrice.trim() && (isNaN(Number(originalPrice)) || Number(originalPrice) <= 0)) {
-      return "Original price must be a valid number";
+      return "Asl narx to'g'ri raqam bo'lishi kerak";
     }
     if (!description.trim()) {
-      return "Description is required";
+      return "Tavsif majburiy";
     }
     return null;
   };
@@ -115,7 +115,7 @@ export default function AddProductScreen() {
       if (Platform.OS === "web") {
         alert(error);
       } else {
-        Alert.alert("Validation Error", error);
+        Alert.alert("Xatolik", error);
       }
       return;
     }
@@ -154,9 +154,9 @@ export default function AddProductScreen() {
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={Colors.text} />
         </Pressable>
-        <Text style={styles.title}>{isEdit ? "Edit Product" : "Add Product"}</Text>
+        <Text style={styles.title}>{isEdit ? "Mahsulotni tahrirlash" : "Mahsulot qo'shish"}</Text>
         <Pressable style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>Save</Text>
+          <Text style={styles.saveBtnText}>Saqlash</Text>
         </Pressable>
       </View>
 
@@ -172,12 +172,12 @@ export default function AddProductScreen() {
               <Ionicons name="pencil" size={10} color="#fff" />
             </View>
           </Pressable>
-          <Text style={styles.previewHint}>Tap emoji to change</Text>
+          <Text style={styles.previewHint}>Emojini o'zgartirish uchun bosing</Text>
         </View>
 
         {showEmojiPicker && (
           <View style={styles.emojiPickerCard}>
-            <Text style={styles.emojiPickerTitle}>Choose an Emoji</Text>
+            <Text style={styles.emojiPickerTitle}>Emoji tanlang</Text>
             <View style={styles.emojiGrid}>
               {EMOJI_OPTIONS.map((emoji) => (
                 <Pressable
@@ -196,37 +196,37 @@ export default function AddProductScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Basic Information</Text>
+          <Text style={styles.sectionTitle}>Asosiy ma'lumot</Text>
           <LabeledInput
-            label="Product Name"
+            label="Mahsulot nomi"
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Fresh Tomatoes"
+            placeholder="Masalan: Yangi pomidorlar"
             required
           />
           <LabeledInput
-            label="Brand"
+            label="Brend"
             value={brand}
             onChangeText={setBrand}
-            placeholder="e.g. FreshFarm"
+            placeholder="Masalan: FreshFarm"
           />
           <LabeledInput
-            label="Description"
+            label="Tavsif"
             value={description}
             onChangeText={setDescription}
-            placeholder="Describe the product..."
+            placeholder="Mahsulotni tasvirlang..."
             required
           />
           <LabeledInput
-            label="Weight / Size"
+            label="Og'irlik / O'lcham"
             value={weight}
             onChangeText={setWeight}
-            placeholder="e.g. 1 kg"
+            placeholder="Masalan: 1 kg"
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Category</Text>
+          <Text style={styles.sectionTitle}>Kategoriya</Text>
           <View style={styles.chipRow}>
             {CATEGORIES.map((cat) => (
               <Pressable
@@ -243,26 +243,26 @@ export default function AddProductScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pricing (UZS)</Text>
+          <Text style={styles.sectionTitle}>Narxlash (so'm)</Text>
           <LabeledInput
-            label="Price"
+            label="Narx"
             value={price}
             onChangeText={setPrice}
-            placeholder="e.g. 12000"
+            placeholder="Masalan: 12000"
             keyboardType="numeric"
             required
           />
           <LabeledInput
-            label="Original Price (before discount)"
+            label="Asl narx (chegirmadan oldin)"
             value={originalPrice}
             onChangeText={setOriginalPrice}
-            placeholder="Leave empty if no discount"
+            placeholder="Chegirma yo'q bo'lsa bo'sh qoldiring"
             keyboardType="numeric"
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Unit</Text>
+          <Text style={styles.sectionTitle}>O'lchov birligi</Text>
           <View style={styles.chipRow}>
             {UNIT_OPTIONS.map((u) => (
               <Pressable
@@ -277,7 +277,7 @@ export default function AddProductScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Badge</Text>
+          <Text style={styles.sectionTitle}>Belgi</Text>
           <View style={styles.chipRow}>
             {BADGE_OPTIONS.map((b) => (
               <Pressable
@@ -294,11 +294,11 @@ export default function AddProductScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Availability</Text>
+          <Text style={styles.sectionTitle}>Mavjudlik</Text>
           <View style={styles.toggleRow}>
             <View>
-              <Text style={styles.toggleLabel}>In Stock</Text>
-              <Text style={styles.toggleSub}>Product is available for purchase</Text>
+              <Text style={styles.toggleLabel}>Mavjud</Text>
+              <Text style={styles.toggleSub}>Mahsulot sotib olish uchun mavjud</Text>
             </View>
             <Pressable
               style={[styles.toggle, inStock && styles.toggleOn]}
@@ -311,7 +311,7 @@ export default function AddProductScreen() {
 
         <Pressable style={styles.saveButton} onPress={handleSave}>
           <Ionicons name={isEdit ? "checkmark" : "add-circle-outline"} size={20} color="#fff" />
-          <Text style={styles.saveButtonText}>{isEdit ? "Save Changes" : "Add Product"}</Text>
+          <Text style={styles.saveButtonText}>{isEdit ? "O'zgarishlarni saqlash" : "Mahsulot qo'shish"}</Text>
         </Pressable>
       </ScrollView>
     </View>

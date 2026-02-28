@@ -16,7 +16,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -39,7 +38,7 @@ function Banner({ item }: { item: (typeof BANNERS)[0] }) {
           <Text style={styles.bannerSubtitle}>{item.subtitle}</Text>
           <Text style={styles.bannerTitle}>{item.title}</Text>
           <Pressable style={styles.bannerBtn}>
-            <Text style={styles.bannerBtnText}>Shop Now</Text>
+            <Text style={styles.bannerBtnText}>Xarid qilish</Text>
           </Pressable>
         </View>
         <Text style={styles.bannerEmoji}>{item.emoji}</Text>
@@ -100,7 +99,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Good morning</Text>
+          <Text style={styles.greeting}>Xayrli kun</Text>
           <Text style={styles.storeName}>FreshMart</Text>
         </View>
         <Pressable style={styles.notifBtn}>
@@ -113,7 +112,7 @@ export default function HomeScreen() {
         onPress={() => router.push("/(tabs)/catalog")}
       >
         <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
-        <Text style={styles.searchPlaceholder}>Search products...</Text>
+        <Text style={styles.searchPlaceholder}>Mahsulot qidirish...</Text>
         <View style={styles.searchFilter}>
           <Ionicons name="options-outline" size={16} color={Colors.primary} />
         </View>
@@ -144,9 +143,9 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Categories</Text>
+        <Text style={styles.sectionTitle}>Kategoriyalar</Text>
         <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-          <Text style={styles.seeAll}>See all</Text>
+          <Text style={styles.seeAll}>Barchasini ko'rish</Text>
         </Pressable>
       </View>
 
@@ -161,7 +160,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Featured</Text>
+        <Text style={styles.sectionTitle}>Tavsiya etilgan</Text>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
@@ -177,10 +176,10 @@ export default function HomeScreen() {
       {saleProducts.length > 0 && (
         <>
           <View style={[styles.sectionHeader, { marginTop: 8 }]}>
-            <Text style={styles.sectionTitle}>On Sale</Text>
+            <Text style={styles.sectionTitle}>Chegirmali</Text>
             <View style={styles.saleBadge}>
               <Ionicons name="pricetag" size={12} color="#fff" />
-              <Text style={styles.saleBadgeText}>Up to 30% off</Text>
+              <Text style={styles.saleBadgeText}>30% gacha chegirma</Text>
             </View>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
@@ -295,9 +294,9 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 20,
+    fontSize: 18,
     color: "#fff",
-    lineHeight: 26,
+    lineHeight: 24,
     marginBottom: 14,
   },
   bannerBtn: {
@@ -358,7 +357,7 @@ const styles = StyleSheet.create({
   categoryPill: {
     alignItems: "center",
     marginRight: 16,
-    width: 68,
+    width: 72,
   },
   categoryIcon: {
     width: 56,
@@ -370,7 +369,7 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontFamily: "Poppins_500Medium",
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.text,
     textAlign: "center",
   },

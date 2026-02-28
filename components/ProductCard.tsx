@@ -6,9 +6,14 @@ import {
   Pressable,
   Platform,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 import { Product, formatPrice } from "@/constants/data";
 import { useCart } from "@/context/CartContext";
@@ -19,75 +24,91 @@ interface ProductCardProps {
   horizontal?: boolean;
 }
 
+const BADGE_LABELS: Record<string, string> = {
+  sale: "Chegirma",
+  new: "Yangi",
+  hot: "Ommabop",
+};
+
+const BADGE_COLORS: Record<string, string> = {
+  sale: "#EF4444",
+  new: "#3B82F6",
+  hot: "#F97316",
+};
+
 export function ProductCard({ product, onPress, horizontal }: ProductCardProps) {
-  const { items, addToCart, updateQuantity } = useCart();
+  const { addToCart, items, updateQuantity, removeFromCart } = useCart();
   const cartItem = items.find((i) => i.product.id === product.id);
-  const qty = cartItem?.quantity ?? 0;
+  const inCart = !!cartItem;
   const scale = useSharedValue(1);
+  const btnScale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const btnAnimStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handleAddToCart = () => {
+  const handleAdd = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    scale.value = withSpring(0.92, {}, () => {
-      scale.value = withSpring(1);
-    });
+    btnScale.value = withSequence(withSpring(0.8), withSpring(1));
     addToCart(product);
   };
 
-  const handleDecrement = () => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    updateQuantity(product.id, qty - 1);
-  };
-
-  const discount = product.originalPrice
-    ? Math.round((1 - product.price / product.originalPrice) * 100)
-    : 0;
-
   if (horizontal) {
     return (
-      <Animated.View style={[animatedStyle]}>
-        <Pressable style={styles.horizontalCard} onPress={onPress}>
+      <Animated.View style={animStyle}>
+        <Pressable
+          style={styles.horizontalCard}
+          onPress={onPress}
+          onPressIn={() => { scale.value = withSpring(0.97); }}
+          onPressOut={() => { scale.value = withSpring(1); }}
+        >
           <View style={styles.horizontalImageContainer}>
             <Text style={styles.horizontalEmoji}>{product.image}</Text>
             {product.badge && (
-              <View style={[styles.badge, styles[`badge_${product.badge}`]]}>
-                <Text style={styles.badgeText}>
-                  {product.badge === "sale" ? `-${discount}%` : product.badge.toUpperCase()}
-                </Text>
+              <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
+                <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
               </View>
             )}
           </View>
           <View style={styles.horizontalInfo}>
-            <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-            <Text style={styles.unitText}>{product.unit}</Text>
-            <View style={styles.priceRow}>
+            <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+            <Text style={styles.brandText}>{product.brand ?? product.unit}</Text>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={11} color="#F59E0B" />
+              <Text style={styles.ratingText}>{product.rating}</Text>
+            </View>
+            <View style={styles.horizontalBottom}>
               <View>
                 <Text style={styles.price}>{formatPrice(product.price)}</Text>
                 {product.originalPrice && (
                   <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
                 )}
               </View>
-              {qty === 0 ? (
-                <Pressable style={styles.addBtn} onPress={handleAddToCart}>
-                  <Ionicons name="add" size={18} color="#fff" />
-                </Pressable>
-              ) : (
-                <View style={styles.qtyRow}>
-                  <Pressable style={styles.qtyBtn} onPress={handleDecrement}>
-                    <Ionicons name="remove" size={14} color={Colors.primary} />
+              {inCart ? (
+                <View style={styles.qtyControlSmall}>
+                  <Pressable
+                    style={styles.qtyBtnSmall}
+                    onPress={() => {
+                      if (cartItem.quantity === 1) removeFromCart(product.id);
+                      else updateQuantity(product.id, cartItem.quantity - 1);
+                    }}
+                  >
+                    <Ionicons name="remove" size={12} color={Colors.primary} />
                   </Pressable>
-                  <Text style={styles.qtyText}>{qty}</Text>
-                  <Pressable style={styles.qtyBtn} onPress={handleAddToCart}>
-                    <Ionicons name="add" size={14} color={Colors.primary} />
+                  <Text style={styles.qtyTextSmall}>{cartItem.quantity}</Text>
+                  <Pressable
+                    style={styles.qtyBtnSmall}
+                    onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
+                  >
+                    <Ionicons name="add" size={12} color={Colors.primary} />
                   </Pressable>
                 </View>
+              ) : (
+                <Animated.View style={btnAnimStyle}>
+                  <Pressable style={styles.addBtnSmall} onPress={handleAdd}>
+                    <Ionicons name="add" size={18} color="#fff" />
+                  </Pressable>
+                </Animated.View>
               )}
             </View>
           </View>
@@ -97,42 +118,60 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
   }
 
   return (
-    <Animated.View style={animatedStyle}>
-      <Pressable style={styles.card} onPress={onPress}>
+    <Animated.View style={[styles.card, animStyle]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.96); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        style={{ flex: 1 }}
+      >
         <View style={styles.imageContainer}>
           <Text style={styles.emoji}>{product.image}</Text>
           {product.badge && (
-            <View style={[styles.badge, styles[`badge_${product.badge}`]]}>
-              <Text style={styles.badgeText}>
-                {product.badge === "sale" ? `-${discount}%` : product.badge.toUpperCase()}
-              </Text>
+            <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
+              <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
             </View>
           )}
         </View>
         <View style={styles.info}>
           <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
           <Text style={styles.unitText}>{product.unit}</Text>
-          <View style={styles.priceRow}>
+          <View style={styles.ratingRow}>
+            <Ionicons name="star" size={11} color="#F59E0B" />
+            <Text style={styles.ratingText}>{product.rating}</Text>
+          </View>
+          <View style={styles.bottomRow}>
             <View>
               <Text style={styles.price}>{formatPrice(product.price)}</Text>
               {product.originalPrice && (
                 <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
               )}
             </View>
-            {qty === 0 ? (
-              <Pressable style={styles.addBtn} onPress={handleAddToCart}>
-                <Ionicons name="add" size={18} color="#fff" />
-              </Pressable>
-            ) : (
-              <View style={styles.qtyColumn}>
-                <Pressable style={styles.qtyBtnSm} onPress={handleAddToCart}>
-                  <Ionicons name="add" size={12} color={Colors.primary} />
-                </Pressable>
-                <Text style={styles.qtyText}>{qty}</Text>
-                <Pressable style={styles.qtyBtnSm} onPress={handleDecrement}>
+            {inCart ? (
+              <View style={styles.qtyControlSmall}>
+                <Pressable
+                  style={styles.qtyBtnSmall}
+                  onPress={() => {
+                    if (cartItem.quantity === 1) removeFromCart(product.id);
+                    else updateQuantity(product.id, cartItem.quantity - 1);
+                  }}
+                >
                   <Ionicons name="remove" size={12} color={Colors.primary} />
                 </Pressable>
+                <Text style={styles.qtyTextSmall}>{cartItem.quantity}</Text>
+                <Pressable
+                  style={styles.qtyBtnSmall}
+                  onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
+                >
+                  <Ionicons name="add" size={12} color={Colors.primary} />
+                </Pressable>
               </View>
+            ) : (
+              <Animated.View style={btnAnimStyle}>
+                <Pressable style={styles.addBtn} onPress={handleAdd}>
+                  <Ionicons name="add" size={20} color="#fff" />
+                </Pressable>
+              </Animated.View>
             )}
           </View>
         </View>
@@ -143,28 +182,43 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
 
 const styles = StyleSheet.create({
   card: {
+    width: 156,
     backgroundColor: Colors.card,
-    borderRadius: 16,
-    overflow: "hidden",
-    width: 160,
+    borderRadius: 18,
     marginRight: 12,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 3,
   },
   imageContainer: {
+    height: 110,
     backgroundColor: "#F8FBF8",
     alignItems: "center",
     justifyContent: "center",
-    height: 110,
+    position: "relative",
   },
   emoji: {
     fontSize: 52,
   },
+  badge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  badgeText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 9,
+    color: "#fff",
+  },
   info: {
     padding: 12,
+    gap: 3,
   },
   productName: {
     fontFamily: "Poppins_600SemiBold",
@@ -176,13 +230,22 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: 11,
     color: Colors.textMuted,
-    marginTop: 2,
   },
-  priceRow: {
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  ratingText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: Colors.textSecondary,
+  },
+  bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginTop: 8,
+    alignItems: "center",
+    marginTop: 4,
   },
   price: {
     fontFamily: "Poppins_700Bold",
@@ -191,90 +254,37 @@ const styles = StyleSheet.create({
   },
   originalPrice: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 10,
+    fontSize: 11,
     color: Colors.textMuted,
     textDecorationLine: "line-through",
   },
   addBtn: {
+    width: 30,
+    height: 30,
     backgroundColor: Colors.primary,
-    width: 32,
-    height: 32,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  qtyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 10,
-    padding: 4,
-    gap: 6,
-  },
-  qtyColumn: {
-    alignItems: "center",
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 10,
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    gap: 2,
-  },
-  qtyBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: Colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qtyBtnSm: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    backgroundColor: Colors.card,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qtyText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: Colors.primary,
-  },
-  badge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badge_sale: { backgroundColor: Colors.accent },
-  badge_new: { backgroundColor: "#3B82F6" },
-  badge_hot: { backgroundColor: "#EF4444" },
-  badgeText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 9,
-    color: "#fff",
-    textTransform: "uppercase",
-  },
-
   horizontalCard: {
     backgroundColor: Colors.card,
-    borderRadius: 16,
+    borderRadius: 18,
     flexDirection: "row",
+    marginBottom: 10,
     overflow: "hidden",
-    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
   horizontalImageContainer: {
-    backgroundColor: "#F8FBF8",
     width: 90,
+    height: 90,
+    backgroundColor: "#F8FBF8",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
   horizontalEmoji: {
     fontSize: 42,
@@ -282,6 +292,48 @@ const styles = StyleSheet.create({
   horizontalInfo: {
     flex: 1,
     padding: 12,
+    gap: 2,
+  },
+  brandText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 11,
+    color: Colors.textMuted,
+  },
+  horizontalBottom: {
+    flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  addBtnSmall: {
+    width: 28,
+    height: 28,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  qtyControlSmall: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+    padding: 3,
+    gap: 6,
+  },
+  qtyBtnSmall: {
+    width: 22,
+    height: 22,
+    backgroundColor: Colors.card,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  qtyTextSmall: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 12,
+    color: Colors.primary,
+    minWidth: 16,
+    textAlign: "center",
   },
 });

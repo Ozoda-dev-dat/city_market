@@ -9,308 +9,298 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
-import { useProducts } from "@/context/ProductsContext";
-import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/constants/data";
+import { useProducts } from "@/context/ProductsContext";
 
-const ADMIN_ORDERS = [
-  { id: "ORD-2842", customer: "Alisher T.", total: 87500, items: 5, status: "delivered", date: "Feb 25" },
-  { id: "ORD-2791", customer: "Malika K.", total: 42300, items: 3, status: "in_transit", date: "Feb 28" },
-  { id: "ORD-2634", customer: "Bobur A.", total: 156000, items: 8, status: "preparing", date: "Feb 28" },
-  { id: "ORD-2589", customer: "Nodira S.", total: 73200, items: 6, status: "pending", date: "Feb 28" },
+const ORDERS_DATA = [
+  {
+    id: "BUY-3001",
+    customer: "Alisher Karimov",
+    items: 4,
+    total: 87500,
+    status: "pending" as const,
+    time: "10 daqiqa oldin",
+  },
+  {
+    id: "BUY-3002",
+    customer: "Malika Yusupova",
+    items: 2,
+    total: 32000,
+    status: "preparing" as const,
+    time: "25 daqiqa oldin",
+  },
+  {
+    id: "BUY-3003",
+    customer: "Jasur Rakhimov",
+    items: 7,
+    total: 145000,
+    status: "transit" as const,
+    time: "1 soat oldin",
+  },
+  {
+    id: "BUY-3004",
+    customer: "Zulfiya Nazarova",
+    items: 3,
+    total: 56000,
+    status: "delivered" as const,
+    time: "2 soat oldin",
+  },
 ];
 
-const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  delivered: { bg: "#E8F5EE", text: Colors.primary, label: "Delivered" },
-  in_transit: { bg: "#EFF6FF", text: "#3B82F6", label: "In Transit" },
-  preparing: { bg: "#FFFBEB", text: "#F59E0B", label: "Preparing" },
-  pending: { bg: "#F5F5F5", text: "#6B7C6B", label: "Pending" },
+const STATUS_CONFIG = {
+  pending: { label: "Kutilmoqda", color: "#F59E0B", bg: "#FFFBEB", icon: "time" as const },
+  preparing: { label: "Tayyorlanmoqda", color: "#3B82F6", bg: "#EFF6FF", icon: "restaurant" as const },
+  transit: { label: "Yo'lda", color: "#8B5CF6", bg: "#F5F3FF", icon: "bicycle" as const },
+  delivered: { label: "Yetkazildi", color: Colors.primary, bg: Colors.primaryLight, icon: "checkmark-circle" as const },
 };
 
-interface QuickActionProps {
+const QuickActionCard = ({
+  icon,
+  label,
+  color,
+  bgColor,
+  onPress,
+}: {
   icon: string;
   label: string;
   color: string;
   bgColor: string;
   onPress: () => void;
-  badge?: number;
-}
-
-function QuickAction({ icon, label, color, bgColor, onPress, badge }: QuickActionProps) {
-  return (
-    <Pressable style={styles.quickAction} onPress={onPress}>
-      <View style={[styles.quickActionIcon, { backgroundColor: bgColor }]}>
-        <Ionicons name={icon as any} size={22} color={color} />
-        {badge !== undefined && badge > 0 && (
-          <View style={styles.quickActionBadge}>
-            <Text style={styles.quickActionBadgeText}>{badge}</Text>
-          </View>
-        )}
-      </View>
-      <Text style={styles.quickActionLabel}>{label}</Text>
-    </Pressable>
-  );
-}
+}) => (
+  <Pressable style={styles.quickCard} onPress={onPress}>
+    <View style={[styles.quickIcon, { backgroundColor: bgColor }]}>
+      <Ionicons name={icon as any} size={22} color={color} />
+    </View>
+    <Text style={styles.quickLabel}>{label}</Text>
+  </Pressable>
+);
 
 export default function AdminDashboard() {
   const insets = useSafeAreaInsets();
   const { products } = useProducts();
-  const { totalItems, totalPrice } = useCart();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const totalProducts = products.length;
-  const inStockProducts = products.filter((p) => p.inStock).length;
-  const customProducts = products.filter((p) => p.id.startsWith("custom_")).length;
-  const saleProducts = products.filter((p) => p.badge === "sale").length;
-
-  const totalRevenue = ADMIN_ORDERS.reduce((sum, o) => sum + o.total, 0);
-  const pendingOrders = ADMIN_ORDERS.filter((o) => o.status === "pending" || o.status === "preparing").length;
+  const totalRevenue = ORDERS_DATA.reduce((sum, o) => sum + o.total, 0);
+  const pendingCount = ORDERS_DATA.filter((o) => o.status === "pending").length;
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={[Colors.primary, Colors.primaryDark]}
-        style={[styles.headerBg, { paddingTop: topPad }]}
-      >
-        <View style={styles.headerRow}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={20} color="#fff" />
-          </Pressable>
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Admin Panel</Text>
-            <Text style={styles.headerSub}>FreshMart Dashboard</Text>
-          </View>
-          <View style={styles.adminBadgeContainer}>
-            <View style={styles.adminBadge}>
-              <Ionicons name="shield-checkmark" size={14} color={Colors.primary} />
-              <Text style={styles.adminBadgeText}>Admin</Text>
-            </View>
-          </View>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        { paddingTop: topPad + 12, paddingBottom: Platform.OS === "web" ? 34 : 40 },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.subtitle}>Boshqaruv paneli</Text>
+          <Text style={styles.title}>Admin Panel</Text>
         </View>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="close" size={20} color={Colors.text} />
+        </Pressable>
+      </View>
 
-        <View style={styles.statsRow}>
-          <View style={styles.statBlock}>
-            <Text style={styles.statNum}>{totalProducts}</Text>
-            <Text style={styles.statLbl}>Products</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBlock}>
-            <Text style={styles.statNum}>{ADMIN_ORDERS.length}</Text>
-            <Text style={styles.statLbl}>Orders</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBlock}>
-            <Text style={styles.statNum}>{formatPrice(totalRevenue).split(" ")[0]}</Text>
-            <Text style={styles.statLbl}>Revenue</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statBlock}>
-            <Text style={styles.statNum}>{pendingOrders}</Text>
-            <Text style={styles.statLbl}>Pending</Text>
-          </View>
+      <View style={styles.statsGrid}>
+        <View style={[styles.statCard, styles.statCardPrimary]}>
+          <Ionicons name="cube-outline" size={22} color="#fff" />
+          <Text style={styles.statValueWhite}>{products.length}</Text>
+          <Text style={styles.statLabelWhite}>Mahsulotlar</Text>
         </View>
-      </LinearGradient>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingBottom: Platform.OS === "web" ? 34 : 40 }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.quickActionsGrid}>
-          <QuickAction
-            icon="add-circle"
-            label="Add Product"
-            color={Colors.primary}
-            bgColor={Colors.primaryLight}
-            onPress={() => router.push("/admin/add-product")}
-          />
-          <QuickAction
-            icon="cube"
-            label="Products"
-            color="#3B82F6"
-            bgColor="#EFF6FF"
-            onPress={() => router.push("/admin/products")}
-            badge={customProducts}
-          />
-          <QuickAction
-            icon="receipt"
-            label="Orders"
-            color="#F59E0B"
-            bgColor="#FFFBEB"
-            onPress={() => router.push("/admin/orders")}
-            badge={pendingOrders}
-          />
-          <QuickAction
-            icon="grid"
-            label="Categories"
-            color="#8B5CF6"
-            bgColor="#F5F3FF"
-            onPress={() => router.push("/admin/categories")}
-          />
+        <View style={styles.statCard}>
+          <Ionicons name="receipt-outline" size={22} color={Colors.primary} />
+          <Text style={styles.statValue}>{ORDERS_DATA.length}</Text>
+          <Text style={styles.statLabel}>Buyurtmalar</Text>
         </View>
-
-        <View style={styles.infoCards}>
-          <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: Colors.primaryLight }]}>
-              <Ionicons name="checkmark-circle" size={18} color={Colors.primary} />
-            </View>
-            <View style={styles.infoCardBody}>
-              <Text style={styles.infoValue}>{inStockProducts}</Text>
-              <Text style={styles.infoLabel}>In Stock</Text>
-            </View>
-          </View>
-          <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: "#FFF0EB" }]}>
-              <Ionicons name="pricetag" size={18} color={Colors.accent} />
-            </View>
-            <View style={styles.infoCardBody}>
-              <Text style={styles.infoValue}>{saleProducts}</Text>
-              <Text style={styles.infoLabel}>On Sale</Text>
-            </View>
-          </View>
-          <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: "#EFF6FF" }]}>
-              <Ionicons name="star" size={18} color="#3B82F6" />
-            </View>
-            <View style={styles.infoCardBody}>
-              <Text style={styles.infoValue}>{customProducts}</Text>
-              <Text style={styles.infoLabel}>Custom</Text>
-            </View>
-          </View>
+        <View style={styles.statCard}>
+          <Ionicons name="cash-outline" size={22} color="#F59E0B" />
+          <Text style={[styles.statValue, { fontSize: 14 }]}>{formatPrice(totalRevenue)}</Text>
+          <Text style={styles.statLabel}>Daromad</Text>
         </View>
-
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Recent Orders</Text>
-          <Pressable onPress={() => router.push("/admin/orders")}>
-            <Text style={styles.seeAll}>See all</Text>
-          </Pressable>
+        <View style={[styles.statCard, { borderColor: "#FEF3C7" }]}>
+          <Ionicons name="time-outline" size={22} color="#F59E0B" />
+          <Text style={[styles.statValue, { color: "#F59E0B" }]}>{pendingCount}</Text>
+          <Text style={styles.statLabel}>Kutilmoqda</Text>
         </View>
+      </View>
 
-        {ADMIN_ORDERS.map((order) => {
-          const status = STATUS_COLORS[order.status] ?? STATUS_COLORS.pending;
-          return (
-            <View key={order.id} style={styles.orderCard}>
-              <View style={styles.orderLeft}>
+      <Text style={styles.sectionTitle}>Tezkor amallar</Text>
+      <View style={styles.quickGrid}>
+        <QuickActionCard
+          icon="add-circle-outline"
+          label="Mahsulot qo'shish"
+          color={Colors.primary}
+          bgColor={Colors.primaryLight}
+          onPress={() => router.push("/admin/add-product")}
+        />
+        <QuickActionCard
+          icon="cube-outline"
+          label="Mahsulotlar"
+          color="#3B82F6"
+          bgColor="#EFF6FF"
+          onPress={() => router.push("/admin/products")}
+        />
+        <QuickActionCard
+          icon="receipt-outline"
+          label="Buyurtmalar"
+          color="#F59E0B"
+          bgColor="#FFFBEB"
+          onPress={() => router.push("/admin/orders")}
+        />
+        <QuickActionCard
+          icon="grid-outline"
+          label="Kategoriyalar"
+          color="#8B5CF6"
+          bgColor="#F5F3FF"
+          onPress={() => router.push("/admin/categories")}
+        />
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>So'nggi buyurtmalar</Text>
+        <Pressable onPress={() => router.push("/admin/orders")}>
+          <Text style={styles.seeAll}>Barchasini ko'rish</Text>
+        </Pressable>
+      </View>
+
+      {ORDERS_DATA.map((order) => {
+        const status = STATUS_CONFIG[order.status];
+        return (
+          <Pressable key={order.id} style={styles.orderCard}>
+            <View style={styles.orderLeft}>
+              <View style={[styles.orderStatusIcon, { backgroundColor: status.bg }]}>
+                <Ionicons name={status.icon} size={18} color={status.color} />
+              </View>
+              <View>
                 <Text style={styles.orderCustomer}>{order.customer}</Text>
-                <Text style={styles.orderId}>{order.id} · {order.date}</Text>
-                <Text style={styles.orderMeta}>{order.items} items · {formatPrice(order.total)}</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-                <Text style={[styles.statusText, { color: status.text }]}>{status.label}</Text>
+                <Text style={styles.orderMeta}>
+                  {order.id} · {order.items} ta mahsulot · {order.time}
+                </Text>
               </View>
             </View>
-          );
-        })}
-
-        <View style={[styles.tipCard]}>
-          <Ionicons name="bulb-outline" size={20} color={Colors.accent} />
-          <Text style={styles.tipText}>
-            Tap <Text style={styles.tipBold}>Add Product</Text> to create new items, or{" "}
-            <Text style={styles.tipBold}>Products</Text> to edit or delete existing ones.
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+            <View style={styles.orderRight}>
+              <Text style={styles.orderTotal}>{formatPrice(order.total)}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                <Text style={[styles.statusBadgeText, { color: status.color }]}>
+                  {status.label}
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  headerBg: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  headerRow: {
+  content: {
+    paddingHorizontal: 16,
+  },
+  header: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 12,
-    paddingBottom: 20,
-    gap: 12,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 24,
+  },
+  subtitle: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  title: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 28,
+    color: Colors.text,
   },
   backBtn: {
-    width: 38,
-    height: 38,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    backgroundColor: Colors.card,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  headerCenter: { flex: 1 },
-  headerTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    color: "#fff",
-  },
-  headerSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.75)",
-  },
-  adminBadgeContainer: {},
-  adminBadge: {
+  statsGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#fff",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 28,
   },
-  adminBadgeText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 11,
-    color: Colors.primary,
-  },
-  statsRow: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 16,
+  statCard: {
+    width: "47%",
+    backgroundColor: Colors.card,
+    borderRadius: 18,
     padding: 16,
+    gap: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.cardBorder,
   },
-  statBlock: { flex: 1, alignItems: "center" },
-  statDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.25)" },
-  statNum: {
+  statCardPrimary: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  statValue: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 18,
+    fontSize: 22,
+    color: Colors.text,
+  },
+  statValueWhite: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 22,
     color: "#fff",
   },
-  statLbl: {
+  statLabel: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 11,
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  statLabelWhite: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
     color: "rgba(255,255,255,0.8)",
   },
-  scroll: { flex: 1 },
-  content: { padding: 16 },
-  sectionTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 17,
-    color: Colors.text,
-    marginBottom: 14,
-    marginTop: 8,
-  },
-  sectionHeaderRow: {
+  sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 14,
-    marginTop: 8,
+  },
+  sectionTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 18,
+    color: Colors.text,
+    marginBottom: 14,
   },
   seeAll: {
     fontFamily: "Poppins_500Medium",
     fontSize: 13,
     color: Colors.primary,
   },
-  quickActionsGrid: {
+  quickGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 28,
   },
-  quickAction: {
+  quickCard: {
     width: "47%",
     backgroundColor: Colors.card,
     borderRadius: 16,
@@ -319,136 +309,78 @@ const styles = StyleSheet.create({
     gap: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
-  quickActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+  quickIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-  quickActionBadge: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.accent,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  quickActionBadgeText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 10,
-    color: "#fff",
-  },
-  quickActionLabel: {
+  quickLabel: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
     color: Colors.text,
     textAlign: "center",
   },
-  infoCards: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 8,
-  },
-  infoCard: {
-    flex: 1,
+  orderCard: {
     backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 16,
+    padding: 14,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: 10,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 2,
+    gap: 12,
   },
-  infoIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+  orderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  orderStatusIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
   },
-  infoCardBody: { flex: 1 },
-  infoValue: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 18,
-    color: Colors.text,
-  },
-  infoLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    color: Colors.textSecondary,
-  },
-  orderCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  orderLeft: { flex: 1, gap: 2 },
   orderCustomer: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 14,
     color: Colors.text,
   },
-  orderId: {
+  orderMeta: {
     fontFamily: "Poppins_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
-  },
-  orderMeta: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 12,
     color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  orderRight: {
+    alignItems: "flex-end",
+    gap: 6,
+  },
+  orderTotal: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    color: Colors.text,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
-  statusText: {
+  statusBadgeText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-  },
-  tipCard: {
-    flexDirection: "row",
-    gap: 10,
-    backgroundColor: "#FFF8F5",
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 8,
-    alignItems: "flex-start",
-    borderWidth: 1,
-    borderColor: "#FFE0D0",
-  },
-  tipText: {
-    flex: 1,
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 20,
-  },
-  tipBold: {
-    fontFamily: "Poppins_600SemiBold",
-    color: Colors.text,
+    fontSize: 11,
   },
 });

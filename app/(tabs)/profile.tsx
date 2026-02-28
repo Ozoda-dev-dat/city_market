@@ -17,22 +17,22 @@ import { formatPrice } from "@/constants/data";
 
 const ORDER_HISTORY = [
   {
-    id: "ORD-2842",
-    date: "Feb 25, 2026",
+    id: "BUY-2842",
+    date: "25 Fevral, 2026",
     items: 5,
     total: 87500,
     status: "delivered",
   },
   {
-    id: "ORD-2791",
-    date: "Feb 20, 2026",
+    id: "BUY-2791",
+    date: "20 Fevral, 2026",
     items: 3,
     total: 42300,
     status: "delivered",
   },
   {
-    id: "ORD-2634",
-    date: "Feb 14, 2026",
+    id: "BUY-2634",
+    date: "14 Fevral, 2026",
     items: 8,
     total: 156000,
     status: "delivered",
@@ -100,18 +100,18 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
     >
-      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>Profil</Text>
 
       <View style={styles.profileCard}>
         <View style={styles.avatarContainer}>
           <Text style={styles.avatarEmoji}>👤</Text>
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>Guest User</Text>
+          <Text style={styles.profileName}>Mehmon foydalanuvchi</Text>
           <Text style={styles.profilePhone}>+998 90 000 00 00</Text>
           <View style={styles.profileBadge}>
             <Ionicons name="star" size={12} color="#F59E0B" />
-            <Text style={styles.profileBadgeText}>Gold Member</Text>
+            <Text style={styles.profileBadgeText}>Oltin a'zo</Text>
           </View>
         </View>
         <Pressable style={styles.editBtn}>
@@ -122,19 +122,19 @@ export default function ProfileScreen() {
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{ORDER_HISTORY.length}</Text>
-          <Text style={styles.statLabel}>Orders</Text>
+          <Text style={styles.statLabel}>Buyurtmalar</Text>
         </View>
         <View style={[styles.statCard, styles.statCardCenter]}>
           <Text style={[styles.statValue, styles.statValueLight]}>{totalItems}</Text>
-          <Text style={[styles.statLabel, styles.statLabelLight]}>In Cart</Text>
+          <Text style={[styles.statLabel, styles.statLabelLight]}>Savatda</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>2.4k</Text>
-          <Text style={styles.statLabel}>Points</Text>
+          <Text style={styles.statLabel}>Ballar</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Recent Orders</Text>
+      <Text style={styles.sectionTitle}>So'nggi buyurtmalar</Text>
 
       {ORDER_HISTORY.map((order) => (
         <View key={order.id} style={styles.orderCard}>
@@ -142,18 +142,18 @@ export default function ProfileScreen() {
             <Text style={styles.orderId}>{order.id}</Text>
             <View style={styles.orderStatusBadge}>
               <Ionicons name="checkmark-circle" size={12} color={Colors.primary} />
-              <Text style={styles.orderStatus}>Delivered</Text>
+              <Text style={styles.orderStatus}>Yetkazildi</Text>
             </View>
           </View>
           <View style={styles.orderDetails}>
             <Text style={styles.orderDate}>{order.date}</Text>
             <Text style={styles.orderDot}>·</Text>
-            <Text style={styles.orderItems}>{order.items} items</Text>
+            <Text style={styles.orderItems}>{order.items} ta mahsulot</Text>
           </View>
           <View style={styles.orderFooter}>
             <Text style={styles.orderTotal}>{formatPrice(order.total)}</Text>
             <Pressable style={styles.reorderBtn}>
-              <Text style={styles.reorderBtnText}>Reorder</Text>
+              <Text style={styles.reorderBtnText}>Qayta buyurtma</Text>
             </Pressable>
           </View>
         </View>
@@ -166,32 +166,32 @@ export default function ProfileScreen() {
           </View>
           <View>
             <Text style={styles.adminCardTitle}>Admin Panel</Text>
-            <Text style={styles.adminCardSub}>Manage products, orders & more</Text>
+            <Text style={styles.adminCardSub}>Mahsulot va buyurtmalarni boshqarish</Text>
           </View>
         </View>
         <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
       </Pressable>
 
-      <Text style={styles.sectionTitle}>Settings</Text>
+      <Text style={styles.sectionTitle}>Sozlamalar</Text>
 
       <View style={styles.menuCard}>
         <MenuItem
           icon="location-outline"
-          label="Delivery Address"
-          value="Tashkent"
+          label="Yetkazib berish manzili"
+          value="Toshkent"
           onPress={() => {}}
         />
         <View style={styles.menuDivider} />
         <MenuItem
           icon="card-outline"
-          label="Payment Methods"
+          label="To'lov usullari"
           value="Uzcard"
           onPress={() => {}}
         />
         <View style={styles.menuDivider} />
         <MenuItem
           icon="notifications-outline"
-          label="Notifications"
+          label="Bildirishnomalar"
           toggle
           toggleValue={notifications}
           onToggle={setNotifications}
@@ -199,7 +199,7 @@ export default function ProfileScreen() {
         <View style={styles.menuDivider} />
         <MenuItem
           icon="moon-outline"
-          label="Dark Mode"
+          label="Tungi rejim"
           toggle
           toggleValue={darkMode}
           onToggle={setDarkMode}
@@ -207,23 +207,23 @@ export default function ProfileScreen() {
         <View style={styles.menuDivider} />
         <MenuItem
           icon="language-outline"
-          label="Language"
-          value="English"
+          label="Til"
+          value="O'zbek"
           onPress={() => {}}
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Support</Text>
+      <Text style={styles.sectionTitle}>Yordam</Text>
       <View style={styles.menuCard}>
-        <MenuItem icon="help-circle-outline" label="Help Center" onPress={() => {}} />
+        <MenuItem icon="help-circle-outline" label="Yordam markazi" onPress={() => {}} />
         <View style={styles.menuDivider} />
-        <MenuItem icon="chatbubble-outline" label="Contact Us" onPress={() => {}} />
+        <MenuItem icon="chatbubble-outline" label="Biz bilan bog'laning" onPress={() => {}} />
         <View style={styles.menuDivider} />
-        <MenuItem icon="document-text-outline" label="Privacy Policy" onPress={() => {}} />
+        <MenuItem icon="document-text-outline" label="Maxfiylik siyosati" onPress={() => {}} />
       </View>
 
       <View style={styles.menuCard}>
-        <MenuItem icon="log-out-outline" label="Sign Out" color={Colors.error} onPress={() => {}} />
+        <MenuItem icon="log-out-outline" label="Chiqish" color={Colors.error} onPress={() => {}} />
       </View>
 
       <Text style={styles.version}>FreshMart v1.0.0</Text>
@@ -426,6 +426,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.primary,
   },
+  adminCard: {
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  adminCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  adminIconContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  adminCardTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 16,
+    color: "#fff",
+  },
+  adminCardSub: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+  },
   menuCard: {
     backgroundColor: Colors.card,
     borderRadius: 18,
@@ -479,42 +516,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 8,
     marginBottom: 8,
-  },
-  adminCard: {
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  adminCardLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  adminIconContainer: {
-    width: 44,
-    height: 44,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  adminCardTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 16,
-    color: "#fff",
-  },
-  adminCardSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
   },
 });

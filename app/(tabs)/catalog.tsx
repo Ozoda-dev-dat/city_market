@@ -40,21 +40,21 @@ export default function CatalogScreen() {
       products = [...products].sort((a, b) => b.price - a.price);
     }
     return products;
-  }, [activeCategory, search, sortBy]);
+  }, [activeCategory, search, sortBy, allProducts]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <Text style={styles.title}>Catalog</Text>
+        <Text style={styles.title}>Katalog</Text>
 
         <View style={styles.searchRow}>
           <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search products..."
+              placeholder="Mahsulot qidirish..."
               placeholderTextColor={Colors.textMuted}
               value={search}
               onChangeText={setSearch}
@@ -94,7 +94,7 @@ export default function CatalogScreen() {
             onPress={() => setActiveCategory(null)}
           >
             <Text style={[styles.catChipText, !activeCategory && styles.catChipTextActive]}>
-              All
+              Barchasi
             </Text>
           </Pressable>
           {CATEGORIES.map((cat) => (
@@ -124,8 +124,8 @@ export default function CatalogScreen() {
       {filtered.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="search" size={48} color={Colors.textMuted} />
-          <Text style={styles.emptyTitle}>No products found</Text>
-          <Text style={styles.emptySubtitle}>Try adjusting your search or filters</Text>
+          <Text style={styles.emptyTitle}>Mahsulot topilmadi</Text>
+          <Text style={styles.emptySubtitle}>Qidiruv yoki filtrni o'zgartirib ko'ring</Text>
         </View>
       ) : (
         <FlatList
@@ -147,7 +147,7 @@ export default function CatalogScreen() {
           )}
           ListHeaderComponent={
             <Text style={styles.resultsCount}>
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+              {filtered.length} ta mahsulot
             </Text>
           }
         />

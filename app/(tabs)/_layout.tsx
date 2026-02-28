@@ -14,20 +14,20 @@ function NativeTabLayout() {
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "house", selected: "house.fill" }} />
-        <Label>Home</Label>
+        <Label>Asosiy</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="catalog">
         <Icon sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }} />
-        <Label>Catalog</Label>
+        <Label>Katalog</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="cart">
         <Icon sf={{ default: "cart", selected: "cart.fill" }} />
-        <Label>Cart</Label>
+        <Label>Savat</Label>
         {totalItems > 0 && <Badge>{totalItems}</Badge>}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
-        <Label>Profile</Label>
+        <Label>Profil</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -68,7 +68,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Asosiy",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
@@ -77,7 +77,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="catalog"
         options={{
-          title: "Catalog",
+          title: "Katalog",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid" size={size} color={color} />
           ),
@@ -86,7 +86,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="cart"
         options={{
-          title: "Cart",
+          title: "Savat",
           tabBarBadge: totalItems > 0 ? totalItems : undefined,
           tabBarBadgeStyle: { backgroundColor: Colors.accent, fontSize: 10 },
           tabBarIcon: ({ color, size }) => (
@@ -97,7 +97,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Profil",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),

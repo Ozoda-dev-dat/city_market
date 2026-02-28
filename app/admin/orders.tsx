@@ -13,119 +13,161 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
 
-const ALL_ORDERS = [
+type OrderStatus = "pending" | "preparing" | "transit" | "delivered";
+
+const ORDERS_DATA = [
   {
-    id: "ORD-2842",
-    customer: "Alisher Tursunov",
-    phone: "+998 90 123 4567",
-    address: "Chilonzor, Tashkent",
+    id: "BUY-3001",
+    customer: "Alisher Karimov",
+    phone: "+998 90 123 45 67",
+    address: "Yunusobod tumani, 7-mavze",
+    items: [
+      { name: "Banan", qty: 2, price: 3500 },
+      { name: "Qizil olma", qty: 1, price: 8900 },
+      { name: "Yangi sut", qty: 3, price: 7500 },
+    ],
     total: 87500,
-    items: [
-      { name: "Banana", qty: 2, price: 3500 },
-      { name: "Apple", qty: 1, price: 8900 },
-      { name: "Milk", qty: 3, price: 7500 },
-    ],
-    status: "delivered",
-    date: "Feb 25, 2026",
-    time: "14:30",
+    status: "pending" as OrderStatus,
+    time: "10 daqiqa oldin",
+    date: "28 Fevral, 2026",
   },
   {
-    id: "ORD-2791",
-    customer: "Malika Karimova",
-    phone: "+998 91 234 5678",
-    address: "Yunusabad, Tashkent",
-    total: 42300,
+    id: "BUY-3002",
+    customer: "Malika Yusupova",
+    phone: "+998 91 234 56 78",
+    address: "Chilonzor tumani, 9-mavze",
     items: [
-      { name: "Tomato", qty: 2, price: 4500 },
-      { name: "Chicken", qty: 1, price: 32000 },
+      { name: "Pomidor", qty: 3, price: 4500 },
+      { name: "Kartoshka", qty: 2, price: 3200 },
     ],
-    status: "in_transit",
-    date: "Feb 28, 2026",
-    time: "10:15",
+    total: 32000,
+    status: "preparing" as OrderStatus,
+    time: "25 daqiqa oldin",
+    date: "28 Fevral, 2026",
   },
   {
-    id: "ORD-2634",
-    customer: "Bobur Aliyev",
-    phone: "+998 97 345 6789",
-    address: "Mirzo-Ulugbek, Tashkent",
-    total: 156000,
+    id: "BUY-3003",
+    customer: "Jasur Rakhimov",
+    phone: "+998 93 345 67 89",
+    address: "Mirzo Ulug'bek tumani, 3-mavze",
     items: [
-      { name: "Ground Beef", qty: 2, price: 45000 },
-      { name: "Eggs", qty: 2, price: 18000 },
-      { name: "Butter", qty: 2, price: 12500 },
+      { name: "Tovuq ko'kragi", qty: 2, price: 32000 },
+      { name: "Sabzi", qty: 1, price: 3800 },
+      { name: "Bodring", qty: 2, price: 3500 },
     ],
-    status: "preparing",
-    date: "Feb 28, 2026",
-    time: "09:00",
+    total: 145000,
+    status: "transit" as OrderStatus,
+    time: "1 soat oldin",
+    date: "28 Fevral, 2026",
   },
   {
-    id: "ORD-2589",
-    customer: "Nodira Saidova",
-    phone: "+998 94 456 7890",
-    address: "Sergeli, Tashkent",
-    total: 73200,
+    id: "BUY-3004",
+    customer: "Zulfiya Nazarova",
+    phone: "+998 94 456 78 90",
+    address: "Shayxontohur tumani, 5-mavze",
     items: [
-      { name: "Orange Juice", qty: 2, price: 15000 },
-      { name: "Watermelon", qty: 4, price: 4800 },
+      { name: "Yogurt", qty: 2, price: 5500 },
+      { name: "Sariyog'", qty: 1, price: 12500 },
     ],
-    status: "pending",
-    date: "Feb 28, 2026",
-    time: "08:45",
+    total: 56000,
+    status: "delivered" as OrderStatus,
+    time: "2 soat oldin",
+    date: "28 Fevral, 2026",
+  },
+  {
+    id: "BUY-3005",
+    customer: "Bobur Toshmatov",
+    phone: "+998 95 567 89 01",
+    address: "Uchtepa tumani, 2-mavze",
+    items: [
+      { name: "Tarvuz", qty: 5, price: 4800 },
+      { name: "Mango", qty: 2, price: 12000 },
+    ],
+    total: 48000,
+    status: "pending" as OrderStatus,
+    time: "5 daqiqa oldin",
+    date: "28 Fevral, 2026",
   },
 ];
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-  delivered: { bg: "#E8F5EE", text: Colors.primary, label: "Delivered", icon: "checkmark-circle" },
-  in_transit: { bg: "#EFF6FF", text: "#3B82F6", label: "In Transit", icon: "bicycle" },
-  preparing: { bg: "#FFFBEB", text: "#F59E0B", label: "Preparing", icon: "restaurant" },
-  pending: { bg: "#F5F5F5", text: "#6B7C6B", label: "Pending", icon: "time" },
+const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: any; next?: OrderStatus; nextLabel?: string }> = {
+  pending: {
+    label: "Kutilmoqda",
+    color: "#F59E0B",
+    bg: "#FFFBEB",
+    icon: "time",
+    next: "preparing",
+    nextLabel: "Tayyorlashni boshlash",
+  },
+  preparing: {
+    label: "Tayyorlanmoqda",
+    color: "#3B82F6",
+    bg: "#EFF6FF",
+    icon: "restaurant",
+    next: "transit",
+    nextLabel: "Yetkazib berishga yuborish",
+  },
+  transit: {
+    label: "Yo'lda",
+    color: "#8B5CF6",
+    bg: "#F5F3FF",
+    icon: "bicycle",
+    next: "delivered",
+    nextLabel: "Yetkazildi deb belgilash",
+  },
+  delivered: {
+    label: "Yetkazildi",
+    color: Colors.primary,
+    bg: Colors.primaryLight,
+    icon: "checkmark-circle",
+  },
 };
 
-const STATUS_TABS = ["all", "pending", "preparing", "in_transit", "delivered"];
+const STATUS_TABS: { id: string; label: string }[] = [
+  { id: "all", label: "Barchasi" },
+  { id: "pending", label: "Kutilmoqda" },
+  { id: "preparing", label: "Tayyorlanmoqda" },
+  { id: "transit", label: "Yo'lda" },
+  { id: "delivered", label: "Yetkazildi" },
+];
 
 export default function AdminOrdersScreen() {
   const insets = useSafeAreaInsets();
-  const [activeStatus, setActiveStatus] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [orders, setOrders] = useState(ORDERS_DATA);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const filtered = activeStatus === "all"
-    ? ALL_ORDERS
-    : ALL_ORDERS.filter((o) => o.status === activeStatus);
+  const filtered = activeTab === "all" ? orders : orders.filter((o) => o.status === activeTab);
+
+  const advanceStatus = (id: string, next: OrderStatus) => {
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: next } : o)));
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <View style={styles.headerRow}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={20} color={Colors.text} />
-          </Pressable>
-          <Text style={styles.title}>Orders</Text>
-          <View style={styles.countBadge}>
-            <Text style={styles.countBadgeText}>{ALL_ORDERS.length}</Text>
-          </View>
+    <View style={[styles.container, { paddingTop: topPad + 12 }]}>
+      <View style={styles.header}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={22} color={Colors.text} />
+        </Pressable>
+        <Text style={styles.title}>Buyurtmalar</Text>
+        <View style={styles.countBadge}>
+          <Text style={styles.countBadgeText}>{orders.length}</Text>
         </View>
+      </View>
 
-        <View style={styles.tabsRow}>
-          {STATUS_TABS.map((tab) => {
-            const cfg = tab !== "all" ? STATUS_CONFIG[tab] : null;
-            const count = tab === "all" ? ALL_ORDERS.length : ALL_ORDERS.filter((o) => o.status === tab).length;
-            return (
-              <Pressable
-                key={tab}
-                style={[styles.tab, activeStatus === tab && styles.tabActive]}
-                onPress={() => setActiveStatus(tab)}
-              >
-                <Text style={[styles.tabText, activeStatus === tab && styles.tabTextActive]}>
-                  {tab === "all" ? "All" : (cfg?.label ?? tab)}
-                </Text>
-                <Text style={[styles.tabCount, activeStatus === tab && styles.tabCountActive]}>
-                  {count}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+      <View style={styles.tabsRow}>
+        {STATUS_TABS.map((tab) => (
+          <Pressable
+            key={tab.id}
+            style={[styles.tab, activeTab === tab.id && styles.tabActive]}
+            onPress={() => setActiveTab(tab.id)}
+          >
+            <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+              {tab.label}
+            </Text>
+          </Pressable>
+        ))}
       </View>
 
       <FlatList
@@ -133,76 +175,86 @@ export default function AdminOrdersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingBottom: Platform.OS === "web" ? 34 : 40 }]}
         scrollEnabled={!!filtered.length}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Ionicons name="receipt-outline" size={48} color={Colors.textMuted} />
+            <Text style={styles.emptyTitle}>Buyurtma topilmadi</Text>
+          </View>
+        }
         renderItem={({ item }) => {
-          const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.pending;
+          const status = STATUS_CONFIG[item.status];
           const isExpanded = expandedId === item.id;
+
           return (
-            <Pressable style={styles.orderCard} onPress={() => setExpandedId(isExpanded ? null : item.id)}>
+            <Pressable
+              style={styles.orderCard}
+              onPress={() => setExpandedId(isExpanded ? null : item.id)}
+            >
               <View style={styles.orderTop}>
-                <View style={styles.orderLeft}>
-                  <Text style={styles.orderCustomer}>{item.customer}</Text>
-                  <Text style={styles.orderId}>{item.id}</Text>
-                  <Text style={styles.orderTime}>{item.date} at {item.time}</Text>
+                <View style={[styles.statusIcon, { backgroundColor: status.bg }]}>
+                  <Ionicons name={status.icon} size={18} color={status.color} />
                 </View>
-                <View style={styles.orderRight}>
-                  <View style={[styles.statusBadge, { backgroundColor: cfg.bg }]}>
-                    <Ionicons name={cfg.icon as any} size={11} color={cfg.text} />
-                    <Text style={[styles.statusText, { color: cfg.text }]}>{cfg.label}</Text>
+                <View style={styles.orderMain}>
+                  <View style={styles.orderHeader}>
+                    <Text style={styles.orderId}>{item.id}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                      <Text style={[styles.statusText, { color: status.color }]}>
+                        {status.label}
+                      </Text>
+                    </View>
                   </View>
-                  <Text style={styles.orderTotal}>{formatPrice(item.total)}</Text>
-                  <Ionicons
-                    name={isExpanded ? "chevron-up" : "chevron-down"}
-                    size={16}
-                    color={Colors.textMuted}
-                  />
+                  <Text style={styles.customer}>{item.customer}</Text>
+                  <View style={styles.orderMeta}>
+                    <Text style={styles.metaText}>{item.time}</Text>
+                    <Text style={styles.metaDot}>·</Text>
+                    <Text style={styles.metaText}>{formatPrice(item.total)}</Text>
+                  </View>
                 </View>
+                <Ionicons
+                  name={isExpanded ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color={Colors.textMuted}
+                />
               </View>
 
               {isExpanded && (
-                <View style={styles.orderDetails}>
+                <View style={styles.expanded}>
                   <View style={styles.divider} />
-                  <View style={styles.detailRow}>
-                    <Ionicons name="call-outline" size={14} color={Colors.textSecondary} />
-                    <Text style={styles.detailText}>{item.phone}</Text>
+
+                  <View style={styles.customerInfo}>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="call-outline" size={14} color={Colors.textMuted} />
+                      <Text style={styles.infoText}>{item.phone}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="location-outline" size={14} color={Colors.textMuted} />
+                      <Text style={styles.infoText}>{item.address}</Text>
+                    </View>
                   </View>
-                  <View style={styles.detailRow}>
-                    <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
-                    <Text style={styles.detailText}>{item.address}</Text>
-                  </View>
-                  <View style={styles.divider} />
-                  <Text style={styles.itemsTitle}>Items</Text>
-                  {item.items.map((orderItem, idx) => (
+
+                  <Text style={styles.itemsTitle}>Mahsulotlar:</Text>
+                  {item.items.map((prod, idx) => (
                     <View key={idx} style={styles.itemRow}>
-                      <Text style={styles.itemName}>{orderItem.name}</Text>
-                      <Text style={styles.itemQty}>x{orderItem.qty}</Text>
-                      <Text style={styles.itemPrice}>{formatPrice(orderItem.price * orderItem.qty)}</Text>
+                      <Text style={styles.itemName}>{prod.name}</Text>
+                      <Text style={styles.itemQty}>x{prod.qty}</Text>
+                      <Text style={styles.itemPrice}>{formatPrice(prod.price * prod.qty)}</Text>
                     </View>
                   ))}
-                  <View style={styles.divider} />
+
                   <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalLabel}>Jami:</Text>
                     <Text style={styles.totalValue}>{formatPrice(item.total)}</Text>
                   </View>
-                  <View style={styles.statusActions}>
-                    {item.status === "pending" && (
-                      <View style={styles.actionBtn}>
-                        <Ionicons name="restaurant-outline" size={14} color={Colors.primary} />
-                        <Text style={styles.actionBtnText}>Start Preparing</Text>
-                      </View>
-                    )}
-                    {item.status === "preparing" && (
-                      <View style={styles.actionBtn}>
-                        <Ionicons name="bicycle-outline" size={14} color="#3B82F6" />
-                        <Text style={[styles.actionBtnText, { color: "#3B82F6" }]}>Send for Delivery</Text>
-                      </View>
-                    )}
-                    {item.status === "in_transit" && (
-                      <View style={[styles.actionBtn, { backgroundColor: Colors.primaryLight }]}>
-                        <Ionicons name="checkmark-circle-outline" size={14} color={Colors.primary} />
-                        <Text style={styles.actionBtnText}>Mark Delivered</Text>
-                      </View>
-                    )}
-                  </View>
+
+                  {status.next && (
+                    <Pressable
+                      style={styles.advanceBtn}
+                      onPress={() => advanceStatus(item.id, status.next!)}
+                    >
+                      <Ionicons name="arrow-forward-circle-outline" size={18} color="#fff" />
+                      <Text style={styles.advanceBtnText}>{status.nextLabel}</Text>
+                    </Pressable>
+                  )}
                 </View>
               )}
             </Pressable>
@@ -214,44 +266,41 @@ export default function AdminOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  header: {
+  container: {
+    flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: 16,
-    paddingBottom: 4,
   },
-  headerRow: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
     gap: 12,
   },
   backBtn: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     backgroundColor: Colors.card,
-    borderRadius: 12,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
   },
   title: {
     flex: 1,
     fontFamily: "Poppins_700Bold",
-    fontSize: 20,
+    fontSize: 22,
     color: Colors.text,
   },
   countBadge: {
     backgroundColor: Colors.primary,
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
   countBadgeText: {
     fontFamily: "Poppins_700Bold",
@@ -260,15 +309,12 @@ const styles = StyleSheet.create({
   },
   tabsRow: {
     flexDirection: "row",
-    gap: 6,
-    marginBottom: 12,
+    gap: 8,
+    marginBottom: 14,
     flexWrap: "wrap",
   },
   tab: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
     backgroundColor: Colors.card,
@@ -284,80 +330,93 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textSecondary,
   },
-  tabTextActive: { color: "#fff" },
-  tabCount: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 11,
-    color: Colors.textMuted,
+  tabTextActive: {
+    color: "#fff",
   },
-  tabCountActive: { color: "rgba(255,255,255,0.85)" },
-  list: { paddingHorizontal: 16 },
+  list: {
+    gap: 10,
+  },
   orderCard: {
     backgroundColor: Colors.card,
     borderRadius: 16,
     padding: 14,
-    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 2,
   },
   orderTop: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
+    gap: 12,
   },
-  orderLeft: { flex: 1, gap: 2 },
-  orderCustomer: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-    color: Colors.text,
+  statusIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  orderId: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: Colors.textMuted,
+  orderMain: {
+    flex: 1,
+    gap: 3,
   },
-  orderTime: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  orderRight: {
-    alignItems: "flex-end",
-    gap: 6,
-  },
-  statusBadge: {
+  orderHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+    justifyContent: "space-between",
+  },
+  orderId: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    color: Colors.text,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
   statusText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 11,
   },
-  orderTotal: {
-    fontFamily: "Poppins_700Bold",
+  customer: {
+    fontFamily: "Poppins_500Medium",
     fontSize: 14,
     color: Colors.text,
   },
-  orderDetails: { paddingTop: 4 },
+  orderMeta: {
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+  },
+  metaText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  metaDot: {
+    color: Colors.textMuted,
+  },
+  expanded: {
+    marginTop: 12,
+  },
   divider: {
     height: 1,
     backgroundColor: Colors.divider,
-    marginVertical: 10,
+    marginBottom: 14,
   },
-  detailRow: {
+  customerInfo: {
+    gap: 6,
+    marginBottom: 14,
+  },
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
   },
-  detailText: {
+  infoText: {
     fontFamily: "Poppins_400Regular",
     fontSize: 13,
     color: Colors.textSecondary,
@@ -377,54 +436,64 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Poppins_400Regular",
     fontSize: 13,
-    color: Colors.text,
+    color: Colors.textSecondary,
   },
   itemQty: {
     fontFamily: "Poppins_500Medium",
     fontSize: 13,
     color: Colors.textSecondary,
-    width: 32,
-    textAlign: "center",
+    marginRight: 12,
   },
   itemPrice: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
     color: Colors.text,
-    width: 90,
+    minWidth: 90,
     textAlign: "right",
   },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.divider,
+    marginBottom: 14,
   },
   totalLabel: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    color: Colors.textSecondary,
+    fontFamily: "Poppins_700Bold",
+    fontSize: 15,
+    color: Colors.text,
   },
   totalValue: {
     fontFamily: "Poppins_700Bold",
     fontSize: 16,
     color: Colors.text,
   },
-  statusActions: {
-    marginTop: 10,
-    flexDirection: "row",
-    gap: 8,
-  },
-  actionBtn: {
+  advanceBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 13,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 12,
+    justifyContent: "center",
+    gap: 8,
   },
-  actionBtnText: {
+  advanceBtnText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: Colors.primary,
+    fontSize: 14,
+    color: "#fff",
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    gap: 12,
+  },
+  emptyTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 18,
+    color: Colors.text,
   },
 });
