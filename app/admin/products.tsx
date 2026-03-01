@@ -14,11 +14,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
-import { useProducts } from "@/context/ProductsContext";
+import { useApp } from "@/context/ProductsContext";
 
 export default function AdminProductsScreen() {
   const insets = useSafeAreaInsets();
-  const { products, deleteProduct } = useProducts();
+  const { products, deleteProduct } = useApp();
   const [search, setSearch] = useState("");
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 

@@ -1,137 +1,87 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Product, PRODUCTS as STATIC_PRODUCTS, CATEGORIES as STATIC_CATEGORIES, Category } from "@/constants/data";
+import { apiRequest } from "@/lib/query-client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Product, Category, Order } from "@/constants/data";
 
-const CUSTOM_PRODUCTS_KEY = "@freshmart_custom_products";
-const DELETED_IDS_KEY = "@freshmart_deleted_ids";
-
-interface ProductsContextValue {
+interface AppContextValue {
   products: Product[];
   categories: Category[];
+  orders: Order[];
   addProduct: (product: Omit<Product, "id">) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
+  updateOrderStatus: (id: string, status: string) => void;
   isLoading: boolean;
 }
 
-const ProductsContext = createContext<ProductsContextValue | null>(null);
+const AppContext = createContext<AppContextValue | null>(null);
 
-export function ProductsProvider({ children }: { children: ReactNode }) {
-  const [customProducts, setCustomProducts] = useState<Product[]>([]);
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function AppProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    load();
-  }, []);
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
 
-  const load = async () => {
-    try {
-      const [cp, di] = await Promise.all([
-        AsyncStorage.getItem(CUSTOM_PRODUCTS_KEY),
-        AsyncStorage.getItem(DELETED_IDS_KEY),
-      ]);
-      if (cp) setCustomProducts(JSON.parse(cp));
-      if (di) setDeletedIds(JSON.parse(di));
-    } catch (e) {
-      console.error("Failed to load products:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+  });
 
-  const saveCustomProducts = async (items: Product[]) => {
-    try {
-      await AsyncStorage.setItem(CUSTOM_PRODUCTS_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
+    queryKey: ["/api/orders"],
+  });
 
-  const saveDeletedIds = async (ids: string[]) => {
-    try {
-      await AsyncStorage.setItem(DELETED_IDS_KEY, JSON.stringify(ids));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  const addProductMutation = useMutation({
+    mutationFn: (newProduct: Omit<Product, "id">) => 
+      apiRequest("POST", "/api/products", newProduct),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
+  });
 
-  const addProduct = (productData: Omit<Product, "id">) => {
-    const newProduct: Product = {
-      ...productData,
-      id: "custom_" + Date.now().toString() + Math.random().toString(36).substr(2, 6),
-    };
-    setCustomProducts((prev) => {
-      const updated = [...prev, newProduct];
-      saveCustomProducts(updated);
-      return updated;
-    });
-  };
+  const updateProductMutation = useMutation({
+    mutationFn: (updatedProduct: Product) => 
+      apiRequest("PATCH", `/api/products/${updatedProduct.id}`, updatedProduct),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
+  });
 
-  const updateProduct = (product: Product) => {
-    const isCustom = product.id.startsWith("custom_");
-    if (isCustom) {
-      setCustomProducts((prev) => {
-        const updated = prev.map((p) => (p.id === product.id ? product : p));
-        saveCustomProducts(updated);
-        return updated;
-      });
-    } else {
-      setCustomProducts((prev) => {
-        const existing = prev.find((p) => p.id === product.id);
-        let updated: Product[];
-        if (existing) {
-          updated = prev.map((p) => (p.id === product.id ? product : p));
-        } else {
-          updated = [...prev, product];
-        }
-        saveCustomProducts(updated);
-        return updated;
-      });
-      setDeletedIds((prev) => {
-        const cleaned = prev.filter((id) => id !== product.id);
-        saveDeletedIds(cleaned);
-        return cleaned;
-      });
-    }
-  };
+  const deleteProductMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/products/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
+  });
 
-  const deleteProduct = (id: string) => {
-    const isCustom = id.startsWith("custom_");
-    if (isCustom) {
-      setCustomProducts((prev) => {
-        const updated = prev.filter((p) => p.id !== id);
-        saveCustomProducts(updated);
-        return updated;
-      });
-    } else {
-      setDeletedIds((prev) => {
-        const updated = [...prev, id];
-        saveDeletedIds(updated);
-        return updated;
-      });
-    }
-  };
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: string }) => 
+      apiRequest("PATCH", `/api/orders/${id}/status`, { status }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
+  });
 
-  const products = useMemo(() => {
-    const filteredStatic = STATIC_PRODUCTS.filter((p) => {
-      const isDeleted = deletedIds.includes(p.id);
-      const isOverridden = customProducts.some((cp) => cp.id === p.id);
-      return !isDeleted && !isOverridden;
-    });
-    return [...filteredStatic, ...customProducts];
-  }, [customProducts, deletedIds]);
+  const addProduct = (product: Omit<Product, "id">) => addProductMutation.mutate(product);
+  const updateProduct = (product: Product) => updateProductMutation.mutate(product);
+  const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
+  const updateOrderStatus = (id: string, status: string) => updateOrderStatusMutation.mutate({ id, status });
 
   const value = useMemo(
-    () => ({ products, categories: STATIC_CATEGORIES, addProduct, updateProduct, deleteProduct, isLoading }),
-    [products, isLoading]
+    () => ({ 
+      products, 
+      categories, 
+      orders,
+      addProduct, 
+      updateProduct, 
+      deleteProduct, 
+      updateOrderStatus,
+      isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders
+    }),
+    [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]
   );
 
-  return <ProductsContext.Provider value={value}>{children}</ProductsContext.Provider>;
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-export function useProducts() {
-  const ctx = useContext(ProductsContext);
-  if (!ctx) throw new Error("useProducts must be used within ProductsProvider");
+export function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error("useApp must be used within AppProvider");
   return ctx;
 }
+
+// Keep backward compatibility for now
+export const useProducts = useApp;
+export const ProductsProvider = AppProvider;

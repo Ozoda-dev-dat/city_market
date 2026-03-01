@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
+import { useApp } from "@/context/ProductsContext";
 
 type OrderStatus = "pending" | "preparing" | "transit" | "delivered";
 
@@ -135,13 +136,13 @@ export default function AdminOrdersScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [orders, setOrders] = useState(ORDERS_DATA);
+  const { orders, updateOrderStatus } = useApp();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const filtered = activeTab === "all" ? orders : orders.filter((o) => o.status === activeTab);
 
   const advanceStatus = (id: string, next: OrderStatus) => {
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: next } : o)));
+    updateOrderStatus(id, next);
   };
 
   return (

@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
-import { useProducts } from "@/context/ProductsContext";
+import { useApp } from "@/context/ProductsContext";
 import { Product, CATEGORIES } from "@/constants/data";
 
 const BADGE_OPTIONS = [
@@ -70,11 +70,11 @@ function LabeledInput({
 
 export default function AddProductScreen() {
   const insets = useSafeAreaInsets();
-  const { addProduct, updateProduct, products } = useProducts();
-  const params = useLocalSearchParams<{ editId?: string }>();
+  const { addProduct, updateProduct, products } = useApp();
+  const params = useLocalSearchParams<{ id?: string }>();
 
-  const isEdit = !!params.editId;
-  const existingProduct = isEdit ? products.find((p) => p.id === params.editId) : undefined;
+  const isEdit = !!params.id;
+  const existingProduct = isEdit ? products.find((p) => p.id === params.id) : undefined;
 
   const [name, setName] = useState(existingProduct?.name ?? "");
   const [category, setCategory] = useState(existingProduct?.category ?? "fruits");

@@ -12,16 +12,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES } from "@/constants/data";
-import { useProducts } from "@/context/ProductsContext";
+import { useApp } from "@/context/ProductsContext";
 
 export default function AdminCategoriesScreen() {
   const insets = useSafeAreaInsets();
-  const { products } = useProducts();
+  const { products, categories } = useApp();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const categoriesWithCount = CATEGORIES.map((cat) => ({
+  const categoriesToRender = categories.length > 0 ? categories : CATEGORIES;
+
+  const categoriesWithCount = categoriesToRender.map((cat) => ({
     ...cat,
     productCount: products.filter((p) => p.category === cat.id).length,
+    color: (cat as any).color || (cat as any).color,
+    bgColor: (cat as any).bgColor || (cat as any).bgColor,
   }));
 
   const maxCount = Math.max(...categoriesWithCount.map((c) => c.productCount), 1);
