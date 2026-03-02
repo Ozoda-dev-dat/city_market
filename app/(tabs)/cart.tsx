@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { useCart } from "@/context/CartContext";
+import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
 import { router } from "expo-router";
 
@@ -92,7 +93,9 @@ function CartItemRow({ item, onRemove, onQtyChange }: {
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice, totalItems } = useCart();
+  const { createOrder } = useApp();
   const [ordered, setOrdered] = useState(false);
+  const [isSubmitting, setIsOrderedSubmitting] = useState(false);
 
   const delivery = totalPrice > 100000 ? 0 : 15000;
   const finalTotal = totalPrice + delivery;
@@ -100,12 +103,38 @@ export default function CartScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const handleCheckout = () => {
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const handleCheckout = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsOrderedSubmitting(true);
+      
+      const orderData = {
+        customerName: "Mehmon foydalanuvchi",
+        phoneNumber: "+998 90 000 00 00",
+        address: "Toshkent shahri",
+        total: finalTotal,
+        items: items.map(i => ({
+          name: i.product.name,
+          qty: i.quantity,
+          price: i.product.price
+        })),
+        status: "pending"
+      };
+
+      await createOrder(orderData);
+
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      setOrdered(true);
+      clearCart();
+    } catch (error) {
+      console.error("Order creation failed:", error);
+      Alert.alert("Xatolik", "Buyurtmani rasmiylashtirishda xatolik yuz berdi");
+    } finally {
+      setIsOrderedSubmitting(false);
     }
-    setOrdered(true);
-    clearCart();
   };
 
   if (ordered) {

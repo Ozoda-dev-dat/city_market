@@ -54,10 +54,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
   });
 
+  const createOrderMutation = useMutation({
+    mutationFn: (newOrder: any) => 
+      apiRequest("POST", "/api/orders", newOrder),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
+  });
+
   const addProduct = (product: Omit<Product, "id">) => addProductMutation.mutate(product);
   const updateProduct = (product: Product) => updateProductMutation.mutate(product);
   const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
   const updateOrderStatus = (id: string, status: string) => updateOrderStatusMutation.mutate({ id, status });
+  const createOrder = (order: any) => createOrderMutation.mutateAsync(order);
 
   const value = useMemo(
     () => ({ 
@@ -68,6 +75,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateProduct, 
       deleteProduct, 
       updateOrderStatus,
+      createOrder,
       isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders
     }),
     [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]

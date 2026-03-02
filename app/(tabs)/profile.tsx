@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useCart } from "@/context/CartContext";
+import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
 
 const ORDER_HISTORY = [
@@ -88,10 +89,13 @@ function MenuItem({
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { totalItems } = useCart();
+  const { orders } = useApp();
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const userOrders = orders.filter(o => o.customerName === "Mehmon foydalanuvchi").slice(0, 5);
 
   return (
     <ScrollView
@@ -121,7 +125,7 @@ export default function ProfileScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{ORDER_HISTORY.length}</Text>
+          <Text style={styles.statValue}>{userOrders.length}</Text>
           <Text style={styles.statLabel}>Buyurtmalar</Text>
         </View>
         <View style={[styles.statCard, styles.statCardCenter]}>
@@ -136,28 +140,42 @@ export default function ProfileScreen() {
 
       <Text style={styles.sectionTitle}>So'nggi buyurtmalar</Text>
 
-      {ORDER_HISTORY.map((order) => (
-        <View key={order.id} style={styles.orderCard}>
-          <View style={styles.orderHeader}>
-            <Text style={styles.orderId}>{order.id}</Text>
-            <View style={styles.orderStatusBadge}>
-              <Ionicons name="checkmark-circle" size={12} color={Colors.primary} />
-              <Text style={styles.orderStatus}>Yetkazildi</Text>
+      {userOrders.length === 0 ? (
+        <View style={styles.emptyOrders}>
+          <Text style={styles.emptyOrdersText}>Hozircha buyurtmalar yo'q</Text>
+        </View>
+      ) : (
+        userOrders.map((order) => (
+          <View key={order.id} style={styles.orderCard}>
+            <View style={styles.orderHeader}>
+              <Text style={styles.orderId}>{order.id}</Text>
+              <View style={[styles.orderStatusBadge, order.status === "delivered" && { backgroundColor: Colors.primaryLight }]}>
+                <Ionicons 
+                  name={order.status === "delivered" ? "checkmark-circle" : "time-outline"} 
+                  size={12} 
+                  color={order.status === "delivered" ? Colors.primary : Colors.textMuted} 
+                />
+                <Text style={[styles.orderStatus, order.status !== "delivered" && { color: Colors.textSecondary }]}>
+                  {order.status === "pending" ? "Kutilmoqda" : 
+                   order.status === "preparing" ? "Tayyorlanmoqda" :
+                   order.status === "transit" ? "Yo'lda" : "Yetkazildi"}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.orderDetails}>
+              <Text style={styles.orderDate}>{new Date(order.createdAt).toLocaleDateString("uz-UZ")}</Text>
+              <Text style={styles.orderDot}>·</Text>
+              <Text style={styles.orderItems}>{(order.items as any[]).length} ta mahsulot</Text>
+            </View>
+            <View style={styles.orderFooter}>
+              <Text style={styles.orderTotal}>{formatPrice(order.total)}</Text>
+              <Pressable style={styles.reorderBtn}>
+                <Text style={styles.reorderBtnText}>Qayta buyurtma</Text>
+              </Pressable>
             </View>
           </View>
-          <View style={styles.orderDetails}>
-            <Text style={styles.orderDate}>{order.date}</Text>
-            <Text style={styles.orderDot}>·</Text>
-            <Text style={styles.orderItems}>{order.items} ta mahsulot</Text>
-          </View>
-          <View style={styles.orderFooter}>
-            <Text style={styles.orderTotal}>{formatPrice(order.total)}</Text>
-            <Pressable style={styles.reorderBtn}>
-              <Text style={styles.reorderBtnText}>Qayta buyurtma</Text>
-            </Pressable>
-          </View>
-        </View>
-      ))}
+        ))
+      )}
 
       <Pressable style={styles.courierCard} onPress={() => router.push("/courier")}>
         <View style={styles.adminCardLeft}>
@@ -543,5 +561,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 8,
     marginBottom: 8,
+  },
+  emptyOrders: {
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  emptyOrdersText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+    color: Colors.textMuted,
   },
 });
