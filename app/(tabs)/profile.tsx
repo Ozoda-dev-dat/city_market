@@ -159,6 +159,19 @@ export default function ProfileScreen() {
         </View>
       ))}
 
+      <Pressable style={styles.courierCard} onPress={() => router.push("/courier")}>
+        <View style={styles.adminCardLeft}>
+          <View style={[styles.adminIconContainer, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+            <Ionicons name="bicycle" size={22} color="#fff" />
+          </View>
+          <View>
+            <Text style={styles.adminCardTitle}>Kuryer paneli</Text>
+            <Text style={styles.adminCardSub}>Buyurtmalarni yetkazib berish</Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+      </Pressable>
+
       <Pressable style={styles.adminCard} onPress={() => router.push("/admin")}>
         <View style={styles.adminCardLeft}>
           <View style={styles.adminIconContainer}>
@@ -433,8 +446,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 10,
     shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  courierCard: {
+    backgroundColor: "#3B82F6",
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    shadowColor: "#3B82F6",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
