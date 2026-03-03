@@ -60,11 +60,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
   });
 
+  const createPromoCodeMutation = useMutation({
+    mutationFn: (promo: any) => apiRequest("POST", "/api/promo-codes", promo),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/promo-codes"] }),
+  });
+
   const addProduct = (product: Omit<Product, "id">) => addProductMutation.mutate(product);
   const updateProduct = (product: Product) => updateProductMutation.mutate(product);
   const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
-  const updateOrderStatus = (id: string, status: string) => updateOrderStatusMutation.mutate({ id, status });
+  const updateOrderStatus = (id: string, status: string, courierId?: string) => 
+    updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any);
   const createOrder = (order: any) => createOrderMutation.mutateAsync(order);
+  const createPromoCode = (promo: any) => createPromoCodeMutation.mutateAsync(promo);
 
   const value = useMemo(
     () => ({ 
@@ -76,6 +83,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       deleteProduct, 
       updateOrderStatus,
       createOrder,
+      createPromoCode,
       isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders
     }),
     [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]

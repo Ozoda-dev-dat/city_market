@@ -12,13 +12,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useApp } from "@/context/ProductsContext";
+import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/constants/data";
 
 export default function CourierDashboard() {
   const insets = useSafeAreaInsets();
   const { orders } = useApp();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"available" | "my-orders">("available");
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  if (user?.role !== "courier" && user?.role !== "admin") {
+    return (
+      <View style={[styles.container, { paddingTop: topPad + 100, alignItems: "center" }]}>
+        <Ionicons name="lock-closed" size={64} color={Colors.error} />
+        <Text style={{ fontFamily: "Poppins_700Bold", fontSize: 20, marginTop: 16 }}>Ruxsat yo'q</Text>
+        <Pressable onPress={() => router.replace("/(tabs)")} style={{ marginTop: 20 }}>
+          <Text style={{ color: Colors.primary }}>Ortga qaytish</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   // For prototype, we'll filter based on status
   const availableOrders = orders.filter(o => o.status === "preparing");

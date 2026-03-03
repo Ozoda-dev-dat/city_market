@@ -12,42 +12,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
-import { useProducts } from "@/context/ProductsContext";
-
-const ORDERS_DATA = [
-  {
-    id: "BUY-3001",
-    customer: "Alisher Karimov",
-    items: 4,
-    total: 87500,
-    status: "pending" as const,
-    time: "10 daqiqa oldin",
-  },
-  {
-    id: "BUY-3002",
-    customer: "Malika Yusupova",
-    items: 2,
-    total: 32000,
-    status: "preparing" as const,
-    time: "25 daqiqa oldin",
-  },
-  {
-    id: "BUY-3003",
-    customer: "Jasur Rakhimov",
-    items: 7,
-    total: 145000,
-    status: "transit" as const,
-    time: "1 soat oldin",
-  },
-  {
-    id: "BUY-3004",
-    customer: "Zulfiya Nazarova",
-    items: 3,
-    total: 56000,
-    status: "delivered" as const,
-    time: "2 soat oldin",
-  },
-];
+import { useApp } from "@/context/ProductsContext";
+import { useAuth } from "@/context/AuthContext";
 
 const STATUS_CONFIG = {
   pending: { label: "Kutilmoqda", color: "#F59E0B", bg: "#FFFBEB", icon: "time" as const },
@@ -79,11 +45,24 @@ const QuickActionCard = ({
 
 export default function AdminDashboard() {
   const insets = useSafeAreaInsets();
-  const { products } = useProducts();
+  const { products, orders } = useApp();
+  const { user } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const totalRevenue = ORDERS_DATA.reduce((sum, o) => sum + o.total, 0);
-  const pendingCount = ORDERS_DATA.filter((o) => o.status === "pending").length;
+  if (user?.role !== "admin") {
+    return (
+      <View style={[styles.container, { paddingTop: topPad + 100, alignItems: "center" }]}>
+        <Ionicons name="lock-closed" size={64} color={Colors.error} />
+        <Text style={{ fontFamily: "Poppins_700Bold", fontSize: 20, marginTop: 16 }}>Ruxsat yo'q</Text>
+        <Pressable onPress={() => router.replace("/(tabs)")} style={{ marginTop: 20 }}>
+          <Text style={{ color: Colors.primary }}>Ortga qaytish</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
 
   return (
     <ScrollView
@@ -112,7 +91,7 @@ export default function AdminDashboard() {
         </View>
         <View style={styles.statCard}>
           <Ionicons name="receipt-outline" size={22} color={Colors.primary} />
-          <Text style={styles.statValue}>{ORDERS_DATA.length}</Text>
+          <Text style={styles.statValue}>{orders.length}</Text>
           <Text style={styles.statLabel}>Buyurtmalar</Text>
         </View>
         <View style={styles.statCard}>
@@ -157,6 +136,13 @@ export default function AdminDashboard() {
           bgColor="#F5F3FF"
           onPress={() => router.push("/admin/categories")}
         />
+        <QuickActionCard
+          icon="bicycle-outline"
+          label="Kuryer qo'shish"
+          color="#10B981"
+          bgColor="#ECFDF5"
+          onPress={() => router.push("/admin/add-courier")}
+        />
       </View>
 
       <View style={styles.sectionHeader}>
@@ -166,8 +152,8 @@ export default function AdminDashboard() {
         </Pressable>
       </View>
 
-      {ORDERS_DATA.map((order) => {
-        const status = STATUS_CONFIG[order.status];
+      {orders.slice(0, 5).map((order) => {
+        const status = STATUS_CONFIG[order.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
         return (
           <Pressable key={order.id} style={styles.orderCard}>
             <View style={styles.orderLeft}>
@@ -175,9 +161,9 @@ export default function AdminDashboard() {
                 <Ionicons name={status.icon} size={18} color={status.color} />
               </View>
               <View>
-                <Text style={styles.orderCustomer}>{order.customer}</Text>
+                <Text style={styles.orderCustomer}>{order.customerName}</Text>
                 <Text style={styles.orderMeta}>
-                  {order.id} · {order.items} ta mahsulot · {order.time}
+                  {order.id} · {(order.items as any[]).length} ta mahsulot
                 </Text>
               </View>
             </View>

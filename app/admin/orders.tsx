@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   Platform,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,83 +14,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { formatPrice } from "@/constants/data";
 import { useApp } from "@/context/ProductsContext";
+import { useQuery } from "@tanstack/react-query";
 
 type OrderStatus = "pending" | "preparing" | "transit" | "delivered";
-
-const ORDERS_DATA = [
-  {
-    id: "BUY-3001",
-    customer: "Alisher Karimov",
-    phone: "+998 90 123 45 67",
-    address: "Yunusobod tumani, 7-mavze",
-    items: [
-      { name: "Banan", qty: 2, price: 3500 },
-      { name: "Qizil olma", qty: 1, price: 8900 },
-      { name: "Yangi sut", qty: 3, price: 7500 },
-    ],
-    total: 87500,
-    status: "pending" as OrderStatus,
-    time: "10 daqiqa oldin",
-    date: "28 Fevral, 2026",
-  },
-  {
-    id: "BUY-3002",
-    customer: "Malika Yusupova",
-    phone: "+998 91 234 56 78",
-    address: "Chilonzor tumani, 9-mavze",
-    items: [
-      { name: "Pomidor", qty: 3, price: 4500 },
-      { name: "Kartoshka", qty: 2, price: 3200 },
-    ],
-    total: 32000,
-    status: "preparing" as OrderStatus,
-    time: "25 daqiqa oldin",
-    date: "28 Fevral, 2026",
-  },
-  {
-    id: "BUY-3003",
-    customer: "Jasur Rakhimov",
-    phone: "+998 93 345 67 89",
-    address: "Mirzo Ulug'bek tumani, 3-mavze",
-    items: [
-      { name: "Tovuq ko'kragi", qty: 2, price: 32000 },
-      { name: "Sabzi", qty: 1, price: 3800 },
-      { name: "Bodring", qty: 2, price: 3500 },
-    ],
-    total: 145000,
-    status: "transit" as OrderStatus,
-    time: "1 soat oldin",
-    date: "28 Fevral, 2026",
-  },
-  {
-    id: "BUY-3004",
-    customer: "Zulfiya Nazarova",
-    phone: "+998 94 456 78 90",
-    address: "Shayxontohur tumani, 5-mavze",
-    items: [
-      { name: "Yogurt", qty: 2, price: 5500 },
-      { name: "Sariyog'", qty: 1, price: 12500 },
-    ],
-    total: 56000,
-    status: "delivered" as OrderStatus,
-    time: "2 soat oldin",
-    date: "28 Fevral, 2026",
-  },
-  {
-    id: "BUY-3005",
-    customer: "Bobur Toshmatov",
-    phone: "+998 95 567 89 01",
-    address: "Uchtepa tumani, 2-mavze",
-    items: [
-      { name: "Tarvuz", qty: 5, price: 4800 },
-      { name: "Mango", qty: 2, price: 12000 },
-    ],
-    total: 48000,
-    status: "pending" as OrderStatus,
-    time: "5 daqiqa oldin",
-    date: "28 Fevral, 2026",
-  },
-];
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: any; next?: OrderStatus; nextLabel?: string }> = {
   pending: {
@@ -136,13 +63,24 @@ export default function AdminOrdersScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showCourierList, setShowCourierList] = useState<string | null>(null);
   const { orders, updateOrderStatus } = useApp();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  const { data: couriers = [] } = useQuery<any[]>({
+    queryKey: ["/api/couriers"],
+  });
+
   const filtered = activeTab === "all" ? orders : orders.filter((o) => o.status === activeTab);
 
-  const advanceStatus = (id: string, next: OrderStatus) => {
-    updateOrderStatus(id, next);
+  const handleAssign = async (orderId: string, courierId: string) => {
+    try {
+      await updateOrderStatus(orderId, "preparing", courierId);
+      Alert.alert("Muvaffaqiyat", "Buyurtma kuryerga biriktirildi");
+      setShowCourierList(null);
+    } catch (e) {
+      Alert.alert("Xatolik", "Kuryerga biriktirishda xatolik yuz berdi");
+    }
   };
 
   return (
@@ -175,25 +113,18 @@ export default function AdminOrdersScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={[styles.list, { paddingBottom: Platform.OS === "web" ? 34 : 40 }]}
-        scrollEnabled={!!filtered.length}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={48} color={Colors.textMuted} />
-            <Text style={styles.emptyTitle}>Buyurtma topilmadi</Text>
-          </View>
-        }
         renderItem={({ item }) => {
-          const status = STATUS_CONFIG[item.status];
+          const status = STATUS_CONFIG[item.status as OrderStatus] || STATUS_CONFIG.pending;
           const isExpanded = expandedId === item.id;
 
           return (
-            <Pressable
-              style={styles.orderCard}
-              onPress={() => setExpandedId(isExpanded ? null : item.id)}
-            >
-              <View style={styles.orderTop}>
+            <View style={styles.orderCard}>
+              <Pressable
+                style={styles.orderTop}
+                onPress={() => setExpandedId(isExpanded ? null : item.id)}
+              >
                 <View style={[styles.statusIcon, { backgroundColor: status.bg }]}>
-                  <Ionicons name={status.icon} size={18} color={status.color} />
+                  <Ionicons name={status.icon as any} size={18} color={status.color} />
                 </View>
                 <View style={styles.orderMain}>
                   <View style={styles.orderHeader}>
@@ -204,10 +135,8 @@ export default function AdminOrdersScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Text style={styles.customer}>{item.customer}</Text>
+                  <Text style={styles.customer}>{item.customerName}</Text>
                   <View style={styles.orderMeta}>
-                    <Text style={styles.metaText}>{item.time}</Text>
-                    <Text style={styles.metaDot}>·</Text>
                     <Text style={styles.metaText}>{formatPrice(item.total)}</Text>
                   </View>
                 </View>
@@ -216,25 +145,18 @@ export default function AdminOrdersScreen() {
                   size={18}
                   color={Colors.textMuted}
                 />
-              </View>
+              </Pressable>
 
               {isExpanded && (
                 <View style={styles.expanded}>
                   <View style={styles.divider} />
-
                   <View style={styles.customerInfo}>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="call-outline" size={14} color={Colors.textMuted} />
-                      <Text style={styles.infoText}>{item.phone}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="location-outline" size={14} color={Colors.textMuted} />
-                      <Text style={styles.infoText}>{item.address}</Text>
-                    </View>
+                    <Text style={styles.infoText}>📍 {item.address}</Text>
+                    <Text style={styles.infoText}>📞 {item.phoneNumber}</Text>
                   </View>
 
                   <Text style={styles.itemsTitle}>Mahsulotlar:</Text>
-                  {item.items.map((prod, idx) => (
+                  {(item.items as any[]).map((prod, idx) => (
                     <View key={idx} style={styles.itemRow}>
                       <Text style={styles.itemName}>{prod.name}</Text>
                       <Text style={styles.itemQty}>x{prod.qty}</Text>
@@ -242,23 +164,38 @@ export default function AdminOrdersScreen() {
                     </View>
                   ))}
 
-                  <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Jami:</Text>
-                    <Text style={styles.totalValue}>{formatPrice(item.total)}</Text>
-                  </View>
-
-                  {status.next && (
+                  {item.status === "pending" && (
                     <Pressable
                       style={styles.advanceBtn}
-                      onPress={() => advanceStatus(item.id, status.next!)}
+                      onPress={() => setShowCourierList(showCourierList === item.id ? null : item.id)}
                     >
-                      <Ionicons name="arrow-forward-circle-outline" size={18} color="#fff" />
-                      <Text style={styles.advanceBtnText}>{status.nextLabel}</Text>
+                      <Ionicons name="person-add-outline" size={18} color="#fff" />
+                      <Text style={styles.advanceBtnText}>Kuryer biriktirish</Text>
                     </Pressable>
+                  )}
+
+                  {showCourierList === item.id && (
+                    <View style={styles.courierList}>
+                      <Text style={styles.courierListTitle}>Kuryer tanlang:</Text>
+                      {couriers.length === 0 ? (
+                        <Text style={styles.emptyText}>Mavjud kuryerlar yo'q</Text>
+                      ) : (
+                        couriers.map((c) => (
+                          <Pressable
+                            key={c.id}
+                            style={styles.courierItem}
+                            onPress={() => handleAssign(item.id, c.id)}
+                          >
+                            <Ionicons name="bicycle" size={16} color={Colors.primary} />
+                            <Text style={styles.courierName}>{c.name}</Text>
+                          </Pressable>
+                        ))
+                      )}
+                    </View>
                   )}
                 </View>
               )}
-            </Pressable>
+            </View>
           );
         }}
       />
@@ -267,234 +204,45 @@ export default function AdminOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    paddingHorizontal: 16,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 12,
-  },
-  backBtn: {
-    width: 42,
-    height: 42,
-    backgroundColor: Colors.card,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  title: {
-    flex: 1,
-    fontFamily: "Poppins_700Bold",
-    fontSize: 22,
-    color: Colors.text,
-  },
-  countBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  countBadgeText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 14,
-    color: "#fff",
-  },
-  tabsRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 14,
-    flexWrap: "wrap",
-  },
-  tab: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.cardBorder,
-  },
-  tabActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  tabText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  tabTextActive: {
-    color: "#fff",
-  },
-  list: {
-    gap: 10,
-  },
-  orderCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  orderTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  statusIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  orderMain: {
-    flex: 1,
-    gap: 3,
-  },
-  orderHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  orderId: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 14,
-    color: Colors.text,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-  },
-  customer: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 14,
-    color: Colors.text,
-  },
-  orderMeta: {
-    flexDirection: "row",
-    gap: 6,
-    alignItems: "center",
-  },
-  metaText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  metaDot: {
-    color: Colors.textMuted,
-  },
-  expanded: {
-    marginTop: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.divider,
-    marginBottom: 14,
-  },
-  customerInfo: {
-    gap: 6,
-    marginBottom: 14,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  infoText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  itemsTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  itemRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  itemName: {
-    flex: 1,
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  itemQty: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginRight: 12,
-  },
-  itemPrice: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: Colors.text,
-    minWidth: 90,
-    textAlign: "right",
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.divider,
-    marginBottom: 14,
-  },
-  totalLabel: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 15,
-    color: Colors.text,
-  },
-  totalValue: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 16,
-    color: Colors.text,
-  },
-  advanceBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 13,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  advanceBtnText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    color: "#fff",
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 80,
-    gap: 12,
-  },
-  emptyTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 18,
-    color: Colors.text,
-  },
+  container: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: 16 },
+  header: { flexDirection: "row", alignItems: "center", marginBottom: 16, gap: 12 },
+  backBtn: { width: 42, height: 42, backgroundColor: Colors.card, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  title: { flex: 1, fontFamily: "Poppins_700Bold", fontSize: 22, color: Colors.text },
+  countBadge: { backgroundColor: Colors.primary, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
+  countBadgeText: { fontFamily: "Poppins_700Bold", fontSize: 14, color: "#fff" },
+  tabsRow: { flexDirection: "row", gap: 8, marginBottom: 14, flexWrap: "wrap" },
+  tab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.cardBorder },
+  tabActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  tabText: { fontFamily: "Poppins_500Medium", fontSize: 12, color: Colors.textSecondary },
+  tabTextActive: { color: "#fff" },
+  list: { gap: 10 },
+  orderCard: { backgroundColor: Colors.card, borderRadius: 16, padding: 14, marginBottom: 10 },
+  orderTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  statusIcon: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  orderMain: { flex: 1, gap: 3 },
+  orderHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  orderId: { fontFamily: "Poppins_700Bold", fontSize: 14, color: Colors.text },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  statusText: { fontFamily: "Poppins_600SemiBold", fontSize: 11 },
+  customer: { fontFamily: "Poppins_500Medium", fontSize: 14, color: Colors.text },
+  orderMeta: { flexDirection: "row", gap: 6, alignItems: "center" },
+  metaText: { fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textSecondary },
+  expanded: { marginTop: 12 },
+  divider: { height: 1, backgroundColor: Colors.divider, marginBottom: 14 },
+  customerInfo: { gap: 6, marginBottom: 14 },
+  infoText: { fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary },
+  itemsTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 13, color: Colors.text, marginBottom: 8 },
+  itemRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
+  itemName: { flex: 1, fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary },
+  itemQty: { fontFamily: "Poppins_500Medium", fontSize: 13, color: Colors.textSecondary, marginRight: 12 },
+  itemPrice: { fontFamily: "Poppins_600SemiBold", fontSize: 13, color: Colors.text, minWidth: 90, textAlign: "right" },
+  advanceBtn: { backgroundColor: Colors.primary, borderRadius: 13, paddingVertical: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 10 },
+  advanceBtnText: { fontFamily: "Poppins_600SemiBold", fontSize: 14, color: "#fff" },
+  courierList: { marginTop: 12, backgroundColor: Colors.background, borderRadius: 12, padding: 12 },
+  courierListTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 13, marginBottom: 8 },
+  courierItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.divider },
+  courierName: { fontFamily: "Poppins_500Medium", fontSize: 13 },
+  emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 12 },
+  emptyTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 18, color: Colors.text },
+  emptyText: { fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted, textAlign: "center" },
 });
