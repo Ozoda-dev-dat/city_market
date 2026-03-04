@@ -22,6 +22,7 @@ export default function AuthScreen() {
 
   useEffect(() => {
     if (user && !authLoading) {
+      console.log("User detected, redirecting to tabs");
       router.replace("/(tabs)");
     }
   }, [user, authLoading]);
@@ -44,7 +45,7 @@ export default function AuthScreen() {
       } else {
         await register(phoneNumber, password, name);
       }
-      router.replace("/(tabs)");
+      // The useEffect will handle redirection
     } catch (e: any) {
       Alert.alert("Xatolik", "Ma'lumotlar noto'g'ri kiritildi");
     } finally {
