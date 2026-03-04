@@ -18,7 +18,13 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
-  const { login, register } = useAuth();
+  const { login, register, user, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.replace("/(tabs)");
+    }
+  }, [user, authLoading]);
   const [isLogin, setIsLogin] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");

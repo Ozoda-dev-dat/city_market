@@ -25,6 +25,9 @@ function RootLayoutNav() {
   useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/auth");
+    } else if (!isLoading && user && router.canGoBack()) {
+      // If we are on auth and have a user, go to tabs
+      // But router.replace handles it better in the specific screen
     }
   }, [user, isLoading]);
 

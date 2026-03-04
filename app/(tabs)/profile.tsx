@@ -7,6 +7,7 @@ import {
   Pressable,
   Switch,
   Platform,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -14,31 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useCart } from "@/context/CartContext";
 import { useApp } from "@/context/ProductsContext";
+import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/constants/data";
-
-const ORDER_HISTORY = [
-  {
-    id: "BUY-2842",
-    date: "25 Fevral, 2026",
-    items: 5,
-    total: 87500,
-    status: "delivered",
-  },
-  {
-    id: "BUY-2791",
-    date: "20 Fevral, 2026",
-    items: 3,
-    total: 42300,
-    status: "delivered",
-  },
-  {
-    id: "BUY-2634",
-    date: "14 Fevral, 2026",
-    items: 8,
-    total: 156000,
-    status: "delivered",
-  },
-];
 
 function MenuItem({
   icon,
@@ -90,12 +68,29 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { totalItems } = useCart();
   const { orders } = useApp();
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const userOrders = orders.filter(o => o.customerName === "Mehmon foydalanuvchi").slice(0, 5);
+  if (!user) return null;
+
+  const userOrders = orders.filter(o => o.phoneNumber === user.phoneNumber).slice(0, 5);
+
+  const handleLogout = () => {
+    Alert.alert("Chiqish", "Tizimdan chiqmoqchimisiz?", [
+      { text: "Yo'q", style: "cancel" },
+      { 
+        text: "Ha", 
+        style: "destructive", 
+        onPress: () => {
+          logout();
+          router.replace("/auth");
+        } 
+      }
+    ]);
+  };
 
   return (
     <ScrollView
@@ -111,16 +106,15 @@ export default function ProfileScreen() {
           <Text style={styles.avatarEmoji}>👤</Text>
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>Mehmon foydalanuvchi</Text>
-          <Text style={styles.profilePhone}>+998 90 000 00 00</Text>
+          <Text style={styles.profileName}>{user.name}</Text>
+          <Text style={styles.profilePhone}>{user.phoneNumber}</Text>
           <View style={styles.profileBadge}>
             <Ionicons name="star" size={12} color="#F59E0B" />
-            <Text style={styles.profileBadgeText}>Oltin a'zo</Text>
+            <Text style={styles.profileBadgeText}>
+              {user.role === 'admin' ? 'Admin' : user.role === 'courier' ? 'Kuryer' : 'Mijoz'}
+            </Text>
           </View>
         </View>
-        <Pressable style={styles.editBtn}>
-          <Ionicons name="pencil" size={16} color={Colors.primary} />
-        </Pressable>
       </View>
 
       <View style={styles.statsRow}>
@@ -133,7 +127,7 @@ export default function ProfileScreen() {
           <Text style={[styles.statLabel, styles.statLabelLight]}>Savatda</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>2.4k</Text>
+          <Text style={styles.statValue}>0</Text>
           <Text style={styles.statLabel}>Ballar</Text>
         </View>
       </View>
@@ -169,39 +163,43 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.orderFooter}>
               <Text style={styles.orderTotal}>{formatPrice(order.total)}</Text>
-              <Pressable style={styles.reorderBtn}>
-                <Text style={styles.reorderBtnText}>Qayta buyurtma</Text>
+              <Pressable style={styles.reorderBtn} onPress={() => router.push(`/order/${order.id}`)}>
+                <Text style={styles.reorderBtnText}>Kuzatish</Text>
               </Pressable>
             </View>
           </View>
         ))
       )}
 
-      <Pressable style={styles.courierCard} onPress={() => router.push("/courier")}>
-        <View style={styles.adminCardLeft}>
-          <View style={[styles.adminIconContainer, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
-            <Ionicons name="bicycle" size={22} color="#fff" />
+      {user.role === 'courier' && (
+        <Pressable style={styles.courierCard} onPress={() => router.push("/courier")}>
+          <View style={styles.adminCardLeft}>
+            <View style={[styles.adminIconContainer, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+              <Ionicons name="bicycle" size={22} color="#fff" />
+            </View>
+            <View>
+              <Text style={styles.adminCardTitle}>Kuryer paneli</Text>
+              <Text style={styles.adminCardSub}>Buyurtmalarni yetkazib berish</Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.adminCardTitle}>Kuryer paneli</Text>
-            <Text style={styles.adminCardSub}>Buyurtmalarni yetkazib berish</Text>
-          </View>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
-      </Pressable>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+        </Pressable>
+      )}
 
-      <Pressable style={styles.adminCard} onPress={() => router.push("/admin")}>
-        <View style={styles.adminCardLeft}>
-          <View style={styles.adminIconContainer}>
-            <Ionicons name="shield-checkmark" size={22} color="#fff" />
+      {user.role === 'admin' && (
+        <Pressable style={styles.adminCard} onPress={() => router.push("/admin")}>
+          <View style={styles.adminCardLeft}>
+            <View style={styles.adminIconContainer}>
+              <Ionicons name="shield-checkmark" size={22} color="#fff" />
+            </View>
+            <View>
+              <Text style={styles.adminCardTitle}>Admin Panel</Text>
+              <Text style={styles.adminCardSub}>Boshqaruv markazi</Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.adminCardTitle}>Admin Panel</Text>
-            <Text style={styles.adminCardSub}>Mahsulot va buyurtmalarni boshqarish</Text>
-          </View>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
-      </Pressable>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+        </Pressable>
+      )}
 
       <Text style={styles.sectionTitle}>Sozlamalar</Text>
 
@@ -235,26 +233,10 @@ export default function ProfileScreen() {
           toggleValue={darkMode}
           onToggle={setDarkMode}
         />
-        <View style={styles.menuDivider} />
-        <MenuItem
-          icon="language-outline"
-          label="Til"
-          value="O'zbek"
-          onPress={() => {}}
-        />
-      </View>
-
-      <Text style={styles.sectionTitle}>Yordam</Text>
-      <View style={styles.menuCard}>
-        <MenuItem icon="help-circle-outline" label="Yordam markazi" onPress={() => {}} />
-        <View style={styles.menuDivider} />
-        <MenuItem icon="chatbubble-outline" label="Biz bilan bog'laning" onPress={() => {}} />
-        <View style={styles.menuDivider} />
-        <MenuItem icon="document-text-outline" label="Maxfiylik siyosati" onPress={() => {}} />
       </View>
 
       <View style={styles.menuCard}>
-        <MenuItem icon="log-out-outline" label="Chiqish" color={Colors.error} onPress={() => {}} />
+        <MenuItem icon="log-out-outline" label="Chiqish" color={Colors.error} onPress={handleLogout} />
       </View>
 
       <Text style={styles.version}>FreshMart v1.0.0</Text>
