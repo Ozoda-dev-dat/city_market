@@ -27,6 +27,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/categories"],
   });
 
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/categories/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/categories"] }),
+  });
+
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
   });
@@ -68,6 +73,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addProduct = (product: Omit<Product, "id">) => addProductMutation.mutate(product);
   const updateProduct = (product: Product) => updateProductMutation.mutate(product);
   const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
+  const deleteCategory = (id: string) => deleteCategoryMutation.mutate(id);
   const updateOrderStatus = (id: string, status: string, courierId?: string) => 
     updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any);
   const createOrder = (order: any) => createOrderMutation.mutateAsync(order);
@@ -81,9 +87,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addProduct, 
       updateProduct, 
       deleteProduct, 
+      deleteCategory,
       updateOrderStatus,
       createOrder,
       createPromoCode,
+      createCategory: (cat: any) => apiRequest("POST", "/api/categories", cat).then(() => queryClient.invalidateQueries({ queryKey: ["/api/categories"] })),
       isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders
     }),
     [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]

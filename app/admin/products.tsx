@@ -96,10 +96,22 @@ export default function AdminProductsScreen() {
             <View style={styles.productImageContainer}>
               <Text style={styles.productEmoji}>{item.image}</Text>
             </View>
-            <View style={styles.productInfo}>
+            <View style={{ flex: 1 }}>
               <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
               <Text style={styles.productCategory}>{item.category}</Text>
-              <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
+                {item.originalPrice && (
+                  <Text style={{ textDecorationLine: 'line-through', color: Colors.textMuted, fontSize: 12 }}>
+                    {formatPrice(item.originalPrice)}
+                  </Text>
+                )}
+              </View>
+              {item.stockQuantity < 5 && (
+                <View style={{ backgroundColor: "#FEF2F2", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: 'flex-start', marginTop: 4 }}>
+                  <Text style={{ color: Colors.error, fontSize: 10, fontFamily: 'Poppins_700Bold' }}>Kam qoldi: {item.stockQuantity}</Text>
+                </View>
+              )}
             </View>
             <View style={styles.productActions}>
               <Pressable

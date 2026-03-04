@@ -20,6 +20,7 @@ const STATUS_CONFIG = {
   preparing: { label: "Tayyorlanmoqda", color: "#3B82F6", bg: "#EFF6FF", icon: "restaurant" as const },
   transit: { label: "Yo'lda", color: "#8B5CF6", bg: "#F5F3FF", icon: "bicycle" as const },
   delivered: { label: "Yetkazildi", color: Colors.primary, bg: Colors.primaryLight, icon: "checkmark-circle" as const },
+  cancelled: { label: "Bekor qilingan", color: Colors.error, bg: "#FEF2F2", icon: "close-circle" as const },
 };
 
 const QuickActionCard = ({
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + o.total, 0);
   const pendingCount = orders.filter((o) => o.status === "pending").length;
 
   return (
@@ -138,10 +139,17 @@ export default function AdminDashboard() {
         />
         <QuickActionCard
           icon="bicycle-outline"
-          label="Kuryer qo'shish"
+          label="Kuryerlar"
           color="#10B981"
           bgColor="#ECFDF5"
           onPress={() => router.push("/admin/add-courier")}
+        />
+        <QuickActionCard
+          icon="pricetag-outline"
+          label="Promokodlar"
+          color="#EC4899"
+          bgColor="#FDF2F8"
+          onPress={() => router.push("/admin/promo-codes")}
         />
       </View>
 

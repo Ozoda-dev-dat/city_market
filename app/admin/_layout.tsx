@@ -16,6 +16,7 @@ export default function AdminLayout() {
       <Stack.Screen name="orders" />
       <Stack.Screen name="categories" />
       <Stack.Screen name="add-courier" />
+      <Stack.Screen name="promo-codes" />
     </Stack>
   );
 }

@@ -36,7 +36,7 @@ export default function CourierDashboard() {
 
   // For prototype, we'll filter based on status
   const availableOrders = orders.filter(o => o.status === "preparing");
-  const myOrders = orders.filter(o => o.status === "transit");
+  const myOrders = orders.filter(o => o.status === "transit" || o.status === "delivered");
 
   const displayOrders = activeTab === "available" ? availableOrders : myOrders;
 

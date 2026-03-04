@@ -83,6 +83,24 @@ export default function AdminOrdersScreen() {
     }
   };
 
+  const handleCancel = async (orderId: string) => {
+    Alert.alert("Tasdiqlash", "Buyurtmani bekor qilmoqchimisiz?", [
+      { text: "Yo'q" },
+      { 
+        text: "Ha", 
+        style: "destructive", 
+        onPress: async () => {
+          try {
+            await updateOrderStatus(orderId, "cancelled" as any);
+            Alert.alert("Muvaffaqiyat", "Buyurtma bekor qilindi");
+          } catch (e) {
+            Alert.alert("Xatolik", "Bekor qilishda xatolik yuz berdi");
+          }
+        } 
+      }
+    ]);
+  };
+
   return (
     <View style={[styles.container, { paddingTop: topPad + 12 }]}>
       <View style={styles.header}>
@@ -164,14 +182,28 @@ export default function AdminOrdersScreen() {
                     </View>
                   ))}
 
+                  <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Jami:</Text>
+                    <Text style={styles.totalValue}>{formatPrice(item.total)}</Text>
+                  </View>
+
                   {item.status === "pending" && (
-                    <Pressable
-                      style={styles.advanceBtn}
-                      onPress={() => setShowCourierList(showCourierList === item.id ? null : item.id)}
-                    >
-                      <Ionicons name="person-add-outline" size={18} color="#fff" />
-                      <Text style={styles.advanceBtnText}>Kuryer biriktirish</Text>
-                    </Pressable>
+                    <View style={{ gap: 8 }}>
+                      <Pressable
+                        style={styles.advanceBtn}
+                        onPress={() => setShowCourierList(showCourierList === item.id ? null : item.id)}
+                      >
+                        <Ionicons name="person-add-outline" size={18} color="#fff" />
+                        <Text style={styles.advanceBtnText}>Kuryer biriktirish</Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.advanceBtn, { backgroundColor: Colors.error }]}
+                        onPress={() => handleCancel(item.id)}
+                      >
+                        <Ionicons name="close-circle-outline" size={18} color="#fff" />
+                        <Text style={styles.advanceBtnText}>Bekor qilish</Text>
+                      </Pressable>
+                    </View>
                   )}
 
                   {showCourierList === item.id && (

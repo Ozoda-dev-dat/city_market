@@ -73,7 +73,18 @@ export default function HomeScreen() {
   const scrollRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
 
-  const { products } = useProducts();
+  const { products, addToCart } = useProducts();
+  
+  const handleAddToCart = (product: any) => {
+    if (!product.inStock) {
+      Alert.alert("Xatolik", "Ushbu mahsulot vaqtincha tugagan");
+      return;
+    }
+    addToCart(product);
+    if (Platform.OS !== "web") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  };
   const featuredProducts = products.filter((p) => p.badge === "hot" || p.badge === "new");
   const saleProducts = products.filter((p) => p.badge === "sale");
 

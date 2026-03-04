@@ -24,7 +24,7 @@ export default function CourierOrderDetail() {
     try {
       await updateOrderStatus(order.id, next);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      if (next === "delivered") router.back();
+      // Removed router.back() to allow viewing delivered state or manual navigation
     } catch (e) {
       Alert.alert("Xatolik", "Statusni yangilashda xatolik yuz berdi");
     }

@@ -30,6 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(user);
   });
 
+  app.get("/api/promo-codes", async (_req, res) => {
+    const promos = await storage.getPromoCodes();
+    res.json(promos);
+  });
+
   app.post("/api/promo-codes", async (req, res) => {
     const promo = await storage.createPromoCode(req.body);
     res.json(promo);
@@ -66,6 +71,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (_req, res) => {
     const categories = await storage.getCategories();
     res.json(categories);
+  });
+
+  app.post("/api/categories", async (req, res) => {
+    const category = await storage.createCategory(req.body);
+    res.json(category);
+  });
+
+  app.delete("/api/categories/:id", async (req, res) => {
+    await storage.deleteCategory(req.params.id);
+    res.sendStatus(204);
   });
 
   app.get("/api/orders", async (_req, res) => {

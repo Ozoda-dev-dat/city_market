@@ -46,10 +46,11 @@ export default function CartScreen() {
     };
 
     try {
-      await createOrder(data);
+      const order = await createOrder(data);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setOrdered(true);
       clearCart();
+      router.push(`/order/${order.id}`);
     } catch (e) {
       Alert.alert("Xatolik", "Buyurtma berishda xatolik yuz berdi");
     }
@@ -89,6 +90,9 @@ export default function CartScreen() {
           {discount > 0 && <Text style={{ color: Colors.primary }}>Chegirma: {discount}%</Text>}
           <Text style={styles.finalTotal}>To'lov: {formatPrice(finalTotal)}</Text>
         </View>
+        <Text style={{ fontSize: 12, color: Colors.textSecondary, textAlign: 'center', marginTop: 10 }}>
+          Buyurtma kuryerga biriktirilguniga qadar bekor qilinishi mumkin.
+        </Text>
         <Pressable style={styles.checkoutBtn} onPress={handleCheckout}><Text style={{ color: "#fff", fontWeight: "bold" }}>Buyurtma berish</Text></Pressable>
       </ScrollView>
     </View>

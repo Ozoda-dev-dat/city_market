@@ -17,6 +17,7 @@ export interface IStorage {
   
   getCategories(): Promise<Category[]>;
   createCategory(category: any): Promise<Category>;
+  deleteCategory(id: string): Promise<void>;
   
   getOrders(): Promise<Order[]>;
   createOrder(order: any): Promise<Order>;
@@ -89,6 +90,9 @@ export class MemStorage implements IStorage {
     this.categories.set(cat.id, cat);
     return cat;
   }
+  async deleteCategory(id: string) {
+    this.categories.delete(id);
+  }
 
   async getOrders() { return Array.from(this.orders.values()); }
   async createOrder(o: any) {
@@ -100,9 +104,18 @@ export class MemStorage implements IStorage {
   async updateOrderStatus(id: string, status: string, courierId?: string) {
     const existing = this.orders.get(id);
     if (!existing) throw new Error("Not found");
-    const updated = { ...existing, status, courierId: courierId || existing.courierId };
+    const updated = { 
+      ...existing, 
+      status, 
+      courierId: courierId || existing.courierId,
+      updatedAt: new Date()
+    };
     this.orders.set(id, updated);
     return updated;
+  }
+
+  async getPromoCodes() {
+    return Array.from(this.promoCodes.values());
   }
 
   async getPromoCode(code: string) {

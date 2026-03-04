@@ -161,15 +161,25 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
                 <Text style={styles.qtyTextSmall}>{cartItem.quantity}</Text>
                 <Pressable
                   style={styles.qtyBtnSmall}
-                  onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
+                  onPress={() => {
+                    if (product.stockQuantity && cartItem.quantity >= product.stockQuantity) {
+                      Alert.alert("Xatolik", "Omborda yetarli mahsulot yo'q");
+                      return;
+                    }
+                    updateQuantity(product.id, cartItem.quantity + 1);
+                  }}
                 >
                   <Ionicons name="add" size={12} color={Colors.primary} />
                 </Pressable>
               </View>
             ) : (
               <Animated.View style={btnAnimStyle}>
-                <Pressable style={styles.addBtn} onPress={handleAdd}>
-                  <Ionicons name="add" size={20} color="#fff" />
+                <Pressable 
+                  style={[styles.addBtn, !product.inStock && { backgroundColor: Colors.textMuted }]} 
+                  onPress={handleAdd}
+                  disabled={!product.inStock}
+                >
+                  <Ionicons name={product.inStock ? "add" : "close"} size={20} color="#fff" />
                 </Pressable>
               </Animated.View>
             )}

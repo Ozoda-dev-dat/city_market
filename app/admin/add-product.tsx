@@ -12,21 +12,9 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { useApp } from "@/context/ProductsContext";
 import { CATEGORIES } from "@/constants/data";
-
-const BADGE_OPTIONS = [
-  { value: "", label: "Yo'q" },
-  { value: "new", label: "Yangi" },
-  { value: "hot", label: "Ommabop" },
-  { value: "sale", label: "Chegirma" },
-];
-
-const UNIT_OPTIONS = ["kg", "dona", "L", "g", "o'nlik", "paket"];
-
-const EMOJI_OPTIONS = ["🍎", "🍊", "🍋", "🍇", "🍓", "🍌", "🍉", "🥭", "🍅", "🥕", "🥔", "🧅", "🥦", "🥬", "🫑", "🥒"];
 
 function LabeledInput({ label, value, onChangeText, placeholder, keyboardType, required }: any) {
   return (
@@ -53,29 +41,32 @@ export default function AddProductScreen() {
   const [name, setName] = useState(existing?.name ?? "");
   const [category, setCategory] = useState(existing?.category ?? "fruits");
   const [price, setPrice] = useState(existing?.price ? String(existing.price) : "");
-  const [originalPrice, setOriginalPrice] = useState(existing?.originalPrice ? String(existing.originalPrice) : "");
   const [unit, setUnit] = useState(existing?.unit ?? "kg");
   const [image, setImage] = useState(existing?.image ?? "🍎");
   const [description, setDescription] = useState(existing?.description ?? "");
+  const [originalPrice, setOriginalPrice] = useState(existing?.originalPrice ? String(existing.originalPrice) : "");
   const [stockQuantity, setStockQuantity] = useState(existing?.stockQuantity ? String(existing.stockQuantity) : "0");
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const handleSave = async () => {
     if (!name || !price) return Alert.alert("Xatolik", "Nom va narx majburiy");
     
-    const data = {
-      name, category, unit, image, description,
-      price: Number(price),
-      originalPrice: originalPrice ? Number(originalPrice) : null,
-      stockQuantity: Number(stockQuantity),
-      inStock: Number(stockQuantity) > 0,
+    const productData = {
+      name: name.trim(),
+      category,
+      price: Math.round(Number(price)),
+      originalPrice: originalPrice ? Math.round(Number(originalPrice)) : null,
+      unit,
+      image,
+      description: description.trim(),
+      stockQuantity: Math.round(Number(stockQuantity)),
+      inStock: Math.round(Number(stockQuantity)) > 0,
     };
 
     try {
-      if (isEdit) {
-        await updateProduct({ ...data, id: existing!.id } as any);
+      if (isEdit && existing) {
+        await updateProduct({ ...productData, id: existing.id } as any);
       } else {
-        await addProduct({ ...data, id: Date.now().toString() } as any);
+        await addProduct({ ...productData, id: Date.now().toString() } as any);
       }
       router.back();
     } catch (e) {
@@ -93,7 +84,7 @@ export default function AddProductScreen() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <LabeledInput label="Nom" value={name} onChangeText={setName} required />
         <LabeledInput label="Narx" value={price} onChangeText={setPrice} keyboardType="numeric" required />
-        <LabeledInput label="Asl narx" value={originalPrice} onChangeText={setOriginalPrice} keyboardType="numeric" />
+        <LabeledInput label="Asl narx (chegirma uchun)" value={originalPrice} onChangeText={setOriginalPrice} keyboardType="numeric" />
         <LabeledInput label="Ombordagi soni" value={stockQuantity} onChangeText={setStockQuantity} keyboardType="numeric" required />
         <Text style={styles.sectionTitle}>Kategoriya</Text>
         <View style={styles.chipRow}>

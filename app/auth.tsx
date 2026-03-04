@@ -122,6 +122,11 @@ export default function AuthScreen() {
             </Text>
           </Pressable>
         </View>
+        <View style={{ marginTop: 20, alignItems: 'center' }}>
+          <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5 }}>
+            Admin: +998901234567 / admin
+          </Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
