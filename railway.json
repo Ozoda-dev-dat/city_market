@@ -1,0 +1,14 @@
+{
+  "name": "supermarket-go-api",
+  "version": "1.0.0",
+  "description": "Supermarket Go Backend API",
+  "scripts": {
+    "start": "NODE_ENV=production tsx server/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "postgres": "^3.4.3",
+    "drizzle-orm": "^0.29.4"
+  }
+}

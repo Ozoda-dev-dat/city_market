@@ -1,0 +1,128 @@
+import { fetch } from "expo/fetch";
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+/**
+ * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
+ * @returns {string} The API base URL
+ */
+export function getApiUrl(): string {
+  let host = process.env.EXPO_PUBLIC_DOMAIN;
+
+  // For web development, use ngrok URL
+  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+    host = "katabatic-unwarrantedly-renay.ngrok-free.dev";
+  }
+  
+  // Fallback to local IP for mobile development
+  if (!host) {
+    // For mobile devices, use your computer's IP address
+    host = "172.20.10.6:5001"; // Updated to current IP
+  }
+
+  // Trim whitespace
+  host = host.trim();
+
+  // Use http for localhost/local IPs, https for other domains
+  const protocol = host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168") || host.includes("172.20") ? "http" : "https";
+  let url = new URL(`${protocol}://${host}`);
+
+  return url.href;
+}
+
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+}
+
+export async function apiRequest(
+  method: string,
+  route: string,
+  data?: unknown | undefined,
+): Promise<Response> {
+  const baseUrl = getApiUrl();
+  const url = new URL(route, baseUrl);
+
+  // Get JWT token from AsyncStorage
+  let token: string | null = null;
+  try {
+    const authData = await AsyncStorage.getItem("@freshmart_auth");
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      token = parsed.token;
+    }
+  } catch (error) {
+    console.warn("Failed to get auth token:", error);
+  }
+
+  // Create timeout using setTimeout for React Native compatibility
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30 seconds
+
+  try {
+    const headers: HeadersInit = {};
+    
+    // Add content-type for requests with data
+    if (data) {
+      headers["Content-Type"] = "application/json";
+    }
+    
+    // Add authorization header if token exists
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(url.toString(), {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn: <T>(options: {
+  on401: UnauthorizedBehavior;
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }) => {
+    const baseUrl = getApiUrl();
+    const url = new URL(queryKey.join("/") as string, baseUrl);
+
+    const res = await fetch(url.toString(), {
+      credentials: "include",
+    });
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
+    }
+
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      retry: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});

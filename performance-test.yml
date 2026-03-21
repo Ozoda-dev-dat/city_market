@@ -1,0 +1,85 @@
+# Artillery Performance Test Configuration
+# =======================================
+
+config:
+  target: 'http://localhost:5001'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 10
+      name: "Load test"
+    - duration: 60
+      arrivalRate: 20
+      name: "Stress test"
+  processor: "./test-processor.js"
+
+scenarios:
+  - name: "API Health Check"
+    weight: 20
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+            - contentType: application/json
+
+  - name: "User Authentication"
+    weight: 15
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            phone: "+998901234567"
+            password: "testpassword123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+          expect:
+            - statusCode: 200
+            - contentType: application/json
+
+  - name: "Get Products"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/products"
+          qs:
+            limit: 20
+            offset: 0
+          expect:
+            - statusCode: 200
+            - contentType: application/json
+
+  - name: "Get Categories"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/categories"
+          expect:
+            - statusCode: 200
+            - contentType: application/json
+
+  - name: "Search Products"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/products/search"
+          qs:
+            query: "milk"
+            limit: 10
+          expect:
+            - statusCode: 200
+            - contentType: application/json
+
+  - name: "Get User Profile"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/user/profile"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - contentType: application/json

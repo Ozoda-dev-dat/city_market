@@ -1,0 +1,357 @@
+export interface Product {
+  id: string;
+  name: string;
+  nameUz?: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  unit: string;
+  image: string;
+  badge?: "sale" | "new" | "hot";
+  rating: number;
+  description: string;
+  brand?: string;
+  weight?: string;
+  inStock: boolean;
+  stockQuantity?: number;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  count: number;
+}
+
+export interface Order {
+  id: string;
+  customerId?: string;
+  courierId?: string;
+  customerName: string;
+  phoneNumber: string;
+  address: string;
+  total: number;
+  discount: number;
+  status: "pending" | "preparing" | "on_the_way" | "delivered" | "cancelled";
+  items: any[];
+  createdAt?: Date | string;
+}
+
+export const CATEGORIES: Category[] = [
+  { id: "fruits", name: "Mevalar", icon: "nutrition", color: "#FF6B35", bgColor: "#FFF0EB", count: 24 },
+  { id: "vegetables", name: "Sabzavotlar", icon: "leaf", color: "#1A9B5C", bgColor: "#E8F5EE", count: 31 },
+  { id: "dairy", name: "Sut mahsulotlari", icon: "water", color: "#3B82F6", bgColor: "#EFF6FF", count: 18 },
+  { id: "meat", name: "Go'sht", icon: "flame", color: "#EF4444", bgColor: "#FEF2F2", count: 22 },
+  { id: "bakery", name: "Non mahsulotlari", icon: "cafe", color: "#F59E0B", bgColor: "#FFFBEB", count: 14 },
+  { id: "beverages", name: "Ichimliklar", icon: "wine", color: "#8B5CF6", bgColor: "#F5F3FF", count: 29 },
+  { id: "snacks", name: "Gazaklar", icon: "pizza", color: "#EC4899", bgColor: "#FDF2F8", count: 20 },
+  { id: "frozen", name: "Muzlatilgan", icon: "snow", color: "#06B6D4", bgColor: "#ECFEFF", count: 16 },
+];
+
+export const PRODUCTS: Product[] = [
+  {
+    id: "1",
+    name: "Banan",
+    category: "fruits",
+    price: 3500,
+    unit: "kg",
+    image: "🍌",
+    badge: "hot",
+    rating: 4.8,
+    description: "Ekvadordan keltirilgan yangi pishgan bananlar. Shirin, foydali va smuti yoki yegulik uchun zo'r.",
+    brand: "FreshFarm",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "2",
+    name: "Qizil olma",
+    category: "fruits",
+    price: 8900,
+    originalPrice: 11000,
+    unit: "kg",
+    image: "🍎",
+    badge: "sale",
+    rating: 4.6,
+    description: "Tandir qizil olmalar — g'irt-g'irt va shirin. Vitaminlar va antioksidantlarga boy.",
+    brand: "Garden Fresh",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "3",
+    name: "Pomidor",
+    category: "vegetables",
+    price: 4500,
+    unit: "kg",
+    image: "🍅",
+    rating: 4.7,
+    description: "Tok pishgan pomidorlar. Salat va ovqat tayyorlash uchun juda mos.",
+    brand: "Mahalliy ferma",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "4",
+    name: "Yangi sut",
+    category: "dairy",
+    price: 7500,
+    unit: "L",
+    image: "🥛",
+    badge: "new",
+    rating: 4.9,
+    description: "Fermadan yangi sut. Kalsiy va oqsilga boy, butun oila uchun foydali.",
+    brand: "DairyBest",
+    weight: "1 L",
+    inStock: true,
+  },
+  {
+    id: "5",
+    name: "Tovuq ko'kragi",
+    category: "meat",
+    price: 32000,
+    originalPrice: 38000,
+    unit: "kg",
+    image: "🍗",
+    badge: "sale",
+    rating: 4.7,
+    description: "Zamonaviy parvarishlangan tovuq go'shti, gormon va antibiotikdan holi. Sog'lom ovqatlar uchun ideal.",
+    brand: "FreshMeat Co.",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "6",
+    name: "Oq non",
+    category: "bakery",
+    price: 6500,
+    unit: "dona",
+    image: "🍞",
+    rating: 4.5,
+    description: "Yangi pishirilgan oq non. Yumshoq va oltin qobuqli.",
+    brand: "Bakehouse",
+    weight: "500 g",
+    inStock: true,
+  },
+  {
+    id: "7",
+    name: "Apelsin sharbati",
+    category: "beverages",
+    price: 15000,
+    unit: "L",
+    image: "🍊",
+    rating: 4.8,
+    description: "100% tabiiy siqilgan apelsin sharbati. Qo'shimcha shakar yoki konservantlarsiz.",
+    brand: "SunFresh",
+    weight: "1 L",
+    inStock: true,
+  },
+  {
+    id: "8",
+    name: "Kartoshka",
+    category: "vegetables",
+    price: 3200,
+    unit: "kg",
+    image: "🥔",
+    rating: 4.6,
+    description: "Yangi mahalliy kartoshkalar. Qovurish, qaynatish yoki pishirish uchun ajoyib.",
+    brand: "Mahalliy ferma",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "9",
+    name: "Yogurt",
+    category: "dairy",
+    price: 5500,
+    unit: "dona",
+    image: "🫙",
+    badge: "new",
+    rating: 4.7,
+    description: "Qaymaqli grek uslubidagi yogurt. Oqsilga boy, probiotik.",
+    brand: "DairyBest",
+    weight: "400 g",
+    inStock: true,
+  },
+  {
+    id: "10",
+    name: "Tarvuz",
+    category: "fruits",
+    price: 4800,
+    unit: "kg",
+    image: "🍉",
+    badge: "hot",
+    rating: 4.9,
+    description: "Shirin va sharbatli yozgi tarvuz. Yangilovchi va suvsizlikni qondiruvchi.",
+    brand: "Summer Farm",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "11",
+    name: "Tuxum",
+    category: "dairy",
+    price: 18000,
+    unit: "o'nlik",
+    image: "🥚",
+    rating: 4.8,
+    description: "Fermadan yangi erkin parvarishlangan tuxumlar. Yuqori sifatli oqsil manbai.",
+    brand: "Happy Hen",
+    weight: "12 dona",
+    inStock: true,
+  },
+  {
+    id: "12",
+    name: "Sabzi",
+    category: "vegetables",
+    price: 3800,
+    unit: "kg",
+    image: "🥕",
+    rating: 4.6,
+    description: "Yangi g'irt-g'irt sabzilar. A va C vitaminlariga boy.",
+    brand: "Garden Fresh",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "13",
+    name: "Mol go'shti (qiyma)",
+    category: "meat",
+    price: 45000,
+    unit: "kg",
+    image: "🥩",
+    rating: 4.7,
+    description: "Yangi yog'siz mol go'shti qiymasi. Burger, köfta va boshqalar uchun zo'r.",
+    brand: "FreshMeat Co.",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "14",
+    name: "Kola",
+    category: "beverages",
+    price: 9500,
+    originalPrice: 12000,
+    unit: "L",
+    image: "🥤",
+    badge: "sale",
+    rating: 4.5,
+    description: "Klassik yangilovchi kola. Sovuq va ichishga tayyor.",
+    brand: "RefreshCo",
+    weight: "2 L",
+    inStock: true,
+  },
+  {
+    id: "15",
+    name: "Chips",
+    category: "snacks",
+    price: 7200,
+    unit: "dona",
+    image: "🥨",
+    rating: 4.4,
+    description: "Yengil ziravorli g'irt-g'irt oltin chiplar.",
+    brand: "CrunchTime",
+    weight: "200 g",
+    inStock: true,
+  },
+  {
+    id: "16",
+    name: "Sariyog'",
+    category: "dairy",
+    price: 12500,
+    unit: "dona",
+    image: "🧈",
+    rating: 4.8,
+    description: "Qaymaqli tabiiy sariyog'. Yangi qaymaqdan tayyorlangan.",
+    brand: "DairyBest",
+    weight: "200 g",
+    inStock: true,
+  },
+  {
+    id: "17",
+    name: "Bodring",
+    category: "vegetables",
+    price: 3500,
+    unit: "kg",
+    image: "🥒",
+    rating: 4.6,
+    description: "Yangi g'irt-g'irt bodringlar. Salat uchun ajoyib.",
+    brand: "Mahalliy ferma",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "18",
+    name: "Mango",
+    category: "fruits",
+    price: 12000,
+    unit: "kg",
+    image: "🥭",
+    badge: "new",
+    rating: 4.8,
+    description: "Shirin tropik mangolar, yangi import qilingan. Tropik lazzat.",
+    brand: "Tropical Fresh",
+    weight: "1 kg",
+    inStock: true,
+  },
+  {
+    id: "19",
+    name: "Mineral suv",
+    category: "beverages",
+    price: 3500,
+    unit: "L",
+    image: "💧",
+    rating: 4.9,
+    description: "Toza tog' mineral suvi. Tabiiy yangilovchi.",
+    brand: "AquaPure",
+    weight: "1.5 L",
+    inStock: true,
+  },
+  {
+    id: "20",
+    name: "Muzqaymoq",
+    category: "frozen",
+    price: 8500,
+    unit: "dona",
+    image: "🍦",
+    badge: "hot",
+    rating: 4.9,
+    description: "Qaymaqli vanil muzqaymoq. Haqiqiy sut mahsulotidan tayyorlangan.",
+    brand: "FrozenDelights",
+    weight: "500 ml",
+    inStock: true,
+  },
+];
+
+export const BANNERS = [
+  {
+    id: "1",
+    title: "Har kuni yangi\nmevalar yetkaziladi",
+    subtitle: "30% gacha chegirma",
+    color: "#1A9B5C",
+    lightColor: "#2ECC71",
+    emoji: "🍓",
+  },
+  {
+    id: "2",
+    title: "Go'sht va parranda\nmaxsus narxlar",
+    subtitle: "32 000 so'mdan boshlab",
+    color: "#E53E3E",
+    lightColor: "#FC8181",
+    emoji: "🥩",
+  },
+  {
+    id: "3",
+    title: "Sut mahsulotlari\nhar kun yangi",
+    subtitle: "100 mingdan yuqori bepul yetkazib berish",
+    color: "#2B6CB0",
+    lightColor: "#63B3ED",
+    emoji: "🥛",
+  },
+];
+
+export function formatPrice(price: number): string {
+  return price.toLocaleString("ru-RU") + " so'm";
+}
