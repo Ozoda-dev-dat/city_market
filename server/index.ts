@@ -281,28 +281,42 @@ function serveLandingPage({
 
 function proxyToMetro(req: Request, res: Response) {
   const http = require("http");
+
+  // Strip content-length since body may have been modified by body-parser
+  const headers = { ...req.headers, host: "localhost:8080" };
+  delete headers["content-length"];
+
   const options = {
     hostname: "localhost",
     port: 8080,
     path: req.url,
     method: req.method,
-    headers: {
-      ...req.headers,
-      host: "localhost:8080",
-    },
+    headers,
   };
 
   const proxyReq = http.request(options, (proxyRes: any) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    // Forward all headers from Metro back to the client
+    Object.keys(proxyRes.headers).forEach((key) => {
+      try { res.setHeader(key, proxyRes.headers[key]); } catch (_) {}
+    });
+    res.status(proxyRes.statusCode);
     proxyRes.pipe(res, { end: true });
   });
 
   proxyReq.on("error", (err: Error) => {
     log("Metro proxy error:", err.message);
-    res.status(502).json({ error: "Expo dev server not reachable. Make sure the Start Frontend workflow is running." });
+    if (!res.headersSent) {
+      res.status(502).json({ error: "Expo dev server not reachable. Make sure the Start Frontend workflow is running." });
+    }
   });
 
-  req.pipe(proxyReq, { end: true });
+  // Body may already be parsed by express.json() — write it manually then end
+  if (req.body && Object.keys(req.body).length > 0) {
+    const bodyStr = JSON.stringify(req.body);
+    proxyReq.setHeader("content-length", Buffer.byteLength(bodyStr));
+    proxyReq.write(bodyStr);
+  }
+  proxyReq.end();
 }
 
 function configureExpoAndLanding(app: express.Application) {
