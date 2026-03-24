@@ -248,27 +248,6 @@ function getAppName(): string {
   }
 }
 
-function serveExpoManifest(platform: string, res: Response) {
-  const manifestPath = path.resolve(
-    process.cwd(),
-    "static-build",
-    platform,
-    "manifest.json",
-  );
-
-  if (!fs.existsSync(manifestPath)) {
-    return res
-      .status(404)
-      .json({ error: `Manifest not found for platform: ${platform}` });
-  }
-
-  res.setHeader("expo-protocol-version", "1");
-  res.setHeader("expo-sfv-version", "0");
-  res.setHeader("content-type", "application/json");
-
-  const manifest = fs.readFileSync(manifestPath, "utf-8");
-  res.send(manifest);
-}
 
 function serveLandingPage({
   req,
@@ -300,6 +279,32 @@ function serveLandingPage({
   res.status(200).send(html);
 }
 
+function proxyToMetro(req: Request, res: Response) {
+  const http = require("http");
+  const options = {
+    hostname: "localhost",
+    port: 8080,
+    path: req.url,
+    method: req.method,
+    headers: {
+      ...req.headers,
+      host: "localhost:8080",
+    },
+  };
+
+  const proxyReq = http.request(options, (proxyRes: any) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
+  });
+
+  proxyReq.on("error", (err: Error) => {
+    log("Metro proxy error:", err.message);
+    res.status(502).json({ error: "Expo dev server not reachable. Make sure the Start Frontend workflow is running." });
+  });
+
+  req.pipe(proxyReq, { end: true });
+}
+
 function configureExpoAndLanding(app: express.Application) {
   const templatePath = path.resolve(
     process.cwd(),
@@ -317,13 +322,22 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/manifest") {
-      return next();
-    }
+    // Proxy all Metro dev server paths to port 8080
+    const isMetroPath =
+      req.path.startsWith("/node_modules/") ||
+      req.path.startsWith("/.expo/") ||
+      req.path.startsWith("/__metro") ||
+      req.path.startsWith("/__expo") ||
+      req.path === "/manifest" ||
+      req.path === "/_expo/loading" ||
+      req.path.endsWith(".bundle") ||
+      req.path.endsWith(".map");
 
     const platform = req.header("expo-platform");
-    if (platform && (platform === "ios" || platform === "android")) {
-      return serveExpoManifest(platform, res);
+    const hasExpoPlatform = platform && (platform === "ios" || platform === "android");
+
+    if (hasExpoPlatform || isMetroPath) {
+      return proxyToMetro(req, res);
     }
 
     if (req.path === "/") {
@@ -341,7 +355,7 @@ function configureExpoAndLanding(app: express.Application) {
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
   app.use(express.static(path.resolve(process.cwd(), "static-build")));
 
-  log("Expo routing: Checking expo-platform header on / and /manifest");
+  log("Expo routing: Proxying Expo Go requests to Metro on port 8080");
 }
 
 function setupErrorHandler(app: express.Application) {
