@@ -8,23 +8,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  */
 export function getApiUrl(): string {
   let host = process.env.EXPO_PUBLIC_DOMAIN;
-
-  // For web development, use ngrok URL
-  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
-    host = "katabatic-unwarrantedly-renay.ngrok-free.dev";
-  }
   
-  // Fallback to local IP for mobile development
+  // Fallback to local development
   if (!host) {
-    // For mobile devices, use your computer's IP address
-    host = "172.20.10.6:5001"; // Updated to current IP
+    host = "localhost:5000";
   }
 
   // Trim whitespace
   host = host.trim();
 
   // Use http for localhost/local IPs, https for other domains
-  const protocol = host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168") || host.includes("172.20") ? "http" : "https";
+  const protocol = host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168") ? "http" : "https";
   let url = new URL(`${protocol}://${host}`);
 
   return url.href;

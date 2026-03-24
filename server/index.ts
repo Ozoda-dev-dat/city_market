@@ -74,8 +74,14 @@ function setupCors(app: express.Application) {
       origin?.startsWith("http://172.") ||
       !origin; // Allow requests with no origin
 
+    // Allow Replit dev domain
+    const isReplitOrigin =
+      origin?.includes(".replit.dev") ||
+      origin?.includes(".repl.co") ||
+      origin?.includes(".replit.app");
+
     // Set CORS headers
-    if (isLocalhost || isExpoOrigin || !origin) {
+    if (isLocalhost || isExpoOrigin || isReplitOrigin || !origin) {
       res.header("Access-Control-Allow-Origin", origin || "http://localhost:8081");
       res.header(
         "Access-Control-Allow-Methods",
@@ -391,7 +397,7 @@ function setupErrorHandler(app: express.Application) {
 
   setupErrorHandler(app);
 
-  const port = parseInt(process.env.PORT || "5001", 10);
+  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen(port, "0.0.0.0", () => {
     log(`express server serving on port ${port}`);
     log(`Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection`);
