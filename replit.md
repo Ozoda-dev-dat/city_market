@@ -49,6 +49,21 @@ inventory_movements, system_logs, audit_logs.
 - **courier**: Delivery personnel
 - **admin**: Store administrators
 
+## Expo Go / QR Code Access
+
+The Express server (port 5000) proxies all Expo Go requests to Metro (port 8080).
+Detection: `expo-platform` header OR Metro paths (`.bundle`, `/node_modules/`, `/__metro`, `/.expo/`).
+QR Code URL: `exp://676ddd9d-40c4-4c87-b81a-1982d5d7af1c-00-10zioiyuwaojs.sisko.replit.dev`
+Scan with Expo Go app to open on a physical device.
+
+## Known Fixes Applied
+
+- `lib/data-security.ts`: Removed Node.js `crypto` module import (not available in RN); replaced with platform-guarded stubs.
+- `lib/error-handling.ts`: Fixed invalid TypeScript `let stack?: string` → `let stack: string | undefined`.
+- `hooks/useErrorHandler.ts` → renamed to `.tsx` (file contained JSX syntax).
+- `react-native-worklets` package installed (required by react-native-reanimated v4).
+- Several packages (`expo-modules-core`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-safe-area-context`, `react-native-screens`, `react-native-paper`, etc.) reinstalled to fix incomplete TypeScript source files in npm cache.
+
 ## Key Dependencies
 
 - expo-router for navigation

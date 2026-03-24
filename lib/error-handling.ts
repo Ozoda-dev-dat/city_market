@@ -76,7 +76,7 @@ export class ErrorHandlingService {
     const timestamp = new Date().toISOString();
     
     let message: string;
-    let stack?: string;
+    let stack: string | undefined;
     
     if (error instanceof Error) {
       message = error.message;
