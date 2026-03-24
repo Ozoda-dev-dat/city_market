@@ -30,7 +30,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=8080 EXPO_PACKAGER_PROXY_URL=https://$REPLIT_DEV_DOMAIN REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN npx expo start --port 8080 --host lan --non-interactive"
+args = "CI=1 PORT=8080 EXPO_PACKAGER_PROXY_URL=https://$REPLIT_DEV_DOMAIN REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN npx expo start --port 8080 --host lan"
 waitForPort = 8080
 
 [[workflows.workflow]]
@@ -56,3 +56,10 @@ externalPort = 80
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "b672cd78121eaefabd4e2c6fe68f79fb0ef017493732465835f53edce313cb47230e569a081ac8d471f93a2acb164cc2"
+JWT_REFRESH_SECRET = "9c59aee4b830dea08d63ae12b2e44d4b8d2ac10d57075ded755ed41a561fb52a23fd248771628bfc24fff6df26da3de0"
+NODE_ENV = "development"

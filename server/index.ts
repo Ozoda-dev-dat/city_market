@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes-simple";
+import { registerRoutes } from "./routes";
 import * as fs from "fs";
 import * as path from "path";
 import { storage } from "./db-storage";
@@ -148,24 +148,23 @@ function validateInput(req: Request, res: Response, next: NextFunction) {
   };
 
   // Sanitize request body
-  if (req.body) {
-    const checkObject = (obj: any): boolean => {
-      if (typeof obj === 'string') {
-        if (detectSqlInjection(obj)) {
-          return true;
-        }
-        req.body = sanitizeString(obj);
-      } else if (typeof obj === 'object' && obj !== null) {
+  if (req.body && typeof req.body === 'object') {
+    const checkAndSanitize = (obj: any): boolean => {
+      if (typeof obj === 'object' && obj !== null) {
         for (const key in obj) {
-          if (checkObject(obj[key])) {
-            return true;
+          const val = obj[key];
+          if (typeof val === 'string') {
+            if (detectSqlInjection(val)) return true;
+            obj[key] = sanitizeString(val);
+          } else if (typeof val === 'object') {
+            if (checkAndSanitize(val)) return true;
           }
         }
       }
       return false;
     };
 
-    if (checkObject(req.body)) {
+    if (checkAndSanitize(req.body)) {
       return res.status(400).json({ error: 'Invalid input detected' });
     }
   }

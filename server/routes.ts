@@ -20,7 +20,9 @@ import {
 } from "../lib/security";
 import { 
   sanitizeRequest, 
-  sanitizeResponse 
+  sanitizeResponse,
+  maskSensitiveData,
+  logger
 } from "../lib/data-security";
 import { 
   getDatabaseUrl, 
@@ -28,7 +30,6 @@ import {
   getJwtExpiresIn,
   getEncryptionKey 
 } from "../lib/env-config";
-import { logger } from "../lib/data-security";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Apply security middleware

@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 /**
  * Data encryption utilities for sensitive information
  * Note: Actual encryption only works server-side (Node.js)
@@ -9,39 +7,36 @@ import { Platform } from 'react-native';
  * Encrypt sensitive data - server-side only
  */
 export function encryptSensitiveData(data: string, key: string): { encrypted: string; iv: string } {
-  if (Platform.OS !== 'web' && typeof window === 'undefined') {
-    try {
-      const crypto = require('crypto');
-      const algorithm = 'aes-256-gcm';
-      const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipher(algorithm, key);
-      let encrypted = cipher.update(data, 'utf8', 'hex');
-      encrypted += cipher.final('hex');
-      return { encrypted, iv: iv.toString('hex') };
-    } catch {
-      // fall through to stub
-    }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const crypto = require('crypto');
+    const algorithm = 'aes-256-gcm';
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipher(algorithm, key);
+    let encrypted = cipher.update(data, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return { encrypted, iv: iv.toString('hex') };
+  } catch {
+    // Fallback for non-Node environments
+    try { return { encrypted: btoa(data), iv: 'client-side' }; } catch { return { encrypted: data, iv: 'none' }; }
   }
-  return { encrypted: btoa(data), iv: 'client-side' };
 }
 
 /**
  * Decrypt sensitive data - server-side only
  */
 export function decryptSensitiveData(encryptedData: string, key: string, iv: string): string {
-  if (Platform.OS !== 'web' && typeof window === 'undefined') {
-    try {
-      const crypto = require('crypto');
-      const algorithm = 'aes-256-gcm';
-      const decipher = crypto.createDecipher(algorithm, key);
-      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
-      return decrypted;
-    } catch {
-      // fall through to stub
-    }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const crypto = require('crypto');
+    const algorithm = 'aes-256-gcm';
+    const decipher = crypto.createDecipher(algorithm, key);
+    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch {
+    try { return atob(encryptedData); } catch { return encryptedData; }
   }
-  try { return atob(encryptedData); } catch { return encryptedData; }
 }
 
 /**
@@ -228,9 +223,9 @@ export class SecureEnv {
  * Request data sanitization middleware (server-side only)
  */
 export function sanitizeRequest(req: any, res: any, next: any): void {
-  if (req.body) req.body = sanitizeForLogging(req.body);
-  if (req.query) req.query = sanitizeForLogging(req.query);
-  if (req.params) req.params = sanitizeForLogging(req.params);
+  // NOTE: Do NOT mutate req.body or req.params here.
+  // sanitizeForLogging is for log output only — it redacts sensitive fields like passwords.
+  // Mutating req.body would break password comparison and other auth logic.
   next();
 }
 
@@ -238,11 +233,9 @@ export function sanitizeRequest(req: any, res: any, next: any): void {
  * Response data sanitization middleware (server-side only)
  */
 export function sanitizeResponse(req: any, res: any, next: any): void {
-  const originalJson = res.json;
-  res.json = function(data: any) {
-    const sanitizedData = sanitizeForLogging(data);
-    return originalJson.call(res, sanitizedData);
-  };
+  // NOTE: Do NOT mutate response data here.
+  // sanitizeForLogging is for log output only — it redacts sensitive fields like tokens.
+  // Passing sanitized data back to clients would break auth flows (token becomes [REDACTED]).
   next();
 }
 
