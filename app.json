@@ -3,11 +3,6 @@
     "name": "City market",
     "scheme": "citymarket",
     "slug": "citymarket",
-    "extra": {
-      "eas": {
-        "projectId": "citymarket"
-      }
-    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
