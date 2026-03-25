@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -10,7 +11,7 @@ import { queryClient } from "@/lib/query-client";
 import { CartProvider } from "@/context/CartContext";
 import { AppProvider } from "@/context/ProductsContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { BiometricProvider } from "@/context/BiometricContext";
 import { LocationProvider } from "@/context/LocationContext";
 import {
@@ -26,17 +27,13 @@ import { NetworkProvider } from "@/components/OfflineComponents";
 
 SplashScreen.preventAutoHideAsync();
 
-// Hides the splash only after BOTH fonts AND auth are ready — prevents white screen flash
-function SplashController({ fontsReady }: { fontsReady: boolean }) {
-  const { isLoading } = useAuth();
-
-  useEffect(() => {
-    if (fontsReady && !isLoading) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsReady, isLoading]);
-
-  return null;
+function LoadingScreen() {
+  const { isDarkMode } = useTheme();
+  return (
+    <View style={[styles.loading, { backgroundColor: isDarkMode ? "#121212" : "#F5F8F3" }]}>
+      <ActivityIndicator size="large" color="#4CAF50" />
+    </View>
+  );
 }
 
 function RootLayoutNav() {
@@ -60,8 +57,9 @@ function RootLayoutNav() {
     }
   }, [user, isLoading, pathname]);
 
+  // Show a branded loading screen instead of null — prevents white screen on iOS
   if (isLoading) {
-    return null;
+    return <LoadingScreen />;
   }
 
   if (!user) {
@@ -126,7 +124,12 @@ export default function RootLayout() {
 
   const fontsReady = fontsLoaded || !!fontError;
 
-  // While fonts are not ready, return null — splash screen stays visible
+  useEffect(() => {
+    if (fontsReady) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsReady]);
+
   if (!fontsReady) return null;
 
   return (
@@ -137,8 +140,6 @@ export default function RootLayout() {
             <LocationProvider>
               <NetworkProvider>
                 <AuthProvider>
-                  {/* SplashController lives inside AuthProvider so it can read auth state */}
-                  <SplashController fontsReady={fontsReady} />
                   <AppProvider>
                     <CartProvider>
                       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -162,3 +163,11 @@ export default function RootLayout() {
     </ErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
