@@ -43,6 +43,13 @@ Tables: users, categories, products, promo_codes, orders, wishlists, product_rev
 notifications, payment_transactions, payment_methods, refunds, admin_settings,
 inventory_movements, system_logs, audit_logs.
 
+## Known Issues Fixed
+
+- **iOS white screen (root cause)**: `@expo-google-fonts/poppins` npm package was corrupted — missing `useFonts.js` file. `_layout.tsx` imports from the package which threw `Cannot find module './useFonts'` before React could render anything. Fixed by reinstalling the package.
+- **expo-image-picker version**: Downgraded from v55 to v17.0.10 to match SDK 54 expected version.
+- **Lazy route loading**: Added `EXPO_ROUTER_IMPORT_MODE=lazy` to the Start Frontend workflow to prevent future route-level import crashes at startup.
+- **Login**: All 5 user passwords hashed with bcrypt; removed KeyboardProvider/netinfo; fixed hardcoded IPs.
+
 ## User Roles
 
 - **customer**: Regular shoppers
