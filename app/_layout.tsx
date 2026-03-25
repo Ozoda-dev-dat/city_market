@@ -26,7 +26,14 @@ import { I18nProvider } from "@/lib/I18nProvider";
 import LangToggle from "@/components/LangToggle";
 import { NetworkProvider } from "@/components/OfflineComponents";
 
-SplashScreen.preventAutoHideAsync();
+// Force hide the splash screen immediately so we can see React's render
+try {
+  SplashScreen.preventAutoHideAsync().catch(() => {});
+} catch (_) {}
+// Also try to hide it right away to bypass any stuck splash
+setTimeout(() => {
+  try { SplashScreen.hideAsync().catch(() => {}); } catch (_) {}
+}, 100);
 
 function LoadingScreen() {
   return (
@@ -142,9 +149,10 @@ export default function RootLayout() {
   if (!fontsReady) {
     return (
       <SafeAreaProvider>
-        <View style={{ flex: 1, backgroundColor: '#1A9B5C', alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ flex: 1, backgroundColor: '#CC0000', alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator size="large" color="#ffffff" />
-          <Text style={{ color: '#ffffff', marginTop: 12 }}>Font yuklanmoqda...</Text>
+          <Text style={{ color: '#ffffff', marginTop: 12, fontSize: 18, fontWeight: 'bold' }}>Font yuklanmoqda...</Text>
+          <Text style={{ color: '#ffffff', marginTop: 6, fontSize: 14 }}>Agar bu sahifada qolsa, qayta ishga tushiring</Text>
         </View>
       </SafeAreaProvider>
     );
