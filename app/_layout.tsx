@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack, router } from "expo-router";
+import { Stack, router, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -32,15 +32,28 @@ console.log("[Layout] SplashScreen.preventAutoHideAsync called");
 function RootLayoutNav() {
   console.log("[Nav] RootLayoutNav rendering");
   const { user, isLoading } = useAuth();
-  console.log("[Nav] Auth state - isLoading:", isLoading, "user:", !!user);
+  const pathname = usePathname();
+  console.log("[Nav] Auth state - isLoading:", isLoading, "user:", !!user, "role:", user?.role);
 
   useEffect(() => {
-    console.log("[Nav] useEffect - isLoading:", isLoading, "user:", !!user);
-    if (!isLoading && !user) {
-      console.log("[Nav] Redirecting to /auth");
-      router.replace("/auth");
+    if (isLoading) return;
+    if (!user) {
+      if (!pathname.startsWith("/auth")) {
+        console.log("[Nav] Redirecting to /auth");
+        router.replace("/auth");
+      }
+    } else if (user.role === "admin") {
+      if (!pathname.startsWith("/admin")) {
+        console.log("[Nav] Admin redirecting to /admin");
+        router.replace("/admin");
+      }
+    } else if (user.role === "courier") {
+      if (!pathname.startsWith("/courier")) {
+        console.log("[Nav] Courier redirecting to /courier");
+        router.replace("/courier");
+      }
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, pathname]);
 
   if (isLoading) {
     console.log("[Nav] Auth isLoading - returning null");
