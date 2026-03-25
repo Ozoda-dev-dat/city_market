@@ -63,10 +63,16 @@ Scan with Expo Go app to open on a physical device.
 - `hooks/useErrorHandler.ts` → renamed to `.tsx` (file contained JSX syntax).
 - `react-native-worklets` package installed (required by react-native-reanimated v4).
 - Several packages (`expo-modules-core`, `react-native-reanimated`, `react-native-gesture-handler`, `react-native-safe-area-context`, `react-native-screens`, `react-native-paper`, etc.) reinstalled to fix incomplete TypeScript source files in npm cache.
+- Passwords in DB re-hashed with bcrypt (were stored as plain text, bcrypt comparison failed at login).
+- Removed `react-native-keyboard-controller` (`KeyboardProvider`) from `_layout.tsx` — native library not available in Expo Go.
+- Replaced `@react-native-community/netinfo` usage in `OfflineComponents.tsx` — wrong version for SDK 54; replaced with simple Platform-aware online detection.
+- Fixed hardcoded local IPs in `LocationContext.tsx` and `network-manager.ts` — now use `getApiUrl()` and `EXPO_PUBLIC_DOMAIN`.
+- **iOS white screen fix**: Upgraded `expo-router@3.5.24` → `expo-router@6.0.23` to match Expo SDK 54 / React Native 0.81 New Architecture requirements. v3 was incompatible with iOS native navigation in Expo Go SDK 54.
+- Added `SafeAreaProvider` at the root layout level so `ErrorFallback` (which uses `useSafeAreaInsets`) renders properly on error.
 
 ## Key Dependencies
 
-- expo-router for navigation
+- expo-router@6.0.23 for navigation (must match Expo SDK 54)
 - @tanstack/react-query for server state
 - drizzle-orm for database access
 - express for the API server

@@ -2,8 +2,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemedBackground } from "@/components/ThemedBackground";
@@ -28,10 +29,10 @@ import { NetworkProvider } from "@/components/OfflineComponents";
 SplashScreen.preventAutoHideAsync();
 
 function LoadingScreen() {
-  const { isDarkMode } = useTheme();
   return (
-    <View style={[styles.loading, { backgroundColor: isDarkMode ? "#121212" : "#F5F8F3" }]}>
-      <ActivityIndicator size="large" color="#4CAF50" />
+    <View style={[styles.loading, { backgroundColor: "#1A9B5C" }]}>
+      <ActivityIndicator size="large" color="#ffffff" />
+      <Text style={{ color: "#ffffff", marginTop: 12, fontSize: 16 }}>Yuklanmoqda...</Text>
     </View>
   );
 }
@@ -130,35 +131,46 @@ export default function RootLayout() {
     }
   }, [fontsReady]);
 
-  if (!fontsReady) return null;
+  if (!fontsReady) {
+    return (
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: '#1A9B5C', alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#ffffff" />
+          <Text style={{ color: '#ffffff', marginTop: 12 }}>Font yuklanmoqda...</Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <BiometricProvider>
-            <LocationProvider>
-              <NetworkProvider>
-                <AuthProvider>
-                  <AppProvider>
-                    <CartProvider>
-                      <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <BiometricProvider>
+              <LocationProvider>
+                <NetworkProvider>
+                  <AuthProvider>
+                    <AppProvider>
+                      <CartProvider>
+                        <GestureHandlerRootView style={{ flex: 1 }}>
                           <I18nProvider>
                             <ThemedBackground>
                               <LangToggle />
                               <RootLayoutNav />
                             </ThemedBackground>
                           </I18nProvider>
-                      </GestureHandlerRootView>
-                    </CartProvider>
-                  </AppProvider>
-                </AuthProvider>
-              </NetworkProvider>
-            </LocationProvider>
-          </BiometricProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+                        </GestureHandlerRootView>
+                      </CartProvider>
+                    </AppProvider>
+                  </AuthProvider>
+                </NetworkProvider>
+              </LocationProvider>
+            </BiometricProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 

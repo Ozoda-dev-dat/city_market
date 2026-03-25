@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, Platform, AppState } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNetworkStatus } from '@/lib/network-manager';
 import { useOfflineCache } from '@/lib/offline-cache';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -15,13 +14,31 @@ interface NetworkContextValue {
 const NetworkContext = React.createContext<NetworkContextValue | null>(null);
 
 export function NetworkProvider({ children }: { children: React.ReactNode }) {
-  const networkStatus = useNetworkStatus();
+  // Use a simple online/offline detection that works across platforms
+  // without relying on @react-native-community/netinfo (version mismatch with Expo Go)
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      setIsOnline(navigator.onLine);
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+    // On native, assume online (can enhance later)
+    setIsOnline(true);
+  }, []);
 
   const value: NetworkContextValue = {
-    isOnline: (networkStatus.isConnected && networkStatus.isInternetReachable) || false,
-    isOffline: (!networkStatus.isConnected || !networkStatus.isInternetReachable) || false,
-    connectionType: networkStatus.connectionType || 'unknown',
-    connectionStrength: networkStatus.connectionStrength || 'unknown',
+    isOnline,
+    isOffline: !isOnline,
+    connectionType: 'unknown',
+    connectionStrength: 'unknown',
   };
 
   return (
