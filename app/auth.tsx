@@ -253,8 +253,8 @@ export default function AuthScreen() {
             >
               <Text style={styles.switchText}>
                 {isLogin
-                  ? t("register") + ": " + t("error_fill")
-                  : t("login") + "?"}
+                  ? "Hisobingiz yo'qmi? Ro'yxatdan o'ting"
+                  : "Hisobingiz bormi? Kirish"}
               </Text>
             </Pressable>
           </View>
