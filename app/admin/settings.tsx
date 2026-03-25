@@ -276,7 +276,6 @@ export default function AdminSettingsScreen() {
           style: "destructive",
           onPress: () => {
             logout();
-            router.replace("/auth");
           },
         },
       ]
