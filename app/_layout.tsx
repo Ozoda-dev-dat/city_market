@@ -24,52 +24,53 @@ import { I18nProvider } from "@/lib/I18nProvider";
 import LangToggle from "@/components/LangToggle";
 import { NetworkProvider } from "@/components/OfflineComponents";
 
-console.log("[Layout] Module loaded");
-
 SplashScreen.preventAutoHideAsync();
-console.log("[Layout] SplashScreen.preventAutoHideAsync called");
+
+// Hides the splash only after BOTH fonts AND auth are ready — prevents white screen flash
+function SplashController({ fontsReady }: { fontsReady: boolean }) {
+  const { isLoading } = useAuth();
+
+  useEffect(() => {
+    if (fontsReady && !isLoading) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsReady, isLoading]);
+
+  return null;
+}
 
 function RootLayoutNav() {
-  console.log("[Nav] RootLayoutNav rendering");
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
-  console.log("[Nav] Auth state - isLoading:", isLoading, "user:", !!user, "role:", user?.role);
 
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
       if (!pathname.startsWith("/auth")) {
-        console.log("[Nav] Redirecting to /auth");
         router.replace("/auth");
       }
     } else if (user.role === "admin") {
       if (!pathname.startsWith("/admin")) {
-        console.log("[Nav] Admin redirecting to /admin");
         router.replace("/admin");
       }
     } else if (user.role === "courier") {
       if (!pathname.startsWith("/courier")) {
-        console.log("[Nav] Courier redirecting to /courier");
         router.replace("/courier");
       }
     }
   }, [user, isLoading, pathname]);
 
   if (isLoading) {
-    console.log("[Nav] Auth isLoading - returning null");
     return null;
   }
 
   if (!user) {
-    console.log("[Nav] No user - showing auth stack");
     return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="auth" options={{ headerShown: false }} />
       </Stack>
     );
   }
-
-  console.log("[Nav] User role:", user.role);
 
   if (user.role === "admin") {
     return (
@@ -116,7 +117,6 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  console.log("[Layout] RootLayout function called");
   const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -124,26 +124,10 @@ export default function RootLayout() {
     Poppins_700Bold,
   });
 
-  console.log("[Layout] useFonts result - loaded:", fontsLoaded, "error:", fontError ? String(fontError) : null);
+  const fontsReady = fontsLoaded || !!fontError;
 
-  useEffect(() => {
-    console.log("[Layout] Font useEffect - loaded:", fontsLoaded, "error:", !!fontError);
-    if (fontsLoaded || fontError) {
-      console.log("[Layout] Hiding splash screen");
-      SplashScreen.hideAsync().then(() => {
-        console.log("[Layout] Splash screen hidden");
-      }).catch((e) => {
-        console.log("[Layout] hideAsync error:", e);
-      });
-    }
-  }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError) {
-    console.log("[Layout] Waiting for fonts - returning null (white screen expected)");
-    return null;
-  }
-
-  console.log("[Layout] Fonts ready - rendering full tree");
+  // While fonts are not ready, return null — splash screen stays visible
+  if (!fontsReady) return null;
 
   return (
     <ErrorBoundary>
@@ -153,6 +137,8 @@ export default function RootLayout() {
             <LocationProvider>
               <NetworkProvider>
                 <AuthProvider>
+                  {/* SplashController lives inside AuthProvider so it can read auth state */}
+                  <SplashController fontsReady={fontsReady} />
                   <AppProvider>
                     <CartProvider>
                       <GestureHandlerRootView style={{ flex: 1 }}>
