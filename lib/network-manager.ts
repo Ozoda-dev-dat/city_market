@@ -207,9 +207,10 @@ class NetworkManager {
   }
 
   private async pingServer(): Promise<void> {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001'}/api/health`, {
+    const domain = process.env.EXPO_PUBLIC_DOMAIN;
+    const baseUrl = domain ? `https://${domain}` : 'http://localhost:5000';
+    const response = await fetch(`${baseUrl}/api/health`, {
       method: 'HEAD',
-      timeout: 5000,
     });
 
     if (!response.ok) {

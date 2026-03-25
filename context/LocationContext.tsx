@@ -106,12 +106,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       const timeoutId = setTimeout(() => abortController.abort(), 20000); // Increased to 20 seconds
       
       try {
-        let apiUrl = process.env.EXPO_PUBLIC_API_URL;
-        if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
-          apiUrl = "https://katabatic-unwarrantedly-renay.ngrok-free.dev";
-        } else if (!apiUrl) {
-          apiUrl = "http://192.168.0.153:5001";
-        }
+        const { getApiUrl } = await import('@/lib/query-client');
+        const apiUrl = getApiUrl();
         
         const response = await fetch(`${apiUrl}/api/user/location`, {
           method: 'PUT',

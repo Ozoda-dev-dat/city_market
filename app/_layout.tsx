@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
+
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemedBackground } from "@/components/ThemedBackground";
 import { queryClient } from "@/lib/query-client";
@@ -143,14 +143,12 @@ export default function RootLayout() {
                   <AppProvider>
                     <CartProvider>
                       <GestureHandlerRootView style={{ flex: 1 }}>
-                        <KeyboardProvider>
                           <I18nProvider>
                             <ThemedBackground>
                               <LangToggle />
                               <RootLayoutNav />
                             </ThemedBackground>
                           </I18nProvider>
-                        </KeyboardProvider>
                       </GestureHandlerRootView>
                     </CartProvider>
                   </AppProvider>
