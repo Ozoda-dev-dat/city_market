@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -123,7 +123,15 @@ export default function RootLayout() {
     Poppins_700Bold,
   });
 
-  const fontsReady = fontsLoaded || !!fontError;
+  const [fontTimedOut, setFontTimedOut] = useState(false);
+
+  // Safety timeout — if fonts don't resolve within 3 seconds on iOS, proceed anyway
+  useEffect(() => {
+    const timer = setTimeout(() => setFontTimedOut(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const fontsReady = fontsLoaded || !!fontError || fontTimedOut;
 
   useEffect(() => {
     if (fontsReady) {
