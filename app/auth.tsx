@@ -138,8 +138,17 @@ export default function AuthScreen() {
       }
       // The useEffect will handle redirection
     } catch (e: any) {
-      const errorMessage = e?.message || t("error_invalid");
-      console.error("Auth error:", e);
+      const rawMessage: string = e?.message || "";
+      let errorMessage = t("error_invalid");
+      try {
+        const match = rawMessage.match(/\{.*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          errorMessage = parsed.error || parsed.message || errorMessage;
+        } else if (rawMessage) {
+          errorMessage = rawMessage;
+        }
+      } catch {}
       Alert.alert(t("error_invalid"), errorMessage);
     } finally {
       setLoading(false);
@@ -254,7 +263,7 @@ export default function AuthScreen() {
               Admin: +998901234567 / admin123
             </Text>
             <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5, marginTop: 4 }}>
-              Test: +998901234568 / test123
+              Test: +998901234568 / Test@1234
             </Text>
           </View>
         </View>
