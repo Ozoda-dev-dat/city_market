@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "QKo1J-CJYApKQXWEUNRkt"
+uri = "file://qr-expo.png"
+type = "image"
+title = "CityMarket Expo QR Code"
