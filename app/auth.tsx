@@ -251,7 +251,7 @@ export default function AuthScreen() {
           </View>
           <View style={{ marginTop: 20, alignItems: 'center' }}>
             <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5 }}>
-              Admin: +998901234567 / admin
+              Admin: +998901234567 / admin123
             </Text>
             <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5, marginTop: 4 }}>
               Test: +998901234568 / test123

@@ -10,6 +10,7 @@ import { storage } from "./db-storage";
 config();
 
 const app = express();
+app.set('trust proxy', 1); // Trust Replit's reverse proxy for correct IP detection
 const log = console.log;
 
 declare module "http" {
@@ -282,8 +283,10 @@ function proxyToMetro(req: Request, res: Response) {
   const http = require("http");
 
   // Strip content-length since body may have been modified by body-parser
+  // Strip origin so Metro's CORS check doesn't reject the proxied browser request
   const headers = { ...req.headers, host: "localhost:8080" };
   delete headers["content-length"];
+  delete headers["origin"];
 
   const options = {
     hostname: "localhost",
@@ -349,20 +352,8 @@ function configureExpoAndLanding(app: express.Application) {
     const platform = req.header("expo-platform");
     const hasExpoPlatform = platform && (platform === "ios" || platform === "android");
 
-    if (hasExpoPlatform || isMetroPath) {
-      return proxyToMetro(req, res);
-    }
-
-    if (req.path === "/") {
-      return serveLandingPage({
-        req,
-        res,
-        landingPageTemplate,
-        appName,
-      });
-    }
-
-    next();
+    // Proxy all non-API requests to Metro (serves the Expo web app in the browser)
+    return proxyToMetro(req, res);
   });
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));

@@ -27,7 +27,9 @@ export const corsOptions = {
         /^https:\/\/.*\.ngrok-free\.dev$/,
         /^https:\/\/.*\.ngrok\.io$/,
         /^https:\/\/.*\.tunnel\.expo\.dev$/,
-        /^http:\/\/.*\.localtunnel\.me$/
+        /^http:\/\/.*\.localtunnel\.me$/,
+        /^https:\/\/.*\.replit\.dev$/,
+        /^https:\/\/.*\.repl\.co$/
       );
     }
 
@@ -182,8 +184,9 @@ export const requestSizeLimit = (maxSize: number = 10 * 1024 * 1024) => {
  */
 export const securityMiddleware = [
   helmetConfig,
-  cors(corsOptions),
   requestSizeLimit(10 * 1024 * 1024), // 10MB limit
+  // Note: CORS is handled by setupCors() in server/index.ts which supports Replit's proxy domain.
+  // Do not add cors(corsOptions) here — it would override setupCors and block Replit domain origins.
 ];
 
 /**
