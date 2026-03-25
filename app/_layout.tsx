@@ -24,22 +24,31 @@ import { I18nProvider } from "@/lib/I18nProvider";
 import LangToggle from "@/components/LangToggle";
 import { NetworkProvider } from "@/components/OfflineComponents";
 
+console.log("[Layout] Module loaded");
+
 SplashScreen.preventAutoHideAsync();
+console.log("[Layout] SplashScreen.preventAutoHideAsync called");
 
 function RootLayoutNav() {
+  console.log("[Nav] RootLayoutNav rendering");
   const { user, isLoading } = useAuth();
+  console.log("[Nav] Auth state - isLoading:", isLoading, "user:", !!user);
 
   useEffect(() => {
+    console.log("[Nav] useEffect - isLoading:", isLoading, "user:", !!user);
     if (!isLoading && !user) {
+      console.log("[Nav] Redirecting to /auth");
       router.replace("/auth");
     }
   }, [user, isLoading]);
 
   if (isLoading) {
+    console.log("[Nav] Auth isLoading - returning null");
     return null;
   }
 
   if (!user) {
+    console.log("[Nav] No user - showing auth stack");
     return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="auth" options={{ headerShown: false }} />
@@ -47,7 +56,8 @@ function RootLayoutNav() {
     );
   }
 
-  // Show different layouts based on user role
+  console.log("[Nav] User role:", user.role);
+
   if (user.role === "admin") {
     return (
       <Stack screenOptions={{ headerShown: false }}>
@@ -73,7 +83,6 @@ function RootLayoutNav() {
     );
   }
 
-  // Default customer layout
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -94,6 +103,7 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  console.log("[Layout] RootLayout function called");
   const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -101,13 +111,26 @@ export default function RootLayout() {
     Poppins_700Bold,
   });
 
+  console.log("[Layout] useFonts result - loaded:", fontsLoaded, "error:", fontError ? String(fontError) : null);
+
   useEffect(() => {
+    console.log("[Layout] Font useEffect - loaded:", fontsLoaded, "error:", !!fontError);
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
+      console.log("[Layout] Hiding splash screen");
+      SplashScreen.hideAsync().then(() => {
+        console.log("[Layout] Splash screen hidden");
+      }).catch((e) => {
+        console.log("[Layout] hideAsync error:", e);
+      });
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!fontsLoaded && !fontError) {
+    console.log("[Layout] Waiting for fonts - returning null (white screen expected)");
+    return null;
+  }
+
+  console.log("[Layout] Fonts ready - rendering full tree");
 
   return (
     <ErrorBoundary>

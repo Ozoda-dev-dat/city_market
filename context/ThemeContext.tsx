@@ -40,10 +40,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (!isLoaded) {
-    return null;
-  }
-
   return (
     <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
       {children}

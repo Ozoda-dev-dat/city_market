@@ -1,4 +1,5 @@
-import { NetInfo, NetInfoState } from '@react-native-community/netinfo';
+import NetInfo from '@react-native-community/netinfo';
+import type { NetInfoState } from '@react-native-community/netinfo';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { logger } from './data-security';
 
