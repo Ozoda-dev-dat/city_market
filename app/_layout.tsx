@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack, router, usePathname } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { Component, PropsWithChildren, useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet, Text, ScrollView } from "react-native";
@@ -64,67 +64,19 @@ function LoadingScreen() {
 }
 
 function RootLayoutNav() {
-  const { user, isLoading } = useAuth();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!user) {
-      if (!pathname.startsWith("/auth")) {
-        router.replace("/auth");
-      }
-    } else if (user.role === "admin") {
-      if (!pathname.startsWith("/admin")) {
-        router.replace("/admin");
-      }
-    } else if (user.role === "courier") {
-      if (!pathname.startsWith("/courier")) {
-        router.replace("/courier");
-      }
-    }
-  }, [user, isLoading, pathname]);
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  if (!user) {
-    return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-      </Stack>
-    );
-  }
-
-  if (user.role === "admin") {
-    return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="admin" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="product/[id]"
-          options={{
-            headerShown: true,
-            headerTitle: "",
-            headerTransparent: true,
-            headerTintColor: "#fff",
-          }}
-        />
-      </Stack>
-    );
-  }
-
-  if (user.role === "courier") {
-    return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="courier" options={{ headerShown: false }} />
-      </Stack>
-    );
-  }
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
+      <Stack.Screen name="courier" options={{ headerShown: false }} />
       <Stack.Screen name="orders" options={{ headerShown: false }} />
       <Stack.Screen
         name="product/[id]"
@@ -135,7 +87,7 @@ function RootLayoutNav() {
           headerTintColor: "#fff",
         }}
       />
-      <Stack.Screen name="order/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="order" options={{ headerShown: false }} />
     </Stack>
   );
 }

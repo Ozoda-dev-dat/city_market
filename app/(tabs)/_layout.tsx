@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
 import React from "react";
@@ -7,6 +7,7 @@ import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 function ClassicTabLayout() {
   const { totalItems } = useCart();
@@ -85,5 +86,9 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
+  const { user } = useAuth();
+  if (!user) return <Redirect href="/auth" />;
+  if (user.role === "admin") return <Redirect href="/admin" />;
+  if (user.role === "courier") return <Redirect href="/courier" />;
   return <ClassicTabLayout />;
 }
