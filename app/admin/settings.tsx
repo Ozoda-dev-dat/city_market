@@ -254,7 +254,6 @@ export default function AdminSettingsScreen() {
               await AsyncStorage.clear();
               clearCart();
               await logout();
-              router.replace("/auth");
             } catch (error) {
               console.error("Clear data error:", error);
               Alert.alert("Xatolik", "Ma'lumotlarni tozalashda xatolik yuz berdi");
@@ -277,7 +276,6 @@ export default function AdminSettingsScreen() {
           style: "destructive",
           onPress: async () => {
             await logout();
-            router.replace("/auth");
           },
         },
       ]

@@ -61,7 +61,7 @@ export default function CourierDashboard() {
           <Text style={styles.greeting}>Xayrli kun! 👋</Text>
           <Text style={styles.title}>Kuryer paneli</Text>
         </View>
-        <Pressable style={styles.profileBtn} onPress={async () => { await logout(); router.replace("/auth"); }}>
+        <Pressable style={styles.profileBtn} onPress={async () => { await logout(); }}>
           <Ionicons name="log-out-outline" size={22} color={Colors.error} />
         </Pressable>
       </View>
