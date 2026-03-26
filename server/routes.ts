@@ -242,6 +242,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Update profile name
+  app.patch("/api/profile",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const { name } = req.body;
+        if (!name || typeof name !== "string" || name.trim().length < 1) {
+          return res.status(400).json({ error: "Invalid name" });
+        }
+        const updated = await storage.updateUser(req.user!.userId, { name: name.trim() });
+        const { password: _, ...userWithoutPassword } = updated as any;
+        res.json({ user: userWithoutPassword });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update profile" });
+      }
+    }
+  );
+
+  // Change password
+  app.patch("/api/password",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+          return res.status(400).json({ error: "Both old and new password are required" });
+        }
+        const user = await storage.getUser(req.user!.userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+        const isValid = await comparePassword(oldPassword, user.password);
+        if (!isValid) return res.status(400).json({ error: "Old password is incorrect" });
+        const strength = validatePasswordStrength(newPassword);
+        if (!strength.isValid) return res.status(400).json({ error: strength.errors[0] });
+        const hashed = await hashPassword(newPassword);
+        await storage.updateUser(req.user!.userId, { password: hashed });
+        res.json({ success: true });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to change password" });
+      }
+    }
+  );
+
   // Promo codes endpoints
   app.get("/api/promo-codes", 
     authenticateToken,

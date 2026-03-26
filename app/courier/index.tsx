@@ -20,7 +20,7 @@ import { formatPrice } from "@/constants/data";
 export default function CourierDashboard() {
   const insets = useSafeAreaInsets();
   const { orders } = useApp();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"available" | "my-orders">("available");
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
@@ -40,8 +40,8 @@ export default function CourierDashboard() {
   }
 
   // For prototype, we'll filter based on status
-  const availableOrders = orders.filter(o => o.status === "preparing");
-  const myOrders = orders.filter(o => o.status === "transit" || o.status === "delivered");
+  const availableOrders = orders.filter(o => o.status === "ready");
+  const myOrders = orders.filter(o => o.status === "delivering" || o.status === "delivered");
 
   // Calculate real statistics
   const todayOrders = myOrders.filter(o => {
@@ -61,7 +61,7 @@ export default function CourierDashboard() {
           <Text style={styles.greeting}>Xayrli kun! 👋</Text>
           <Text style={styles.title}>Kuryer paneli</Text>
         </View>
-        <Pressable style={styles.profileBtn} onPress={() => router.replace("/")}>
+        <Pressable style={styles.profileBtn} onPress={async () => { await logout(); router.replace("/auth"); }}>
           <Ionicons name="log-out-outline" size={22} color={Colors.error} />
         </Pressable>
       </View>

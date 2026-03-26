@@ -10,6 +10,7 @@ interface AuthContextValue {
   login: (phoneNumber: string, password: string) => Promise<void>;
   register: (phoneNumber: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (name: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -67,14 +68,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
+  const updateProfile = async (name: string) => {
+    return handleAsyncError(async () => {
+      const res = await apiRequest("PATCH", "/api/profile", { name });
+      const data = await res.json();
+      const updatedUser = data.user;
+      setUser(updatedUser);
+      const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+      if (stored) {
+        const authData = JSON.parse(stored);
+        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ ...authData, user: updatedUser }));
+      }
+    }, 'updateProfile');
+  };
+
   const value = useMemo(() => ({
     user,
     token,
     login,
     register,
     logout,
+    updateProfile,
     isLoading,
-  }), [user, token, login, register, logout, isLoading]);
+  }), [user, token, login, register, logout, updateProfile, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

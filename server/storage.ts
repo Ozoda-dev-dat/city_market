@@ -7,6 +7,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByPhone(phone: string): Promise<User | undefined>;
   createUser(user: any): Promise<User>;
+  updateUser(id: string, data: Partial<User>): Promise<User>;
   getCouriers(): Promise<User[]>;
   
   getProducts(): Promise<Product[]>;
@@ -63,6 +64,13 @@ export class MemStorage implements IStorage {
     const user = { ...insertUser, id, role: insertUser.role || "customer" };
     this.users.set(id, user);
     return user;
+  }
+  async updateUser(id: string, data: Partial<User>) {
+    const existing = this.users.get(id);
+    if (!existing) throw new Error("User not found");
+    const updated = { ...existing, ...data };
+    this.users.set(id, updated);
+    return updated;
   }
   async getCouriers() {
     return Array.from(this.users.values()).filter(u => u.role === "courier");

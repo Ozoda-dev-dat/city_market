@@ -53,8 +53,10 @@ export default function UserOrdersScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return Colors.warning;
+      case 'confirmed': return Colors.warning;
       case 'preparing': return Colors.info;
-      case 'transit': return Colors.primary;
+      case 'ready': return Colors.primary;
+      case 'delivering': return Colors.primary;
       case 'delivered': return '#10B981';
       case 'cancelled': return Colors.error;
       default: return Colors.textMuted;
@@ -64,8 +66,10 @@ export default function UserOrdersScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return 'time-outline';
+      case 'confirmed': return 'checkmark-outline';
       case 'preparing': return 'restaurant-outline';
-      case 'transit': return 'bicycle-outline';
+      case 'ready': return 'cube-outline';
+      case 'delivering': return 'bicycle-outline';
       case 'delivered': return 'checkmark-circle';
       case 'cancelled': return 'close-circle';
       default: return 'help-circle';
@@ -75,8 +79,10 @@ export default function UserOrdersScreen() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending': return 'Kutilmoqda';
+      case 'confirmed': return 'Tasdiqlandi';
       case 'preparing': return 'Tayyorlanmoqda';
-      case 'transit': return 'Yo\'lda';
+      case 'ready': return 'Tayyor';
+      case 'delivering': return "Yo'lda";
       case 'delivered': return 'Yetkazildi';
       case 'cancelled': return 'Bekor qilingan';
       default: return status;

@@ -16,7 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, queryClient } from "@/lib/query-client";
 import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
@@ -73,11 +73,13 @@ export default function CartScreen() {
     };
 
     try {
-      await apiRequest("POST", "/api/orders", data);
+      const res = await apiRequest("POST", "/api/orders", data);
+      const newOrder = await res.json();
+      await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setOrdered(true);
       clearCart();
-      router.push(`/order/${orderId}`);
+      router.push(`/order/${newOrder.id}`);
     } catch (e) {
       Alert.alert("Xatolik", "Buyurtma berishda xatolik yuz berdi");
     }

@@ -19,13 +19,14 @@ import { formatPrice } from "@/constants/data";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
 
-type OrderStatus = "pending" | "preparing" | "transit" | "delivered";
+type OrderStatus = "pending" | "confirmed" | "preparing" | "ready" | "delivering" | "delivered" | "cancelled";
 
 const STATUS_TABS: { id: string; label: string }[] = [
   { id: "all", label: "Barchasi" },
   { id: "pending", label: "Kutilmoqda" },
   { id: "preparing", label: "Tayyorlanmoqda" },
-  { id: "transit", label: "Yo'lda" },
+  { id: "ready", label: "Tayyor" },
+  { id: "delivering", label: "Yo'lda" },
   { id: "delivered", label: "Yetkazildi" },
   { id: "cancelled", label: "Bekor qilingan" },
 ];
@@ -41,7 +42,7 @@ export default function AdminOrdersScreen() {
   const { orders, updateOrderStatus } = useApp();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: any; next?: OrderStatus; nextLabel?: string }> = {
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any; next?: OrderStatus; nextLabel?: string }> = {
     pending: {
       label: "Kutilmoqda",
       color: "#F59E0B",
@@ -50,15 +51,31 @@ export default function AdminOrdersScreen() {
       next: "preparing",
       nextLabel: "Tayyorlashga yuborish",
     },
+    confirmed: {
+      label: "Tasdiqlandi",
+      color: "#F59E0B",
+      bg: "#FEF3C7",
+      icon: "checkmark-outline",
+      next: "preparing",
+      nextLabel: "Tayyorlashga yuborish",
+    },
     preparing: {
       label: "Tayyorlanmoqda",
       color: "#3B82F6",
       bg: "#EFF6FF",
       icon: "restaurant",
-      next: "transit",
+      next: "ready",
+      nextLabel: "Tayyor deb belgilash",
+    },
+    ready: {
+      label: "Tayyor",
+      color: "#8B5CF6",
+      bg: "#F5F3FF",
+      icon: "cube-outline",
+      next: "delivering",
       nextLabel: "Yetkazib berishga yuborish",
     },
-    transit: {
+    delivering: {
       label: "Yo'lda",
       color: "#8B5CF6",
       bg: "#F5F3FF",
@@ -71,6 +88,12 @@ export default function AdminOrdersScreen() {
       color: Colors.primary,
       bg: Colors.primary,
       icon: "checkmark-circle",
+    },
+    cancelled: {
+      label: "Bekor qilingan",
+      color: "#EF4444",
+      bg: "#FEE2E2",
+      icon: "close-circle",
     },
   };
 

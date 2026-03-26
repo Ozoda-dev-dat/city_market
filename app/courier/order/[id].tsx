@@ -22,22 +22,21 @@ export default function CourierOrderDetail() {
   if (!order) return null;
 
   const handleAction = async () => {
-    const statusMap: any = { preparing: "transit", transit: "delivered" };
+    const statusMap: any = { ready: "delivering", delivering: "delivered" };
     const next = statusMap[order.status];
     if (!next) return;
 
     try {
       await updateOrderStatus(order.id, next);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      // Removed router.back() to allow viewing delivered state or manual navigation
     } catch (e) {
       Alert.alert("Xatolik", "Statusni yangilashda xatolik yuz berdi");
     }
   };
 
   const buttonConfig: any = {
-    preparing: { label: "Olishni tasdiqlash", icon: "bicycle", color: Colors.primary },
-    transit: { label: "Yetkazilganligini tasdiqlash", icon: "checkmark-circle", color: "#10B981" },
+    ready: { label: "Olishni tasdiqlash", icon: "bicycle", color: Colors.primary },
+    delivering: { label: "Yetkazilganligini tasdiqlash", icon: "checkmark-circle", color: "#10B981" },
     delivered: { label: "Yetkazilgan", icon: "checkmark", color: Colors.textMuted, disabled: true },
     pending: { label: "Tayyorlanmoqda...", icon: "time", color: Colors.textMuted, disabled: true },
   };

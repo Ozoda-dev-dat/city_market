@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated, Dimensions, Linking } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated, Dimensions, Linking, ActivityIndicator } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,13 +8,14 @@ import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
+import { queryClient } from "@/lib/query-client";
 
 const { width } = Dimensions.get("window");
 
 export default function EnhancedOrderTrackingScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders } = useApp();
+  const { orders, isLoading: isLoadingOrders } = useApp();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
@@ -46,13 +47,33 @@ export default function EnhancedOrderTrackingScreen() {
     if (!order) return 0;
     if (order.status === 'cancelled') return 0;
     if (order.status === 'pending') return 1;
+    if (order.status === 'confirmed') return 1;
     if (order.status === 'preparing') return 2;
-    if (order.status === 'transit') return 3;
+    if (order.status === 'ready') return 2;
+    if (order.status === 'delivering') return 3;
     if (order.status === 'delivered') return 4;
     return 0;
   };
 
-  if (!order) return null;
+  if (!order && isLoadingOrders) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.background, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  if (!order) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.background, alignItems: "center", justifyContent: "center", gap: 16 }}>
+        <Ionicons name="receipt-outline" size={64} color={Colors.textMuted} />
+        <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 16, color: Colors.textSecondary }}>Buyurtma topilmadi</Text>
+        <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 24, paddingVertical: 12, backgroundColor: Colors.primary, borderRadius: 12 }}>
+          <Text style={{ color: "#fff", fontFamily: "Poppins_600SemiBold" }}>Ortga qaytish</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   const steps = [
     { 
@@ -67,14 +88,14 @@ export default function EnhancedOrderTrackingScreen() {
       label: "Tayyorlanmoqda", 
       icon: "restaurant",
       description: "Buyurtma tayyorlanmoqda",
-      time: order.status === 'preparing' || order.status === 'transit' || order.status === 'delivered' ? '15:30' : ''
+      time: order.status === 'preparing' || order.status === 'ready' || order.status === 'delivering' || order.status === 'delivered' ? '15:30' : ''
     },
     { 
-      key: "transit", 
+      key: "delivering", 
       label: "Yo'lda", 
       icon: "bicycle",
       description: "Kuryer yo'lda",
-      time: order.status === 'transit' || order.status === 'delivered' ? '16:00' : ''
+      time: order.status === 'delivering' || order.status === 'delivered' ? '16:00' : ''
     },
     { 
       key: "delivered", 
@@ -89,16 +110,19 @@ export default function EnhancedOrderTrackingScreen() {
   const isCancelled = order.status === "cancelled";
   const progress = currentStepIndex >= 0 ? (currentStepIndex + 1) / steps.length : 0;
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    setRefreshing(false);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return Colors.warning;
+      case 'confirmed': return Colors.warning;
       case 'preparing': return Colors.primary;
-      case 'transit': return Colors.primary;
+      case 'ready': return Colors.primary;
+      case 'delivering': return Colors.primary;
       case 'delivered': return '#10B981';
       case 'cancelled': return Colors.error;
       default: return Colors.textMuted;
@@ -108,8 +132,10 @@ export default function EnhancedOrderTrackingScreen() {
   const getStatusEmoji = (status: string) => {
     switch (status) {
       case 'pending': return '⏳';
+      case 'confirmed': return '✔️';
       case 'preparing': return '👨‍🍳';
-      case 'transit': return '🚴';
+      case 'ready': return '📦';
+      case 'delivering': return '🚴';
       case 'delivered': return '✅';
       case 'cancelled': return '❌';
       default: return '📦';
