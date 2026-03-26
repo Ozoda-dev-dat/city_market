@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -252,8 +253,8 @@ export default function AdminSettingsScreen() {
             try {
               await AsyncStorage.clear();
               clearCart();
-              logout();
-              Alert.alert("Muvaffaqiyat", "Ma'lumotlar tozalandi");
+              await logout();
+              router.replace("/auth");
             } catch (error) {
               console.error("Clear data error:", error);
               Alert.alert("Xatolik", "Ma'lumotlarni tozalashda xatolik yuz berdi");
@@ -274,8 +275,9 @@ export default function AdminSettingsScreen() {
         {
           text: lang === "uz" ? "Chiqish" : "Выйти",
           style: "destructive",
-          onPress: () => {
-            logout();
+          onPress: async () => {
+            await logout();
+            router.replace("/auth");
           },
         },
       ]
