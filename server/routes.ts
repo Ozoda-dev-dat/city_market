@@ -418,8 +418,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const orderData = {
           ...result.data,
           customerId: req.user!.userId,
-          customerName: req.user!.phoneNumber, // We'll need to add name to JWT payload
+          customerName: result.data.customerName || req.user!.phoneNumber,
           phoneNumber: req.user!.phoneNumber,
+          status: result.data.status ?? "pending",
+          discount: result.data.discount ?? 0,
         };
         
         const order = await storage.createOrder(orderData);

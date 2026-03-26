@@ -425,8 +425,8 @@ export const insertOrderSchema = createInsertSchema(orders, {
   phoneNumber: z.string().regex(/^\+998\d{9}$/, "Invalid Uzbek phone number format"),
   address: z.string().min(1).max(500),
   total: z.number().min(0).max(10000000),
-  discount: z.number().min(0).max(10000000),
-  status: z.enum(["pending", "confirmed", "preparing", "ready", "delivering", "delivered", "cancelled"]),
+  discount: z.number().min(0).max(10000000).optional(),
+  status: z.enum(["pending", "confirmed", "preparing", "ready", "delivering", "delivered", "cancelled"]).optional(),
 });
 
 export const insertPromoCodeSchema = createInsertSchema(promoCodes, {
