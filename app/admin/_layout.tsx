@@ -1,6 +1,6 @@
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
@@ -9,9 +9,17 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLayout() {
   const { isDarkMode } = useTheme();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const Colors = getColors(isDarkMode);
-  
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) return null;
+
   // Protect admin routes - only allow admin users
   if (!user || user.role !== "admin") {
     return (
