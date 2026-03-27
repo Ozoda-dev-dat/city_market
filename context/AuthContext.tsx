@@ -9,7 +9,7 @@ interface AuthContextValue {
   token: string | null;
   login: (phoneNumber: string, password: string) => Promise<void>;
   register: (phoneNumber: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   isLoading: boolean;
 }

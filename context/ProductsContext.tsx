@@ -61,8 +61,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const updateOrderStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string, status: string }) => 
-      apiRequest("PATCH", `/api/orders/${id}/status`, { status }),
+    mutationFn: ({ id, status, courierId }: { id: string, status: string, courierId?: string }) => 
+      apiRequest("PATCH", `/api/orders/${id}/status`, { status, courierId }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
   });
 
@@ -82,7 +82,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
   const deleteCategory = (id: string) => deleteCategoryMutation.mutate(id);
   const updateOrderStatus = (id: string, status: string, courierId?: string) => 
-    updateOrderStatusMutation.mutateAsync({ id, status }).then(() => {});
+    updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any).then(() => {});
   const createOrder = (order: any) => createOrderMutation.mutateAsync(order).then(() => {});
   const createPromoCode = (promo: any) => createPromoCodeMutation.mutateAsync(promo).then(() => {});
 

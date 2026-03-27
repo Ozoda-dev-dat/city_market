@@ -32,6 +32,7 @@ export interface IStorage {
   restoreCategory(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<Category>;
   
   getOrders(): Promise<Order[]>;
+  getOrdersByCustomer(customerId: string): Promise<Order[]>;
   createOrder(order: any): Promise<Order>;
   updateOrderStatus(id: string, status: string, courierId?: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<Order>;
   softDeleteOrder(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<void>;
@@ -343,6 +344,13 @@ export class DbStorage implements IStorage {
 
   async getOrders(): Promise<Order[]> {
     return await this.db.select().from(schema.orders);
+  }
+
+  async getOrdersByCustomer(customerId: string): Promise<Order[]> {
+    return await this.db
+      .select()
+      .from(schema.orders)
+      .where(eq(schema.orders.customerId, customerId));
   }
 
   async createOrder(order: any): Promise<Order> {

@@ -380,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req, res) => {
       try {
-        await storage.deleteProduct(req.params.id);
+        await storage.softDeleteProduct(req.params.id);
         res.sendStatus(204);
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -422,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req, res) => {
       try {
-        await storage.deleteCategory(req.params.id);
+        await storage.softDeleteCategory(req.params.id);
         res.sendStatus(204);
       } catch (error) {
         console.error("Error deleting category:", error);
@@ -432,6 +432,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Orders endpoints
+  app.get("/api/orders/my",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const orders = await storage.getOrdersByCustomer(req.user!.userId);
+        res.json(orders);
+      } catch (error) {
+        console.error("Error fetching customer orders:", error);
+        res.status(500).json({ error: "Failed to fetch orders" });
+      }
+    }
+  );
+
   app.get("/api/orders", 
     authenticateToken,
     requireAdminOrCourier,

@@ -3,11 +3,9 @@ import { View, Text, StyleSheet, FlatList, Pressable, Platform, Alert, ScrollVie
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useApp } from "@/context/ProductsContext";
-import { formatPrice } from "@/constants/data";
 
 export default function AdminCategoriesScreen() {
   const insets = useSafeAreaInsets();

@@ -15,8 +15,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
-import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/query-client";
+import { Order } from "@/shared/schema";
 
 const { width } = Dimensions.get('window');
 
@@ -25,14 +27,20 @@ export default function UserOrdersScreen() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
-  const { orders } = useApp();
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'completed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const onRefresh = () => {
+  const { data: orders = [] } = useQuery<Order[]>({
+    queryKey: ["/api/orders/my"],
+    queryFn: () => apiRequest("GET", "/api/orders/my").then(res => res.json()),
+  });
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
+    setRefreshing(false);
   };
 
   const filteredOrders = orders.filter(order => {

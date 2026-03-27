@@ -3,28 +3,37 @@ import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
-import { queryClient } from "@/lib/query-client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/query-client";
+import { Order } from "@/shared/schema";
 
 const { width } = Dimensions.get("window");
 
 export default function EnhancedOrderTrackingScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { orders, isLoading: isLoadingOrders } = useApp();
+  const { orders: adminOrders, isLoading: isLoadingOrders } = useApp();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
+  const queryClient = useQueryClient();
   
   const [refreshing, setRefreshing] = useState(false);
   const [animatedValue] = useState(new Animated.Value(0));
   const [progressValue] = useState(new Animated.Value(0));
-  
-  const order = orders.find(o => o.id === id);
+
+  // Try admin orders first; fall back to customer orders for regular users
+  const { data: myOrders = [] } = useQuery<Order[]>({
+    queryKey: ["/api/orders/my"],
+    queryFn: () => apiRequest("GET", "/api/orders/my").then(res => res.json()),
+    enabled: !adminOrders.find(o => o.id === id),
+  });
+
+  const order = adminOrders.find(o => o.id === id) ?? myOrders.find(o => o.id === id);
 
   useEffect(() => {
     // Animate progress on mount
@@ -113,6 +122,7 @@ export default function EnhancedOrderTrackingScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
     setRefreshing(false);
   };
 

@@ -76,6 +76,7 @@ export default function CartScreen() {
       const res = await apiRequest("POST", "/api/orders", data);
       const newOrder = await res.json();
       await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setOrdered(true);
       clearCart();
