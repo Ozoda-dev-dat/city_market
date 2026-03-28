@@ -223,21 +223,11 @@ const bannerStyles = StyleSheet.create({
 
 const CARD_W = Math.floor((width - 32 - 8) / 2);
 
-const CAT_GRADIENTS: Record<string, [string, string]> = {
-  fruits:     ["#FF9A5C", "#EF6820"],
-  vegetables: ["#4ADE80", "#16A34A"],
-  dairy:      ["#60A5FA", "#2563EB"],
-  meat:       ["#F87171", "#DC2626"],
-  bakery:     ["#FCD34D", "#D97706"],
-  beverages:  ["#A78BFA", "#7C3AED"],
-  snacks:     ["#F472B6", "#DB2777"],
-  frozen:     ["#67E8F9", "#0891B2"],
-};
-
 function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () => void; isDarkMode: boolean }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const [g0, g1] = CAT_GRADIENTS[item.id] ?? [item.color ?? "#16A34A", "#059669"];
+  const accentColor: string = item.color ?? "#16A34A";
+  const accentBg: string = item.bgColor ?? "#F0FDF4";
 
   return (
     <Animated.View style={[catStyles.cell, anim]}>
@@ -250,28 +240,28 @@ function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () =>
         onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
-        <LinearGradient
-          colors={isDarkMode ? [g0 + "BB", g1 + "CC"] : [g0, g1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={catStyles.card}
-        >
-          <View style={catStyles.decorCircleLg} />
-          <View style={catStyles.decorCircleSm} />
-
-          <View style={catStyles.iconArea}>
-            <Ionicons name={item.icon as any} size={32} color="#fff" />
+        <View style={[
+          catStyles.card,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.78)" : "#fff",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
+          }
+        ]}>
+          <View style={[catStyles.iconArea, { backgroundColor: isDarkMode ? accentColor + "22" : accentBg }]}>
+            <Ionicons name={item.icon as any} size={28} color={accentColor} />
           </View>
 
           <View style={catStyles.textArea}>
-            <Text style={catStyles.label} numberOfLines={2}>{item.name}</Text>
+            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
+              {item.name}
+            </Text>
             {item.count ? (
-              <View style={catStyles.countPill}>
-                <Text style={catStyles.countText}>{item.count} ta</Text>
+              <View style={[catStyles.countPill, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "#F0FDF4" }]}>
+                <Text style={[catStyles.countText, { color: accentColor }]}>{item.count} ta</Text>
               </View>
             ) : null}
           </View>
-        </LinearGradient>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -282,71 +272,46 @@ const catStyles = StyleSheet.create({
     width: CARD_W,
   },
   card: {
-    height: 96,
-    borderRadius: 22,
+    height: 88,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
-    overflow: "hidden",
-    paddingLeft: 18,
-    paddingRight: 14,
-    gap: 14,
+    paddingLeft: 14,
+    paddingRight: 12,
+    gap: 13,
+    borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-  decorCircleLg: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    right: -28,
-    top: -28,
-  },
-  decorCircleSm: {
-    position: "absolute",
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    right: 20,
-    bottom: -14,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 4,
   },
   iconArea: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.22)",
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    flexShrink: 0,
   },
   textArea: {
     flex: 1,
-    gap: 6,
+    gap: 5,
   },
   label: {
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
-    color: "#fff",
     lineHeight: 18,
   },
   countPill: {
-    backgroundColor: "rgba(255,255,255,0.22)",
     alignSelf: "flex-start",
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.28)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   countText: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "Poppins_500Medium",
     fontSize: 10,
-    color: "rgba(255,255,255,0.95)",
   },
 });
 
