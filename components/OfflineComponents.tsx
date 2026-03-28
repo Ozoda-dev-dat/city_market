@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable, Alert, Platform, AppState } from 're
 import { Ionicons } from '@expo/vector-icons';
 import { useOfflineCache } from '@/lib/offline-cache';
 import { useTheme } from '@/context/ThemeContext';
+import { useNetworkStatus } from '@/lib/network-manager';
 
 interface NetworkContextValue {
   isOnline: boolean;
