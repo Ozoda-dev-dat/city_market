@@ -12,6 +12,13 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "@/context/CartContext";
@@ -22,16 +29,137 @@ import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
 
+function CartItemRow({
+  item,
+  isDarkMode,
+  Colors,
+  onRemove,
+  onUpdate,
+}: {
+  item: any;
+  isDarkMode: boolean;
+  Colors: any;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, qty: number) => void;
+}) {
+  const scale = useSharedValue(1);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const isValidImage = (uri: string) => uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+
+  const handleQty = (delta: number) => {
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    scale.value = withSequence(withSpring(0.96, { damping: 12 }), withSpring(1, { damping: 12 }));
+    const next = item.quantity + delta;
+    if (next <= 0) onRemove(item.product.id);
+    else onUpdate(item.product.id, next);
+  };
+
+  return (
+    <Animated.View style={[
+      itemStyles.wrap,
+      {
+        backgroundColor: isDarkMode ? "rgba(30,30,32,0.82)" : "rgba(255,255,255,0.82)",
+        borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.9)",
+      },
+      animStyle,
+    ]}>
+      <View style={itemStyles.imageBox}>
+        {isValidImage(item.product.image) ? (
+          <Image source={{ uri: item.product.image }} style={itemStyles.image} resizeMode="cover" />
+        ) : (
+          <View style={[itemStyles.image, itemStyles.imageFallback]}>
+            <Text style={itemStyles.imageLetter}>{item.product.name.charAt(0).toUpperCase()}</Text>
+          </View>
+        )}
+      </View>
+      <View style={itemStyles.info}>
+        <Text style={[itemStyles.name, { color: Colors.text }]} numberOfLines={2}>
+          {item.product.name}
+        </Text>
+        <Text style={itemStyles.price}>{formatPrice(item.product.price)}</Text>
+      </View>
+      <View style={[
+        itemStyles.controls,
+        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.09)" }
+      ]}>
+        <Pressable style={itemStyles.qtyBtn} onPress={() => handleQty(-1)}>
+          <Ionicons
+            name={item.quantity === 1 ? "trash-outline" : "remove"}
+            size={16}
+            color="#16A34A"
+          />
+        </Pressable>
+        <Text style={itemStyles.qty}>{item.quantity}</Text>
+        <Pressable style={itemStyles.qtyBtn} onPress={() => handleQty(1)}>
+          <Ionicons name="add" size={16} color="#16A34A" />
+        </Pressable>
+      </View>
+    </Animated.View>
+  );
+}
+
+const itemStyles = StyleSheet.create({
+  wrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 12,
+    gap: 12,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  imageBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#E8F5E9",
+  },
+  image: { width: "100%", height: "100%" },
+  imageFallback: { alignItems: "center", justifyContent: "center" },
+  imageLetter: { fontFamily: "Poppins_700Bold", fontSize: 22, color: "#16A34A" },
+  info: { flex: 1, gap: 4 },
+  name: { fontFamily: "Poppins_600SemiBold", fontSize: 13, lineHeight: 18 },
+  price: { fontFamily: "Poppins_700Bold", fontSize: 14, color: "#16A34A" },
+  controls: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    padding: 3,
+    gap: 4,
+  },
+  qtyBtn: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+  qty: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    color: "#16A34A",
+    minWidth: 22,
+    textAlign: "center",
+  },
+});
+
 export default function CartScreen() {
   const insets = useSafeAreaInsets();
   const { items, totalPrice, totalItems, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
-  const styles = getStyles(isDarkMode);
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [ordered, setOrdered] = useState(false);
+
+  const checkoutScale = useSharedValue(1);
+  const checkoutAnim = useAnimatedStyle(() => ({ transform: [{ scale: checkoutScale.value }] }));
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const delivery = totalPrice > 100000 ? 0 : 15000;
@@ -42,6 +170,7 @@ export default function CartScreen() {
       const res = await apiRequest("GET", `/api/promo-codes/${promo}`);
       const data = await res.json();
       setDiscount(data.discountPercent);
+      if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Muvaffaqiyat", `${data.discountPercent}% chegirma qo'llanildi`);
     } catch (e) {
       Alert.alert("Xatolik", "Promokod noto'g'ri");
@@ -49,18 +178,19 @@ export default function CartScreen() {
   };
 
   const handleCheckout = async () => {
-    const orderId = `order-${Date.now()}`;
+    checkoutScale.value = withSequence(
+      withSpring(0.96, { damping: 10 }),
+      withSpring(1, { damping: 12 })
+    );
 
     let userLocation = null;
     try {
-      const locationData = await AsyncStorage.getItem('@user_location');
-      if (locationData) {
-        userLocation = JSON.parse(locationData);
-      }
+      const locationData = await AsyncStorage.getItem("@user_location");
+      if (locationData) userLocation = JSON.parse(locationData);
     } catch (e) {}
 
     const data = {
-      id: orderId,
+      id: `order-${Date.now()}`,
       customerId: user?.id,
       customerName: user?.name || "Mehmon",
       phoneNumber: user?.phoneNumber || "",
@@ -68,8 +198,8 @@ export default function CartScreen() {
       latitude: userLocation?.latitude || null,
       longitude: userLocation?.longitude || null,
       total: finalTotal,
-      discount: discount,
-      items: items.map(i => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
+      discount,
+      items: items.map((i) => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
     };
 
     try {
@@ -78,7 +208,6 @@ export default function CartScreen() {
       await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setOrdered(true);
       clearCart();
       router.push(`/order/${newOrder.id}`);
     } catch (e) {
@@ -86,28 +215,50 @@ export default function CartScreen() {
     }
   };
 
-  const isValidImage = (uri: string) =>
-    uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+  const bgColors: [string, string, string] = isDarkMode
+    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
+    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
 
   if (items.length === 0) {
     return (
-      <View style={[styles.emptyContainer, { paddingTop: topPad }]}>
-        <View style={styles.emptyIconWrap}>
-          <Ionicons name="bag-outline" size={48} color={Colors.primary} />
+      <View style={{ flex: 1 }}>
+        <LinearGradient colors={bgColors} locations={[0, 0.3, 1]} style={StyleSheet.absoluteFill} />
+        <View style={[styles.emptyContainer, { paddingTop: topPad }]}>
+          <View style={[
+            styles.emptyIconWrap,
+            {
+              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.8)",
+              borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+            }
+          ]}>
+            <Ionicons name="bag-outline" size={44} color="#16A34A" />
+          </View>
+          <Text style={[styles.emptyTitle, { color: Colors.text }]}>Savat bo&apos;sh</Text>
+          <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
+            Mahsulotlarni katalogdan qo&apos;shing
+          </Text>
+          <Pressable
+            style={styles.shopBtn}
+            onPress={() => router.push("/(tabs)/catalog")}
+          >
+            <Text style={styles.shopBtnText}>Katalogga o&apos;tish</Text>
+            <Ionicons name="arrow-forward" size={16} color="#fff" />
+          </Pressable>
         </View>
-        <Text style={styles.emptyTitle}>Savat bo'sh</Text>
-        <Text style={styles.emptySubtitle}>Mahsulotlarni katalogdan qo'shing</Text>
-        <Pressable style={styles.shopBtn} onPress={() => router.push("/(tabs)/catalog")}>
-          <Text style={styles.shopBtnText}>Xarid qilish</Text>
-        </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: topPad }]}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Savat</Text>
+    <View style={{ flex: 1 }}>
+      <LinearGradient colors={bgColors} locations={[0, 0.25, 1]} style={StyleSheet.absoluteFill} />
+      <View style={[
+        styles.blobTR,
+        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.07)" : "rgba(22,163,74,0.11)" }
+      ]} />
+
+      <View style={[styles.headerRow, { paddingTop: topPad + 12 }]}>
+        <Text style={[styles.title, { color: Colors.text }]}>Savat</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{totalItems}</Text>
         </View>
@@ -117,394 +268,337 @@ export default function CartScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.itemsCard}>
-          {items.map((item, index) => (
-            <React.Fragment key={item.product.id}>
-              <View style={styles.cartItem}>
-                <View style={styles.itemImageBox}>
-                  {isValidImage(item.product.image) ? (
-                    <Image
-                      source={{ uri: item.product.image }}
-                      style={styles.itemImage}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={[styles.itemImage, styles.itemImageFallback]}>
-                      <Text style={styles.itemImageLetter}>
-                        {item.product.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                  )}
-                </View>
+        {items.map((item) => (
+          <CartItemRow
+            key={item.product.id}
+            item={item}
+            isDarkMode={isDarkMode}
+            Colors={Colors}
+            onRemove={removeFromCart}
+            onUpdate={updateQuantity}
+          />
+        ))}
 
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemName} numberOfLines={2}>{item.product.name}</Text>
-                  <Text style={styles.itemPrice}>{formatPrice(item.product.price)}</Text>
-                </View>
-
-                <View style={styles.itemControls}>
-                  <Pressable
-                    style={styles.qtyBtn}
-                    onPress={() => {
-                      if (item.quantity === 1) removeFromCart(item.product.id);
-                      else updateQuantity(item.product.id, item.quantity - 1);
-                    }}
-                  >
-                    <Ionicons name={item.quantity === 1 ? "trash-outline" : "remove"} size={16} color={Colors.primary} />
-                  </Pressable>
-                  <Text style={styles.qtyText}>{item.quantity}</Text>
-                  <Pressable
-                    style={styles.qtyBtn}
-                    onPress={() => updateQuantity(item.product.id, item.quantity + 1)}
-                  >
-                    <Ionicons name="add" size={16} color={Colors.primary} />
-                  </Pressable>
-                </View>
-              </View>
-              {index < items.length - 1 && <View style={styles.divider} />}
-            </React.Fragment>
-          ))}
-        </View>
-
-        <View style={styles.promoRow}>
+        <View style={[
+          styles.promoRow,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+          }
+        ]}>
+          <Ionicons name="pricetag-outline" size={18} color={Colors.textMuted} style={{ marginLeft: 4 }} />
           <TextInput
-            style={styles.promoInput}
+            style={[styles.promoInput, { color: Colors.text }]}
             placeholder="Promokod kiriting"
             placeholderTextColor={Colors.textMuted}
             value={promo}
             onChangeText={setPromo}
           />
-          <Pressable style={styles.promoBtn} onPress={applyPromo}>
-            <Text style={styles.promoBtnText}>Qo'llash</Text>
+          <Pressable
+            style={[styles.promoBtn, { opacity: promo.length > 0 ? 1 : 0.5 }]}
+            onPress={applyPromo}
+            disabled={promo.length === 0}
+          >
+            <Text style={styles.promoBtnText}>Qo&apos;llash</Text>
           </Pressable>
         </View>
 
-        <View style={styles.summaryCard}>
+        <View style={[
+          styles.summaryCard,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.82)",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.9)",
+          }
+        ]}>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Mahsulotlar</Text>
-            <Text style={styles.summaryValue}>{formatPrice(totalPrice)}</Text>
+            <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Mahsulotlar</Text>
+            <Text style={[styles.summaryValue, { color: Colors.text }]}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Yetkazib berish</Text>
-            <Text style={[styles.summaryValue, delivery === 0 && { color: Colors.primary }]}>
+            <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Yetkazib berish</Text>
+            <Text style={[styles.summaryValue, delivery === 0 ? styles.freeText : { color: Colors.text }]}>
               {delivery === 0 ? "Bepul" : formatPrice(delivery)}
             </Text>
           </View>
           {discount > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: Colors.error }]}>Chegirma</Text>
-              <Text style={[styles.summaryValue, { color: Colors.error }]}>-{discount}%</Text>
+              <Text style={[styles.summaryLabel, { color: "#EF4444" }]}>Chegirma</Text>
+              <Text style={[styles.summaryValue, { color: "#EF4444" }]}>-{discount}%</Text>
             </View>
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]} />
           <View style={styles.summaryRow}>
-            <Text style={styles.totalLabel}>Jami</Text>
+            <Text style={[styles.totalLabel, { color: Colors.text }]}>Jami</Text>
             <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
           </View>
         </View>
 
         {delivery === 0 && (
-          <View style={styles.freeDeliveryBanner}>
-            <Ionicons name="bicycle-outline" size={16} color={Colors.primary} />
-            <Text style={styles.freeDeliveryText}>Bepul yetkazib berish</Text>
+          <View style={[styles.freeBanner, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
+            <Ionicons name="bicycle" size={18} color="#16A34A" />
+            <Text style={styles.freeBannerText}>Bepul yetkazib berish</Text>
           </View>
         )}
 
-        <Text style={styles.note}>
+        <Text style={[styles.note, { color: Colors.textMuted }]}>
           Buyurtma kuryerga biriktirilguniga qadar bekor qilinishi mumkin.
         </Text>
+
+        <View style={{ height: 16 }} />
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Platform.OS === "web" ? 24 : insets.bottom + 12 }]}>
-        <Pressable style={styles.checkoutBtn} onPress={handleCheckout}>
-          <Text style={styles.checkoutText}>Buyurtma berish</Text>
-          <View style={styles.checkoutBadge}>
-            <Text style={styles.checkoutBadgeText}>{formatPrice(finalTotal)}</Text>
-          </View>
-        </Pressable>
+      <View style={[
+        styles.footer,
+        {
+          backgroundColor: "transparent",
+          paddingBottom: Platform.OS === "web" ? 24 : insets.bottom + 12,
+        }
+      ]}>
+        <Animated.View style={checkoutAnim}>
+          <Pressable
+            style={styles.checkoutBtn}
+            onPress={handleCheckout}
+            onPressIn={() => { checkoutScale.value = withSpring(0.97, { damping: 12 }); }}
+            onPressOut={() => { checkoutScale.value = withSpring(1, { damping: 12 }); }}
+          >
+            <View style={styles.checkoutLeft}>
+              <Ionicons name="bag-check-outline" size={20} color="#fff" />
+              <Text style={styles.checkoutText}>Buyurtma berish</Text>
+            </View>
+            <View style={styles.checkoutBadge}>
+              <Text style={styles.checkoutBadgeText}>{formatPrice(finalTotal)}</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
       </View>
     </View>
   );
 }
 
-const getStyles = (isDarkMode: boolean) => {
-  const Colors = getColors(isDarkMode);
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: Colors.background,
-    },
-    emptyContainer: {
-      flex: 1,
-      backgroundColor: Colors.background,
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 12,
-      paddingHorizontal: 32,
-    },
-    emptyIconWrap: {
-      width: 88,
-      height: 88,
-      borderRadius: 28,
-      backgroundColor: Colors.primaryLight,
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: 4,
-    },
-    emptyTitle: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 22,
-      color: Colors.text,
-    },
-    emptySubtitle: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 15,
-      color: Colors.textSecondary,
-      textAlign: "center",
-    },
-    shopBtn: {
-      backgroundColor: Colors.primary,
-      paddingHorizontal: 32,
-      paddingVertical: 14,
-      borderRadius: 16,
-      marginTop: 8,
-    },
-    shopBtnText: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 16,
-      color: "#fff",
-    },
-    headerRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-      paddingHorizontal: 20,
-      paddingVertical: 16,
-    },
-    title: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 26,
-      color: Colors.text,
-    },
-    countBadge: {
-      backgroundColor: Colors.primary,
-      borderRadius: 10,
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-    },
-    countText: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 13,
-      color: "#fff",
-    },
-    scrollContent: {
-      paddingHorizontal: 16,
-      paddingBottom: 24,
-      gap: 12,
-    },
-    itemsCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 20,
-      overflow: "hidden",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: isDarkMode ? 0.3 : 0.07,
-      shadowRadius: 12,
-      elevation: 4,
-    },
-    cartItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 14,
-      gap: 12,
-    },
-    itemImageBox: {
-      width: 64,
-      height: 64,
-      borderRadius: 14,
-      overflow: "hidden",
-      backgroundColor: isDarkMode ? "#2C2C2E" : "#F5F6F5",
-    },
-    itemImage: {
-      width: "100%",
-      height: "100%",
-    },
-    itemImageFallback: {
-      backgroundColor: "#DCFCE7",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    itemImageLetter: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 24,
-      color: "#16A34A",
-    },
-    itemInfo: {
-      flex: 1,
-      gap: 4,
-    },
-    itemName: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 14,
-      color: Colors.text,
-      lineHeight: 20,
-    },
-    itemPrice: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 14,
-      color: Colors.primary,
-    },
-    itemControls: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: isDarkMode ? "#2C2C2E" : "#F4F6F4",
-      borderRadius: 12,
-      padding: 3,
-      gap: 4,
-    },
-    qtyBtn: {
-      width: 30,
-      height: 30,
-      backgroundColor: Colors.card,
-      borderRadius: 9,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    qtyText: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 14,
-      color: Colors.text,
-      minWidth: 22,
-      textAlign: "center",
-    },
-    divider: {
-      height: 1,
-      backgroundColor: Colors.divider,
-      marginHorizontal: 14,
-    },
-    promoRow: {
-      flexDirection: "row",
-      gap: 10,
-    },
-    promoInput: {
-      flex: 1,
-      backgroundColor: Colors.card,
-      borderRadius: 14,
-      paddingHorizontal: 16,
-      paddingVertical: 13,
-      fontFamily: "Poppins_400Regular",
-      fontSize: 14,
-      color: Colors.text,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 2,
-    },
-    promoBtn: {
-      backgroundColor: Colors.primary,
-      borderRadius: 14,
-      paddingHorizontal: 18,
-      justifyContent: "center",
-    },
-    promoBtnText: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 14,
-      color: "#fff",
-    },
-    summaryCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 20,
-      padding: 18,
-      gap: 12,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: isDarkMode ? 0.3 : 0.07,
-      shadowRadius: 12,
-      elevation: 4,
-    },
-    summaryRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    summaryLabel: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 15,
-      color: Colors.textSecondary,
-    },
-    summaryValue: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 15,
-      color: Colors.text,
-    },
-    totalLabel: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 17,
-      color: Colors.text,
-    },
-    totalValue: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 18,
-      color: Colors.primary,
-    },
-    freeDeliveryBanner: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      backgroundColor: Colors.primaryLight,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-    },
-    freeDeliveryText: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 13,
-      color: Colors.primary,
-    },
-    note: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 12,
-      color: Colors.textMuted,
-      textAlign: "center",
-      lineHeight: 18,
-    },
-    footer: {
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      backgroundColor: Colors.background,
-      borderTopWidth: 1,
-      borderTopColor: Colors.divider,
-    },
-    checkoutBtn: {
-      backgroundColor: Colors.primary,
-      borderRadius: 18,
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      shadowColor: Colors.primary,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 16,
-      elevation: 8,
-    },
-    checkoutText: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 16,
-      color: "#fff",
-    },
-    checkoutBadge: {
-      backgroundColor: "rgba(255,255,255,0.2)",
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      paddingVertical: 5,
-    },
-    checkoutBadgeText: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 14,
-      color: "#fff",
-    },
-  });
-};
+const styles = StyleSheet.create({
+  blobTR: {
+    position: "absolute",
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    top: -70,
+    right: -60,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    paddingHorizontal: 32,
+  },
+  emptyIconWrap: {
+    width: 100,
+    height: 100,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 6,
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 22,
+  },
+  emptySubtitle: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  shopBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#16A34A",
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 18,
+    marginTop: 8,
+    shadowColor: "#16A34A",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  shopBtnText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+    color: "#fff",
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
+  title: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 28,
+  },
+  countBadge: {
+    backgroundColor: "#16A34A",
+    borderRadius: 10,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    shadowColor: "#16A34A",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  countText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13,
+    color: "#fff",
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 0,
+  },
+  promoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  promoInput: {
+    flex: 1,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+    paddingVertical: 8,
+  },
+  promoBtn: {
+    backgroundColor: "#16A34A",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  promoBtnText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#fff",
+  },
+  summaryCard: {
+    borderRadius: 22,
+    padding: 18,
+    gap: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  summaryLabel: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 15,
+  },
+  summaryValue: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+  },
+  freeText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+    color: "#16A34A",
+  },
+  divider: {
+    height: 1,
+  },
+  totalLabel: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 17,
+  },
+  totalValue: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 19,
+    color: "#16A34A",
+  },
+  freeBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    marginBottom: 12,
+  },
+  freeBannerText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#16A34A",
+  },
+  note: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  footer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  checkoutBtn: {
+    backgroundColor: "#16A34A",
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#16A34A",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  checkoutLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  checkoutText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 16,
+    color: "#fff",
+  },
+  checkoutBadge: {
+    backgroundColor: "rgba(255,255,255,0.22)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.25)",
+  },
+  checkoutBadgeText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    color: "#fff",
+  },
+});
