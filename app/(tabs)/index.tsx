@@ -34,6 +34,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
 import { NotificationsModal } from "@/components/NotificationsModal";
+import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/LocationPermissionModal";
+import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "@/context/LocationContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 
@@ -328,7 +332,20 @@ export default function HomeScreen() {
   const { products, categories } = useApp();
   const { addToCart } = useCart();
 
+  const { user } = useAuth();
+  const { location, isLoading: locationLoading } = useLocation();
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    if (user?.role !== "customer") return;
+    let cancelled = false;
+    (async () => {
+      const show = await shouldShowLocationPrompt(!!location);
+      if (!cancelled) setShowLocationModal(show);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, !!location]);
 
   const { data: unreadData } = useQuery<{ count: number }>({
     queryKey: ["/api/notifications/unread-count"],
@@ -416,12 +433,23 @@ export default function HomeScreen() {
           <View style={{ flex: 1 }}>
             <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
             <Text style={[styles.storeName, { color: Colors.text }]}>City Market</Text>
-            <Pressable style={styles.locationRow} onPress={() => {}}>
+            <Pressable
+              style={styles.locationRow}
+              onPress={() => setShowLocationModal(true)}
+            >
               <Ionicons name="location" size={14} color="#16A34A" />
               <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
-                Toshkent, O'zbekiston
+                {location?.address
+                  ? location.address.length > 32
+                    ? location.address.slice(0, 32) + "…"
+                    : location.address
+                  : "Joylashuvni aniqlash"}
               </Text>
-              <Ionicons name="chevron-down" size={13} color={Colors.textMuted} />
+              <Ionicons
+                name={locationLoading ? "reload-outline" : "chevron-down"}
+                size={13}
+                color={Colors.textMuted}
+              />
             </Pressable>
           </View>
           <Animated.View style={notifAnim}>
@@ -599,6 +627,11 @@ export default function HomeScreen() {
       <NotificationsModal
         visible={showNotifications}
         onClose={() => setShowNotifications(false)}
+      />
+
+      <LocationPermissionModal
+        visible={showLocationModal}
+        onDismiss={() => setShowLocationModal(false)}
       />
     </View>
   );

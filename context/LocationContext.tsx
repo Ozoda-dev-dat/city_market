@@ -76,12 +76,27 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       });
 
       const { latitude, longitude } = currentLocation.coords;
-      
-      // Reverse geocoding would require a service, for now we'll use coordinates
+
+      let address = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+      try {
+        const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
+        if (place) {
+          const parts: string[] = [];
+          if (place.street) parts.push(place.street);
+          if (place.district) parts.push(place.district);
+          if (place.city) parts.push(place.city);
+          if (parts.length > 0) {
+            address = parts.join(", ");
+          } else if (place.region) {
+            address = place.region;
+          }
+        }
+      } catch (_) {}
+
       const locationData = {
         latitude: latitude.toString(),
         longitude: longitude.toString(),
-        address: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
+        address,
       };
 
       await saveLocation(locationData);
