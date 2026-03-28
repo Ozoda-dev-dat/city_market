@@ -221,11 +221,23 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-const CARD_W = Math.floor((width - 32 - 18) / 4);
+const CARD_W = Math.floor((width - 32 - 8) / 2);
+
+const CAT_GRADIENTS: Record<string, [string, string]> = {
+  fruits:     ["#FF9A5C", "#EF6820"],
+  vegetables: ["#4ADE80", "#16A34A"],
+  dairy:      ["#60A5FA", "#2563EB"],
+  meat:       ["#F87171", "#DC2626"],
+  bakery:     ["#FCD34D", "#D97706"],
+  beverages:  ["#A78BFA", "#7C3AED"],
+  snacks:     ["#F472B6", "#DB2777"],
+  frozen:     ["#67E8F9", "#0891B2"],
+};
 
 function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () => void; isDarkMode: boolean }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const [g0, g1] = CAT_GRADIENTS[item.id] ?? [item.color ?? "#16A34A", "#059669"];
 
   return (
     <Animated.View style={[catStyles.cell, anim]}>
@@ -235,28 +247,31 @@ function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () =>
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.91, { damping: 11 }); }}
+        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
-        <View style={[
-          catStyles.card,
-          {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.75)" : item.bgColor || "#F0FDF4",
-            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : item.color + "33",
-          }
-        ]}>
-          <View style={[catStyles.iconBox, { backgroundColor: item.color || "#16A34A" }]}>
-            <Ionicons name={item.icon as any} size={24} color="#fff" />
+        <LinearGradient
+          colors={isDarkMode ? [g0 + "BB", g1 + "CC"] : [g0, g1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={catStyles.card}
+        >
+          <View style={catStyles.decorCircleLg} />
+          <View style={catStyles.decorCircleSm} />
+
+          <View style={catStyles.iconArea}>
+            <Ionicons name={item.icon as any} size={32} color="#fff" />
           </View>
-          <Text style={[catStyles.label, { color: isDarkMode ? "#fff" : item.color || "#16A34A" }]} numberOfLines={2}>
-            {item.name}
-          </Text>
-          {item.count ? (
-            <Text style={[catStyles.count, { color: isDarkMode ? "rgba(255,255,255,0.4)" : item.color + "99" }]}>
-              {item.count} ta
-            </Text>
-          ) : null}
-        </View>
+
+          <View style={catStyles.textArea}>
+            <Text style={catStyles.label} numberOfLines={2}>{item.name}</Text>
+            {item.count ? (
+              <View style={catStyles.countPill}>
+                <Text style={catStyles.countText}>{item.count} ta</Text>
+              </View>
+            ) : null}
+          </View>
+        </LinearGradient>
       </Pressable>
     </Animated.View>
   );
@@ -267,41 +282,71 @@ const catStyles = StyleSheet.create({
     width: CARD_W,
   },
   card: {
+    height: 96,
+    borderRadius: 22,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingVertical: 14,
-    paddingHorizontal: 6,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    overflow: "hidden",
+    paddingLeft: 18,
+    paddingRight: 14,
+    gap: 14,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 8,
   },
-  iconBox: {
+  decorCircleLg: {
+    position: "absolute",
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    right: -28,
+    top: -28,
+  },
+  decorCircleSm: {
+    position: "absolute",
     width: 52,
     height: 52,
-    borderRadius: 16,
+    borderRadius: 26,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    right: 20,
+    bottom: -14,
+  },
+  iconArea: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.22)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  textArea: {
+    flex: 1,
+    gap: 6,
   },
   label: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    textAlign: "center",
-    lineHeight: 15,
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13,
+    color: "#fff",
+    lineHeight: 18,
   },
-  count: {
-    fontFamily: "Poppins_400Regular",
+  countPill: {
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.28)",
+  },
+  countText: {
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 10,
-    textAlign: "center",
+    color: "rgba(255,255,255,0.95)",
   },
 });
 
@@ -712,7 +757,7 @@ const styles = StyleSheet.create({
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
+    gap: 8,
     marginBottom: 6,
   },
   sectionHeader: {
