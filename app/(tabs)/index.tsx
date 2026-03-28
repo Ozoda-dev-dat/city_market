@@ -9,6 +9,7 @@ import {
   Dimensions,
   Platform,
   Alert,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -65,102 +66,158 @@ function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: bo
   return <Animated.View style={[styles.dot, { backgroundColor: "#16A34A" }, style]} />;
 }
 
-function Banner({ item }: { item: (typeof BANNERS)[0] }) {
-  const { isDarkMode } = useTheme();
+function Banner({ item, onPress }: { item: (typeof BANNERS)[0]; onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
   return (
-    <LinearGradient
-      colors={[item.color, item.lightColor]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={bannerStyles.gradient}
-    >
-      <View style={bannerStyles.noise} />
-      <View style={bannerStyles.content}>
-        <View style={bannerStyles.textSide}>
-          <Text style={bannerStyles.subtitle}>{item.subtitle}</Text>
-          <Text style={bannerStyles.title}>{item.title}</Text>
-          <View style={bannerStyles.pill}>
-            <Text style={bannerStyles.pillText}>Xarid qilish</Text>
-            <Ionicons name="arrow-forward" size={12} color="#fff" />
+    <Animated.View style={[bannerStyles.card, anim]}>
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.975, { damping: 14 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+      >
+        <Image
+          source={{ uri: (item as any).image }}
+          style={bannerStyles.image}
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={[(item as any).overlayStart, (item as any).overlayEnd]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.4, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={bannerStyles.shimmer} />
+
+        <View style={bannerStyles.topRow}>
+          <View style={[bannerStyles.tagBadge, { backgroundColor: (item as any).tagColor }]}>
+            <Ionicons name="pricetag" size={10} color="#fff" />
+            <Text style={bannerStyles.tagText}>{(item as any).tag}</Text>
+          </View>
+          <View style={bannerStyles.deliveryPill}>
+            <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
+            <Text style={bannerStyles.deliveryText}>30 daqiqa</Text>
           </View>
         </View>
-        <View style={bannerStyles.iconWrap}>
-          <View style={bannerStyles.iconInner}>
-            <Ionicons name={(item as any).icon as any} size={46} color="rgba(255,255,255,0.95)" />
+
+        <View style={bannerStyles.bottomContent}>
+          <Text style={bannerStyles.bannerSubtitle}>{item.subtitle}</Text>
+          <Text style={bannerStyles.bannerTitle}>{item.title}</Text>
+          <View style={bannerStyles.ctaRow}>
+            <View style={bannerStyles.ctaBtn}>
+              <Text style={bannerStyles.ctaText}>{(item as any).cta}</Text>
+              <Ionicons name="arrow-forward" size={13} color="#fff" />
+            </View>
           </View>
         </View>
-      </View>
-    </LinearGradient>
+      </Pressable>
+    </Animated.View>
   );
 }
 
+const BANNER_W = width - 32;
+const BANNER_H = 210;
+
 const bannerStyles = StyleSheet.create({
-  gradient: {
-    width: width - 40,
-    height: 176,
-    borderRadius: 28,
-    marginHorizontal: 20,
+  card: {
+    width: BANNER_W,
+    height: BANNER_H,
+    borderRadius: 26,
+    marginHorizontal: 16,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
+    elevation: 12,
   },
-  noise: {
+  image: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    width: "100%",
+    height: "100%",
   },
-  content: {
-    flex: 1,
+  shimmer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.04)",
+  },
+  topRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 22,
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingTop: 18,
   },
-  textSide: { flex: 1, gap: 6 },
-  subtitle: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
-  },
-  title: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    color: "#fff",
-    lineHeight: 26,
-  },
-  pill: {
+  tagBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignSelf: "flex-start",
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    gap: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    marginTop: 4,
   },
-  pillText: {
+  tagText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
+    fontSize: 11,
     color: "#fff",
   },
-  iconWrap: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: "rgba(255,255,255,0.12)",
+  deliveryPill: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
-  iconInner: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "rgba(255,255,255,0.1)",
+  deliveryText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.92)",
+  },
+  bottomContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 14,
+    gap: 3,
+  },
+  bannerSubtitle: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.78)",
+  },
+  bannerTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 21,
+    color: "#fff",
+    lineHeight: 27,
+  },
+  ctaRow: {
+    marginTop: 10,
+  },
+  ctaBtn: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  ctaText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#fff",
   },
 });
 
@@ -312,9 +369,16 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
-            <Text style={[styles.storeName, { color: Colors.text }]}>City market</Text>
+            <Text style={[styles.storeName, { color: Colors.text }]}>City Market</Text>
+            <Pressable style={styles.locationRow} onPress={() => {}}>
+              <Ionicons name="location" size={14} color="#16A34A" />
+              <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
+                Toshkent, O'zbekiston
+              </Text>
+              <Ionicons name="chevron-down" size={13} color={Colors.textMuted} />
+            </Pressable>
           </View>
           <Animated.View style={notifAnim}>
             <Pressable
@@ -329,6 +393,7 @@ export default function HomeScreen() {
               onPressOut={() => { notifScale.value = withSpring(1); }}
             >
               <Ionicons name="notifications-outline" size={21} color={Colors.text} />
+              <View style={styles.notifDot} />
             </Pressable>
           </Animated.View>
         </View>
@@ -337,38 +402,63 @@ export default function HomeScreen() {
           style={[
             styles.searchBar,
             {
-              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
+              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.82)",
               borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
             }
           ]}
           onPress={() => router.push("/(tabs)/catalog")}
         >
-          <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.1)" }]}>
+          <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
             <Ionicons name="search" size={16} color="#16A34A" />
           </View>
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
-            Mahsulot qidirish...
+            Mahsulot yoki kategoriya...
           </Text>
           <View style={[styles.filterBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
-            <Ionicons name="options" size={14} color="#16A34A" />
+            <Ionicons name="options-outline" size={16} color="#16A34A" />
           </View>
         </Pressable>
+
+        <View style={[styles.deliveryStrip, {
+          backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.08)",
+          borderColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.18)",
+        }]}>
+          <View style={styles.deliveryItem}>
+            <Ionicons name="bicycle-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>30 daqiqada yetkazish</Text>
+          </View>
+          <View style={styles.deliverySep} />
+          <View style={styles.deliveryItem}>
+            <Ionicons name="shield-checkmark-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Sifat kafolati</Text>
+          </View>
+          <View style={styles.deliverySep} />
+          <View style={styles.deliveryItem}>
+            <Ionicons name="storefront-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Yangi mahsulotlar</Text>
+          </View>
+        </View>
 
         <FlatList
           ref={scrollRef}
           data={BANNERS}
           keyExtractor={(item) => item.id}
           horizontal
-          pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
-            const index = Math.round(e.nativeEvent.contentOffset.x / (width - 40));
+            const index = Math.round(e.nativeEvent.contentOffset.x / width);
             setActiveBanner(index);
           }}
-          renderItem={({ item }) => <Banner item={item} />}
+          renderItem={({ item }) => (
+            <Banner
+              item={item}
+              onPress={() => router.push("/(tabs)/catalog")}
+            />
+          )}
           style={styles.bannerList}
-          snapToInterval={width - 40}
+          snapToInterval={width}
           decelerationRate="fast"
+          contentContainerStyle={{ paddingHorizontal: 0 }}
         />
         <View style={styles.dotsRow}>
           {BANNERS.map((_, i) => (
@@ -493,10 +583,21 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 34,
   },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 3,
+  },
+  locationText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    flex: 1,
+  },
   notifBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -505,6 +606,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
+  },
+  notifDot: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: "#EF4444",
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
+  deliveryStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+  },
+  deliveryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    flex: 1,
+    justifyContent: "center",
+  },
+  deliveryItemText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 10.5,
+  },
+  deliverySep: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(22,163,74,0.2)",
   },
   searchBar: {
     flexDirection: "row",
@@ -542,6 +680,7 @@ const styles = StyleSheet.create({
   },
   bannerList: {
     marginHorizontal: -16,
+    overflow: "visible",
   },
   dotsRow: {
     flexDirection: "row",
