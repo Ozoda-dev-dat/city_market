@@ -29,31 +29,8 @@ function setupBasicSecurity(app: express.Application) {
     next();
   });
 
-  // Simple rate limiting
-  const requestCounts = new Map<string, { count: number; resetTime: number }>();
-  
-  app.use((req, res, next) => {
-    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
-    const now = Date.now();
-    const windowMs = 15 * 60 * 1000; // 15 minutes
-    const maxRequests = 100;
-
-    if (!requestCounts.has(clientIp)) {
-      requestCounts.set(clientIp, { count: 1, resetTime: now + windowMs });
-    } else {
-      const client = requestCounts.get(clientIp)!;
-      if (now > client.resetTime) {
-        client.count = 1;
-        client.resetTime = now + windowMs;
-      } else {
-        client.count++;
-        if (client.count > maxRequests) {
-          return res.status(429).json({ error: 'Too many requests' });
-        }
-      }
-    }
-    next();
-  });
+  // Route-level rate limiting is handled in routes.ts via lib/security.ts
+  // No global rate limiting here — Expo Go makes many requests for bundle chunks, assets, etc.
 }
 
 function setupCors(app: express.Application) {
