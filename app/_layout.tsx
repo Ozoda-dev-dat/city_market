@@ -128,36 +128,36 @@ export default function RootLayout() {
   }
 
   return (
-    <DiagnosticErrorBoundary>
-      <SafeAreaProvider>
-        <ErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
-              <BiometricProvider>
-                <LocationProvider>
-                  <NetworkProvider>
-                    <AuthProvider>
-                      <AppProvider>
-                        <CartProvider>
-                          <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <DiagnosticErrorBoundary>
+        <SafeAreaProvider>
+          <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+              <ThemeProvider>
+                <BiometricProvider>
+                  <LocationProvider>
+                    <NetworkProvider>
+                      <AuthProvider>
+                        <AppProvider>
+                          <CartProvider>
                             <I18nProvider>
                               <ThemedBackground>
                                 <LangToggle />
                                 <RootLayoutNav />
                               </ThemedBackground>
                             </I18nProvider>
-                          </GestureHandlerRootView>
-                        </CartProvider>
-                      </AppProvider>
-                    </AuthProvider>
-                  </NetworkProvider>
-                </LocationProvider>
-              </BiometricProvider>
-            </ThemeProvider>
-          </QueryClientProvider>
-        </ErrorBoundary>
-      </SafeAreaProvider>
-    </DiagnosticErrorBoundary>
+                          </CartProvider>
+                        </AppProvider>
+                      </AuthProvider>
+                    </NetworkProvider>
+                  </LocationProvider>
+                </BiometricProvider>
+              </ThemeProvider>
+            </QueryClientProvider>
+          </ErrorBoundary>
+        </SafeAreaProvider>
+      </DiagnosticErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
 
