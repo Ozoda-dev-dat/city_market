@@ -85,6 +85,9 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
     addToCart(productForCart);
   };
 
+  const isValidImageUri = (uri: string) =>
+    uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+
   if (horizontal) {
     return (
       <Animated.View style={animStyle}>
@@ -95,11 +98,17 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
           onPressOut={() => { scale.value = withSpring(1); }}
         >
           <View style={styles.horizontalImageContainer}>
-            <Image 
-              source={{ uri: product.image }} 
-              style={styles.horizontalProductImage}
-              resizeMode="cover"
-            />
+            {isValidImageUri(product.image) ? (
+              <Image 
+                source={{ uri: product.image }} 
+                style={styles.horizontalProductImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={[styles.horizontalProductImage, styles.imageFallback]}>
+                <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
+              </View>
+            )}
             {product.badge && (
               <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
                 <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
@@ -162,11 +171,17 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
         style={{ flex: 1 }}
       >
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: product.image }} 
-            style={styles.productImage}
-            resizeMode="cover"
-          />
+          {isValidImageUri(product.image) ? (
+            <Image 
+              source={{ uri: product.image }} 
+              style={styles.productImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.productImage, styles.imageFallback]}>
+              <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
+            </View>
+          )}
           {product.badge && (
             <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
               <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
@@ -250,8 +265,16 @@ const getStyles = (isDarkMode: boolean) => {
     justifyContent: "center",
     position: "relative",
   },
-  emoji: {
-    fontSize: 52,
+  imageFallback: {
+    backgroundColor: "#E8F5E9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fallbackText: {
+    fontSize: 36,
+    fontFamily: "Poppins_700Bold",
+    color: "#1A9B5C",
+    textTransform: "uppercase",
   },
   productImage: {
     width: "100%",

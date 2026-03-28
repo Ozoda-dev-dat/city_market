@@ -56,7 +56,7 @@ export default function AddProductScreen() {
   const [category, setCategory] = useState(existing?.category ?? (categories[0]?.id ?? ""));
   const [price, setPrice] = useState(existing?.price ? String(existing.price) : "");
   const [unit, setUnit] = useState(existing?.unit ?? "kg");
-  const [image, setImage] = useState(existing?.image ?? "🍎");
+  const [image, setImage] = useState(existing?.image ?? "");
   const [imagePreview, setImagePreview] = useState(existing?.image ?? "");
   const [description, setDescription] = useState(existing?.description ?? "");
   const [originalPrice, setOriginalPrice] = useState(existing?.originalPrice ? String(existing.originalPrice) : "");
@@ -85,12 +85,8 @@ export default function AddProductScreen() {
         const asset = result.assets[0];
         if (asset.base64) {
           const base64Image = `data:image/jpeg;base64,${asset.base64}`;
-          // Store base64 only for local preview, not for database
           setImagePreview(base64Image);
-          // Keep image field as default emoji since we can't store base64 in DB
-          if (!image || image.startsWith("data:image")) {
-            setImage("📷");
-          }
+          setImage(base64Image);
         }
       }
     } catch (error) {
@@ -188,10 +184,10 @@ export default function AddProductScreen() {
             </Pressable>
           </View>
           <LabeledInput
-            label={lang === "uz" ? "yoki emoji/URL" : "или эмодзи/URL"}
-            value={image}
-            onChangeText={setImage}
-            placeholder="🍎 yoki https://..."
+            label={lang === "uz" ? "Rasm URL manzili" : "URL изображения"}
+            value={image.startsWith("data:image") ? "" : image}
+            onChangeText={(text: string) => { setImage(text); setImagePreview(text); }}
+            placeholder="https://images.unsplash.com/..."
           />
         </View>
 

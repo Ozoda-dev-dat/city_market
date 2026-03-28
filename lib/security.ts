@@ -104,7 +104,7 @@ export const rateLimiters = {
   // Rate limiting for auth endpoints
   auth: createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 attempts per 15 minutes (Replit proxies all traffic through one IP)
+    max: 2000, // High limit — Replit proxies ALL traffic through one IP
     message: {
       error: 'Too many authentication attempts',
       message: 'Please try again after 15 minutes.',
@@ -114,19 +114,19 @@ export const rateLimiters = {
   // Moderate rate limiting for general API
   general: createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 500, // 500 requests per 15 minutes
+    max: 10000, // High limit — all users share one IP on Replit
   }),
 
   // Lenient rate limiting for data fetching
   data: createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // 1000 requests per 15 minutes
+    max: 20000, // High limit — all users share one IP on Replit
   }),
 
   // Very strict rate limiting for sensitive operations
   sensitive: createRateLimiter({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // 10 requests per hour
+    max: 100, // 100 requests per hour
     message: {
       error: 'Rate limit exceeded',
       message: 'Please try again after 1 hour.',
