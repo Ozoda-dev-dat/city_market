@@ -227,19 +227,22 @@ export default function HomeScreen() {
         ))}
       </ScrollView>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Tavsiya etilgan</Text>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
-        {featuredProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={convertToProduct(product)}
-            onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
-          />
-        ))}
-      </ScrollView>
+      {featuredProducts.length > 0 && (
+        <>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Tavsiya etilgan</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={convertToProduct(product)}
+                onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+              />
+            ))}
+          </ScrollView>
+        </>
+      )}
 
       {saleProducts.length > 0 && (
         <>
@@ -252,6 +255,26 @@ export default function HomeScreen() {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
             {saleProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={convertToProduct(product)}
+                onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+              />
+            ))}
+          </ScrollView>
+        </>
+      )}
+
+      {featuredProducts.length === 0 && saleProducts.length === 0 && products.length > 0 && (
+        <>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Barcha mahsulotlar</Text>
+            <Pressable onPress={() => router.push("/(tabs)/catalog")}>
+              <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
+            </Pressable>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
+            {products.map((product) => (
               <ProductCard
                 key={product.id}
                 product={convertToProduct(product)}

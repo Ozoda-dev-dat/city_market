@@ -62,6 +62,7 @@ export default function AddProductScreen() {
   const [originalPrice, setOriginalPrice] = useState(existing?.originalPrice ? String(existing.originalPrice) : "");
   const [stockQuantity, setStockQuantity] = useState(existing?.stockQuantity ? String(existing.stockQuantity) : "0");
   const [uploading, setUploading] = useState(false);
+  const [badge, setBadge] = useState<string>(existing?.badge ?? "");
 
   const pickImage = async () => {
     try {
@@ -115,6 +116,7 @@ export default function AddProductScreen() {
       originalPrice: originalPrice ? Math.round(Number(originalPrice)) : null,
       unit,
       image,
+      badge: badge || null,
       description: description.trim(),
       stockQuantity: Math.round(Number(stockQuantity)),
       inStock: Math.round(Number(stockQuantity)) > 0,
@@ -194,7 +196,21 @@ export default function AddProductScreen() {
         </View>
 
         <LabeledInput label={t("description")} value={description} onChangeText={setDescription} placeholder="Mahsulot haqida qisqacha ma'lumot" />
-        
+
+        <Text style={styles.sectionTitle}>{lang === "uz" ? "Nishon (badge)" : "Метка"}</Text>
+        <View style={styles.chipRow}>
+          {[
+            { value: "", label: lang === "uz" ? "Yo'q" : "Нет" },
+            { value: "new", label: lang === "uz" ? "Yangi" : "Новый" },
+            { value: "hot", label: lang === "uz" ? "Ommabop" : "Популярный" },
+            { value: "sale", label: lang === "uz" ? "Chegirma" : "Скидка" },
+          ].map(opt => (
+            <Pressable key={opt.value} onPress={() => setBadge(opt.value)} style={[styles.chip, badge === opt.value && styles.chipActive]}>
+              <Text style={{ color: badge === opt.value ? "#fff" : Colors.text }}>{opt.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         <Text style={styles.sectionTitle}>{t("category")}</Text>
         <View style={styles.chipRow}>
           {categories.map(c => (

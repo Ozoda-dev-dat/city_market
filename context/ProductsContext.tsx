@@ -40,7 +40,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
-    queryFn: () => apiRequest("GET", "/api/orders").then(res => res.json()),
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/orders");
+      if (!res.ok) return [];
+      return res.json();
+    },
   });
 
   const addProductMutation = useMutation({
