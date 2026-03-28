@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useMemo, ReactNode } from "react";
 import { apiRequest } from "@/lib/query-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Product, Category, Order } from "@/shared/schema";
+import { useAuth } from "@/context/AuthContext";
 
 interface AppContextValue {
   products: Product[];
@@ -22,6 +23,8 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const isAuthenticated = !!user;
 
   const { data: products = [], isLoading: isLoadingProducts } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -41,18 +44,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true,
   });
 
+  // Orders require auth — only run after user is confirmed logged in
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/orders");
-      if (!res.ok) return [];
-      return res.json();
+      try {
+        const res = await apiRequest("GET", "/api/orders");
+        if (!res.ok) return [];
+        return res.json();
+      } catch {
+        return [];
+      }
     },
+    enabled: isAuthenticated,
     staleTime: 0,
-    refetchInterval: 10_000,
+    refetchInterval: isAuthenticated ? 10_000 : false,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
+
+  // When user logs in, immediately fetch orders
+  useEffect(() => {
+    if (isAuthenticated) {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    }
+  }, [isAuthenticated]);
 
   const addProductMutation = useMutation({
     mutationFn: (newProduct: Omit<Product, "id">) =>
@@ -109,9 +125,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         apiRequest("POST", "/api/categories", cat).then(() =>
           queryClient.invalidateQueries({ queryKey: ["/api/categories"] })
         ),
-      isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders,
+      isLoading: isLoadingProducts || isLoadingCategories || (isAuthenticated && isLoadingOrders),
     }),
-    [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]
+    [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders, isAuthenticated]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
