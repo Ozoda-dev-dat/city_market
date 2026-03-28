@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./db-storage";
+import { setupWebSocket, broadcast } from "./websocket";
 import { insertProductSchema, insertOrderSchema } from "@shared/schema";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../lib/password";
 import { generateToken } from "../lib/jwt";
@@ -353,6 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: "Invalid product data", details: result.error });
         }
         const product = await storage.createProduct(result.data);
+        broadcast("products-changed");
         res.json(product);
       } catch (error) {
         console.error("Error creating product:", error);
@@ -367,6 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
       try {
         const product = await storage.updateProduct(req.params.id, req.body);
+        broadcast("products-changed");
         res.json(product);
       } catch (error) {
         console.error("Error updating product:", error);
@@ -381,6 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
       try {
         await storage.softDeleteProduct(req.params.id);
+        broadcast("products-changed");
         res.sendStatus(204);
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -409,6 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
       try {
         const category = await storage.createCategory(req.body);
+        broadcast("categories-changed");
         res.json(category);
       } catch (error) {
         console.error("Error creating category:", error);
@@ -423,6 +428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req, res) => {
       try {
         await storage.softDeleteCategory(req.params.id);
+        broadcast("categories-changed");
         res.sendStatus(204);
       } catch (error) {
         console.error("Error deleting category:", error);
@@ -480,6 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const order = await storage.createOrder(orderData);
+        broadcast("orders-changed");
         res.json(order);
       } catch (error) {
         console.error("Error creating order:", error);
@@ -495,6 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { status, courierId } = req.body;
         const order = await storage.updateOrderStatus(req.params.id, status, courierId);
+        broadcast("orders-changed");
         res.json(order);
       } catch (error) {
         console.error("Error updating order status:", error);
@@ -504,5 +512,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   const httpServer = createServer(app);
+  setupWebSocket(httpServer);
   return httpServer;
 }

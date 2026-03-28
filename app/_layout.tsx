@@ -25,6 +25,7 @@ import {
 import { I18nProvider } from "@/lib/I18nProvider";
 import LangToggle from "@/components/LangToggle";
 import { NetworkProvider } from "@/components/OfflineComponents";
+import { useRealtime } from "@/hooks/useRealtime";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -65,6 +66,7 @@ function LoadingScreen() {
 
 function RootLayoutNav() {
   const { isLoading } = useAuth();
+  useRealtime();
 
   if (isLoading) {
     return <LoadingScreen />;

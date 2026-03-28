@@ -30,7 +30,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/products"],
     queryFn: () => apiRequest("GET", "/api/products").then(res => res.json()),
     staleTime: 0,
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
@@ -39,7 +39,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/categories"],
     queryFn: () => apiRequest("GET", "/api/categories").then(res => res.json()),
     staleTime: 0,
-    refetchInterval: 30_000,
+    refetchInterval: 60_000,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
