@@ -29,18 +29,26 @@ import { useApp } from "@/context/ProductsContext";
 function CategoryChip({
   label,
   icon,
+  color,
+  bgColor,
+  count,
   isActive,
   onPress,
   isDarkMode,
 }: {
   label: string;
   icon?: string;
+  color?: string;
+  bgColor?: string;
+  count?: number;
   isActive: boolean;
   onPress: () => void;
   isDarkMode: boolean;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const chipColor = color || "#16A34A";
+  const chipBg = bgColor || "#F0FDF4";
 
   return (
     <Animated.View style={anim}>
@@ -49,28 +57,48 @@ function CategoryChip({
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.92, { damping: 12 }); }}
+        onPressIn={() => { scale.value = withSpring(0.91, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
         style={[
           chipStyles.chip,
           isActive
-            ? chipStyles.chipActive
+            ? [chipStyles.chipActive, { backgroundColor: chipColor, borderColor: chipColor, shadowColor: chipColor }]
             : {
-                backgroundColor: isDarkMode ? "rgba(28,28,30,0.65)" : "rgba(255,255,255,0.72)",
-                borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.85)",
+                backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.85)",
+                borderColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
               },
         ]}
       >
         {icon && (
-          <Ionicons
-            name={icon as any}
-            size={13}
-            color={isActive ? "#fff" : isDarkMode ? "#A1A1AA" : "#6B7280"}
-          />
+          <View style={[
+            chipStyles.iconWrap,
+            { backgroundColor: isActive ? "rgba(255,255,255,0.22)" : isDarkMode ? "rgba(255,255,255,0.08)" : chipBg }
+          ]}>
+            <Ionicons
+              name={icon as any}
+              size={14}
+              color={isActive ? "#fff" : chipColor}
+            />
+          </View>
         )}
-        <Text style={[chipStyles.chipText, isActive && chipStyles.chipTextActive]}>
+        {!icon && (
+          <View style={[chipStyles.iconWrap, { backgroundColor: isActive ? "rgba(255,255,255,0.22)" : isDarkMode ? "rgba(255,255,255,0.08)" : "#F0FDF4" }]}>
+            <Ionicons name="grid" size={14} color={isActive ? "#fff" : "#16A34A"} />
+          </View>
+        )}
+        <Text style={[
+          chipStyles.chipText,
+          { color: isActive ? "#fff" : isDarkMode ? "#E4E4E7" : "#374151" }
+        ]}>
           {label}
         </Text>
+        {count !== undefined && !isActive && (
+          <View style={[chipStyles.countBadge, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : chipColor + "18" }]}>
+            <Text style={[chipStyles.countText, { color: isDarkMode ? "rgba(255,255,255,0.5)" : chipColor }]}>
+              {count}
+            </Text>
+          </View>
+        )}
       </Pressable>
     </Animated.View>
   );
@@ -80,32 +108,41 @@ const chipStyles = StyleSheet.create({
   chip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 22,
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 24,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   chipActive: {
-    backgroundColor: "#16A34A",
-    borderColor: "#16A34A",
-    shadowColor: "#16A34A",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  iconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   chipText: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
-    color: "#6B7280",
   },
-  chipTextActive: {
-    color: "#fff",
+  countBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  countText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 11,
   },
 });
 
@@ -248,12 +285,16 @@ export default function CatalogScreen() {
             isActive={!activeCategory}
             onPress={() => setActiveCategory(null)}
             isDarkMode={isDarkMode}
+            count={allProducts.length}
           />
           {categories.map((cat: any) => (
             <CategoryChip
               key={cat.id}
               label={cat.name}
               icon={cat.icon}
+              color={cat.color}
+              bgColor={cat.bgColor}
+              count={cat.count}
               isActive={activeCategory === cat.id}
               onPress={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
               isDarkMode={isDarkMode}

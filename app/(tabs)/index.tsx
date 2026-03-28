@@ -221,34 +221,41 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-function CategoryPill({ item, onPress, isDarkMode }: { item: any; onPress: () => void; isDarkMode: boolean }) {
-  const Colors = getColors(isDarkMode);
+const CARD_W = Math.floor((width - 32 - 18) / 4);
+
+function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () => void; isDarkMode: boolean }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View style={anim}>
+    <Animated.View style={[catStyles.cell, anim]}>
       <Pressable
+        style={{ flex: 1 }}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.92, { damping: 12 }); }}
+        onPressIn={() => { scale.value = withSpring(0.91, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <View style={[
           catStyles.card,
           {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.65)" : "rgba(255,255,255,0.72)",
-            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.85)",
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.75)" : item.bgColor || "#F0FDF4",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : item.color + "33",
           }
         ]}>
-          <View style={[catStyles.iconCircle, { backgroundColor: item.bgColor }]}>
-            <Ionicons name={item.icon as any} size={20} color={item.color} />
+          <View style={[catStyles.iconBox, { backgroundColor: item.color || "#16A34A" }]}>
+            <Ionicons name={item.icon as any} size={24} color="#fff" />
           </View>
-          <Text style={[catStyles.label, { color: Colors.textSecondary }]} numberOfLines={1}>
+          <Text style={[catStyles.label, { color: isDarkMode ? "#fff" : item.color || "#16A34A" }]} numberOfLines={2}>
             {item.name}
           </Text>
+          {item.count ? (
+            <Text style={[catStyles.count, { color: isDarkMode ? "rgba(255,255,255,0.4)" : item.color + "99" }]}>
+              {item.count} ta
+            </Text>
+          ) : null}
         </View>
       </Pressable>
     </Animated.View>
@@ -256,33 +263,45 @@ function CategoryPill({ item, onPress, isDarkMode }: { item: any; onPress: () =>
 }
 
 const catStyles = StyleSheet.create({
+  cell: {
+    width: CARD_W,
+  },
   card: {
     alignItems: "center",
+    justifyContent: "center",
     gap: 7,
-    marginRight: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
     borderRadius: 20,
-    borderWidth: 1,
-    minWidth: 74,
+    borderWidth: 1.5,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  iconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 4,
   },
   label: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 11,
     textAlign: "center",
-    maxWidth: 66,
+    lineHeight: 15,
+  },
+  count: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 10,
+    textAlign: "center",
   },
 });
 
@@ -468,21 +487,18 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
-          <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
-          </Pressable>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 4 }}>
+        <View style={styles.categoryGrid}>
           {categories.map((cat) => (
-            <CategoryPill
+            <CategoryCard
               key={cat.id}
               item={cat}
               isDarkMode={isDarkMode}
               onPress={() => router.push({ pathname: "/(tabs)/catalog", params: { category: cat.id } })}
             />
           ))}
-        </ScrollView>
+        </View>
 
         {featuredProducts.length > 0 && (
           <>
@@ -692,6 +708,12 @@ const styles = StyleSheet.create({
   dot: {
     height: 7,
     borderRadius: 3.5,
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 6,
   },
   sectionHeader: {
     flexDirection: "row",
