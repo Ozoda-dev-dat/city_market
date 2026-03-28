@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -31,6 +31,9 @@ import { ProductCard } from "@/components/ProductCard";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/query-client";
+import { NotificationsModal } from "@/components/NotificationsModal";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 
@@ -325,6 +328,18 @@ export default function HomeScreen() {
   const { products, categories } = useApp();
   const { addToCart } = useCart();
 
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const { data: unreadData } = useQuery<{ count: number }>({
+    queryKey: ["/api/notifications/unread-count"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/notifications/unread-count");
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+  const unreadCount = unreadData?.count ?? 0;
+
   const notifScale = useSharedValue(1);
   const notifAnim = useAnimatedStyle(() => ({ transform: [{ scale: notifScale.value }] }));
 
@@ -418,11 +433,21 @@ export default function HomeScreen() {
                   borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
                 }
               ]}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowNotifications(true);
+              }}
               onPressIn={() => { notifScale.value = withSpring(0.88); }}
               onPressOut={() => { notifScale.value = withSpring(1); }}
             >
               <Ionicons name="notifications-outline" size={21} color={Colors.text} />
-              <View style={styles.notifDot} />
+              {unreadCount > 0 && (
+                <View style={styles.notifDot}>
+                  {unreadCount <= 9 && (
+                    <Text style={styles.notifDotText}>{unreadCount}</Text>
+                  )}
+                </View>
+              )}
             </Pressable>
           </Animated.View>
         </View>
@@ -570,6 +595,11 @@ export default function HomeScreen() {
 
         <View style={{ height: Platform.OS === "web" ? 34 : 100 }} />
       </ScrollView>
+
+      <NotificationsModal
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </View>
   );
 }
@@ -635,14 +665,23 @@ const styles = StyleSheet.create({
   },
   notifDot: {
     position: "absolute",
-    top: 8,
-    right: 8,
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
+    top: 6,
+    right: 6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: "#EF4444",
     borderWidth: 1.5,
     borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  notifDotText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 9,
+    color: "#fff",
+    lineHeight: 12,
   },
   deliveryStrip: {
     flexDirection: "row",

@@ -2,7 +2,7 @@ import {
   type User, type Product, type Category, type Order, type PromoCode 
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, desc, sql } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "../shared/schema";
 import { auditService } from "./audit-service";
@@ -44,6 +44,12 @@ export interface IStorage {
   updatePromoCode(id: string, promo: any, userId?: string, ipAddress?: string, userAgent?: string): Promise<PromoCode>;
   softDeletePromoCode(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<void>;
   restorePromoCode(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<PromoCode>;
+
+  getNotifications(userId: string): Promise<any[]>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  markNotificationRead(id: string, userId: string): Promise<void>;
+  markAllNotificationsRead(userId: string): Promise<void>;
+  createNotification(notification: any): Promise<any>;
 }
 
 export class DbStorage implements IStorage {
@@ -433,6 +439,121 @@ export class DbStorage implements IStorage {
       .returning();
     await auditService.logRestore("promoCodes", id, userId, ipAddress, userAgent);
     return result[0];
+  }
+
+  async getNotifications(userId: string): Promise<any[]> {
+    return this.db
+      .select()
+      .from(schema.notifications)
+      .where(eq(schema.notifications.userId, userId))
+      .orderBy(desc(schema.notifications.createdAt))
+      .limit(50);
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(schema.notifications)
+      .where(
+        and(
+          eq(schema.notifications.userId, userId),
+          eq(schema.notifications.isRead, false)
+        )
+      );
+    return result[0]?.count ?? 0;
+  }
+
+  async markNotificationRead(id: string, userId: string): Promise<void> {
+    await this.db
+      .update(schema.notifications)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(schema.notifications.id, id),
+          eq(schema.notifications.userId, userId)
+        )
+      );
+  }
+
+  async markAllNotificationsRead(userId: string): Promise<void> {
+    await this.db
+      .update(schema.notifications)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(schema.notifications.userId, userId),
+          eq(schema.notifications.isRead, false)
+        )
+      );
+  }
+
+  async createNotification(notification: any): Promise<any> {
+    const result = await this.db
+      .insert(schema.notifications)
+      .values(notification)
+      .returning();
+    return result[0];
+  }
+
+  async seedNotificationsForUser(userId: string): Promise<void> {
+    const existing = await this.db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(schema.notifications)
+      .where(eq(schema.notifications.userId, userId));
+    if ((existing[0]?.count ?? 0) > 0) return;
+
+    const now = new Date();
+    const samples = [
+      {
+        userId,
+        type: "promo",
+        title: "Chegirma mavjud!",
+        message: "Barcha mevalar bo'limida 20% chegirma. Faqat bugun!",
+        isRead: false,
+        priority: "high",
+        createdAt: new Date(now.getTime() - 5 * 60 * 1000),
+      },
+      {
+        userId,
+        type: "order_update",
+        title: "Buyurtmangiz yetkazildi",
+        message: "Buyurtmangiz muvaffaqiyatli yetkazib berildi. Xaridingizdan mamnunmisiz?",
+        isRead: false,
+        priority: "normal",
+        createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
+      },
+      {
+        userId,
+        type: "product_available",
+        title: "Mahsulot mavjud",
+        message: "Siz kutgan Organik tarvuz yana do'konda paydo bo'ldi!",
+        isRead: false,
+        priority: "normal",
+        createdAt: new Date(now.getTime() - 5 * 60 * 60 * 1000),
+      },
+      {
+        userId,
+        type: "promo",
+        title: "Yangi promo-kod!",
+        message: "CITY20 promo-kodidan foydalaning va 15 000 so'm chegirma oling.",
+        isRead: true,
+        priority: "normal",
+        createdAt: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+      },
+      {
+        userId,
+        type: "system",
+        title: "City Marketga xush kelibsiz!",
+        message: "Ilovamizdan foydalanganingiz uchun rahmat. Yaxshi xaridlar!",
+        isRead: true,
+        priority: "low",
+        createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    for (const n of samples) {
+      await this.db.insert(schema.notifications).values(n);
+    }
   }
 }
 

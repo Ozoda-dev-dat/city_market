@@ -153,6 +153,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phoneNumber: maskSensitiveData(user.phoneNumber, 'phone'),
           role: user.role
         });
+
+        // Seed sample notifications for customers on first login
+        if (user.role === "customer") {
+          try {
+            await (storage as any).seedNotificationsForUser(user.id);
+          } catch (_) {}
+        }
         
         res.json({
           user: userWithoutPassword,
@@ -507,6 +514,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ error: "Failed to update order status" });
+      }
+    }
+  );
+
+  // ── Notifications ────────────────────────────────────────────────────────
+  app.get("/api/notifications",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const notifications = await storage.getNotifications(req.user!.userId);
+        res.json(notifications);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ error: "Failed to fetch notifications" });
+      }
+    }
+  );
+
+  app.get("/api/notifications/unread-count",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const count = await storage.getUnreadNotificationCount(req.user!.userId);
+        res.json({ count });
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+        res.status(500).json({ error: "Failed to fetch unread count" });
+      }
+    }
+  );
+
+  app.patch("/api/notifications/read-all",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        await storage.markAllNotificationsRead(req.user!.userId);
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error marking all read:", error);
+        res.status(500).json({ error: "Failed to mark notifications as read" });
+      }
+    }
+  );
+
+  app.patch("/api/notifications/:id/read",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        await storage.markNotificationRead(req.params.id, req.user!.userId);
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error marking notification read:", error);
+        res.status(500).json({ error: "Failed to mark notification as read" });
       }
     }
   );
