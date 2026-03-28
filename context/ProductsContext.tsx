@@ -44,12 +44,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true,
   });
 
+  // Admins see all orders; customers/couriers see only their own
+  const ordersEndpoint = user?.role === "admin" ? "/api/orders" : "/api/orders/my";
+
   // Orders require auth — only run after user is confirmed logged in
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
-    queryKey: ["/api/orders"],
+    queryKey: [ordersEndpoint],
     queryFn: async () => {
       try {
-        const res = await apiRequest("GET", "/api/orders");
+        const res = await apiRequest("GET", ordersEndpoint);
         if (!res.ok) return [];
         return res.json();
       } catch {
@@ -66,9 +69,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // When user logs in, immediately fetch orders
   useEffect(() => {
     if (isAuthenticated) {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: [ordersEndpoint] });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, ordersEndpoint]);
 
   const addProductMutation = useMutation({
     mutationFn: (newProduct: Omit<Product, "id">) =>
@@ -92,15 +95,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/categories"] }),
   });
 
+  const invalidateOrders = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
+  };
+
   const updateOrderStatusMutation = useMutation({
     mutationFn: ({ id, status, courierId }: { id: string; status: string; courierId?: string }) =>
       apiRequest("PATCH", `/api/orders/${id}/status`, { status, courierId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
+    onSuccess: invalidateOrders,
   });
 
   const createOrderMutation = useMutation({
     mutationFn: (newOrder: any) => apiRequest("POST", "/api/orders", newOrder),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
+    onSuccess: invalidateOrders,
   });
 
   const createPromoCodeMutation = useMutation({

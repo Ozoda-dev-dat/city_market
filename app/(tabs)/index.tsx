@@ -69,7 +69,9 @@ function Banner({ item }: { item: (typeof BANNERS)[0] }) {
             <Text style={styles.bannerBtnText}>Xarid qilish</Text>
           </Pressable>
         </View>
-        <Text style={styles.bannerEmoji}>{item.emoji}</Text>
+        <View style={styles.bannerIconCircle}>
+          <Ionicons name={(item as any).icon as any} size={52} color="rgba(255,255,255,0.9)" />
+        </View>
       </View>
     </LinearGradient>
   );
@@ -431,8 +433,13 @@ const getStyles = (isDarkMode: boolean) => {
       fontSize: 12,
       color: Colors.textInverse,
     },
-    bannerEmoji: {
-      fontSize: 48,
+    bannerIconCircle: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      backgroundColor: "rgba(255,255,255,0.15)",
+      alignItems: "center",
+      justifyContent: "center",
     },
     bannerDots: {
       flexDirection: "row",
@@ -474,52 +481,42 @@ const getStyles = (isDarkMode: boolean) => {
       alignItems: "center",
       gap: 8,
       marginRight: 16,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      backgroundColor: Colors.glass,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: Colors.cardBorder,
-      ...Platform.select({
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 8,
-        },
-        android: {
-          elevation: 4,
-        },
-      }),
+      paddingVertical: 4,
     },
     categoryIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 16,
+      width: 60,
+      height: 60,
+      borderRadius: 30,
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
     },
     categoryName: {
       fontFamily: "Poppins_500Medium",
-      fontSize: 13,
-      color: Colors.text,
+      fontSize: 12,
+      color: Colors.textSecondary,
       textAlign: "center",
+      maxWidth: 70,
     },
     productsScroll: {
       gap: 12,
     },
     saleBadge: {
-      position: "absolute",
-      top: 8,
-      left: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
       backgroundColor: Colors.error,
-      paddingHorizontal: 8,
+      paddingHorizontal: 10,
       paddingVertical: 4,
-      borderRadius: 8,
+      borderRadius: 20,
     },
     saleBadgeText: {
       fontFamily: "Poppins_600SemiBold",
-      fontSize: 10,
+      fontSize: 11,
       color: Colors.textInverse,
     },
   });

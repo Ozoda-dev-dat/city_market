@@ -196,7 +196,7 @@ export default function ProfileScreen() {
 
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarEmoji}>👤</Text>
+            <Text style={styles.avatarInitial}>{(user.name || "U").charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{user.name}</Text>
@@ -475,10 +475,14 @@ const getStyles = (isDarkMode: boolean) => {
       shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, gap: 14,
     },
     avatarContainer: {
-      width: 64, height: 64, backgroundColor: Colors.primaryLight,
+      width: 64, height: 64, backgroundColor: Colors.primary,
       borderRadius: 20, alignItems: "center", justifyContent: "center",
     },
-    avatarEmoji: { fontSize: 30 },
+    avatarInitial: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 26,
+      color: "#fff",
+    },
     profileInfo: { flex: 1, gap: 3 },
     profileName: { fontFamily: "Poppins_700Bold", fontSize: 17, color: Colors.text },
     profilePhone: { fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary },

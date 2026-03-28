@@ -77,6 +77,23 @@ Scan with Expo Go app to open on a physical device.
 - **iOS white screen fix**: Upgraded `expo-router@3.5.24` → `expo-router@6.0.23` to match Expo SDK 54 / React Native 0.81 New Architecture requirements. v3 was incompatible with iOS native navigation in Expo Go SDK 54.
 - Added `SafeAreaProvider` at the root layout level so `ErrorFallback` (which uses `useSafeAreaInsets`) renders properly on error.
 
+## UI Design System
+
+- **Primary color**: Forest green `#16A34A` (replaced old red `#E53E3E`)
+- **Full palette**: `constants/colors.ts` — light + dark modes
+- **Tab bar**: Floating pill (marginHorizontal: 48, borderRadius: 31), icon-only, iOS BlurView
+- **Home screen**: Ionicons-based category circles + banner icons (no emojis anywhere)
+- **Product grid**: 2-column layout (`numColumns={2}`) in catalog
+- **Auth screen**: LinearGradient hero + white card form with tabbed login/register
+- **Profile**: Initial-letter avatar on green circle (no emoji)
+- **Design rules**: NEVER use emojis; use `@expo/vector-icons` Ionicons; no purple gradients
+
+## Orders API (Role-based)
+
+- **Admin**: `GET /api/orders` — all orders
+- **Customer/Courier**: `GET /api/orders/my` — own orders only
+- `ProductsContext.tsx` auto-selects endpoint based on `user.role`
+
 ## Key Dependencies
 
 - expo-router@6.0.23 for navigation (must match Expo SDK 54)

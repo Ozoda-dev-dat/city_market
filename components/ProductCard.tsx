@@ -7,6 +7,7 @@ import {
   Platform,
   Alert,
   Image,
+  Dimensions,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -22,6 +23,9 @@ import { Product, formatPrice } from "@/constants/data";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { useCart } from "@/context/CartContext";
 
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 44) / 2;
+
 interface ProductCardProps {
   product: Product;
   onPress: () => void;
@@ -31,7 +35,7 @@ interface ProductCardProps {
 const BADGE_LABELS: Record<string, string> = {
   sale: "Chegirma",
   new: "Yangi",
-  hot: "Ommabop",
+  hot: "Trend",
 };
 
 const BADGE_COLORS: Record<string, string> = {
@@ -45,8 +49,7 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
-  
-  // Convert Product to SchemaProduct for cart operations
+
   const productForCart: SchemaProduct = {
     id: product.id,
     name: product.name,
@@ -63,7 +66,7 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
     inStock: product.inStock,
     stockQuantity: product.stockQuantity || 0,
   };
-  
+
   const cartItem = items.find((i) => i.product.id === product.id);
   const inCart = !!cartItem;
   const scale = useSharedValue(1);
@@ -71,41 +74,35 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const btnAnimStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
 
+  const isValidImageUri = (uri: string) =>
+    uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+
   const handleAdd = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     btnScale.value = withSequence(withSpring(0.8), withSpring(1));
-    
     if (!product.inStock) {
       Alert.alert("Mahsulot yo'q", "Bu mahsulot hozircha mavjud emas");
       return;
     }
-    
     addToCart(productForCart);
   };
-
-  const isValidImageUri = (uri: string) =>
-    uri && (uri.startsWith("http") || uri.startsWith("data:image"));
 
   if (horizontal) {
     return (
       <Animated.View style={animStyle}>
         <Pressable
-          style={styles.horizontalCard}
+          style={styles.hCard}
           onPress={onPress}
           onPressIn={() => { scale.value = withSpring(0.97); }}
           onPressOut={() => { scale.value = withSpring(1); }}
         >
-          <View style={styles.horizontalImageContainer}>
+          <View style={styles.hImageBox}>
             {isValidImageUri(product.image) ? (
-              <Image 
-                source={{ uri: product.image }} 
-                style={styles.horizontalProductImage}
-                resizeMode="cover"
-              />
+              <Image source={{ uri: product.image }} style={styles.hImage} resizeMode="cover" />
             ) : (
-              <View style={[styles.horizontalProductImage, styles.imageFallback]}>
+              <View style={[styles.hImage, styles.imageFallback]}>
                 <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
               </View>
             )}
@@ -115,42 +112,38 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
               </View>
             )}
           </View>
-          <View style={styles.horizontalInfo}>
-            <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
-            <Text style={styles.brandText}>{product.brand ?? product.unit}</Text>
-            <View style={styles.ratingRow}>
-              <Ionicons name="star" size={11} color="#F59E0B" />
-              <Text style={styles.ratingText}>{product.rating}</Text>
-            </View>
-            <View style={styles.horizontalBottom}>
+          <View style={styles.hInfo}>
+            <Text style={styles.hName} numberOfLines={2}>{product.name}</Text>
+            <Text style={styles.hUnit}>{product.brand ?? product.unit}</Text>
+            <View style={styles.hBottom}>
               <View>
-                <Text style={styles.price}>{formatPrice(product.price)}</Text>
+                <Text style={styles.hPrice}>{formatPrice(product.price)}</Text>
                 {product.originalPrice && (
-                  <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
+                  <Text style={styles.hOriginal}>{formatPrice(product.originalPrice)}</Text>
                 )}
               </View>
               {inCart ? (
-                <View style={styles.qtyControlSmall}>
+                <View style={styles.qtyRow}>
                   <Pressable
-                    style={styles.qtyBtnSmall}
+                    style={styles.qtyBtn}
                     onPress={() => {
                       if (cartItem.quantity === 1) removeFromCart(product.id);
                       else updateQuantity(product.id, cartItem.quantity - 1);
                     }}
                   >
-                    <Ionicons name="remove" size={12} color={Colors.primary} />
+                    <Ionicons name="remove" size={14} color={Colors.primary} />
                   </Pressable>
-                  <Text style={styles.qtyTextSmall}>{cartItem.quantity}</Text>
+                  <Text style={styles.qtyText}>{cartItem.quantity}</Text>
                   <Pressable
-                    style={styles.qtyBtnSmall}
+                    style={styles.qtyBtn}
                     onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
                   >
-                    <Ionicons name="add" size={12} color={Colors.primary} />
+                    <Ionicons name="add" size={14} color={Colors.primary} />
                   </Pressable>
                 </View>
               ) : (
                 <Animated.View style={btnAnimStyle}>
-                  <Pressable style={styles.addBtnSmall} onPress={handleAdd}>
+                  <Pressable style={styles.addBtnSm} onPress={handleAdd}>
                     <Ionicons name="add" size={18} color="#fff" />
                   </Pressable>
                 </Animated.View>
@@ -170,15 +163,11 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
         onPressOut={() => { scale.value = withSpring(1); }}
         style={{ flex: 1 }}
       >
-        <View style={styles.imageContainer}>
+        <View style={styles.imageBox}>
           {isValidImageUri(product.image) ? (
-            <Image 
-              source={{ uri: product.image }} 
-              style={styles.productImage}
-              resizeMode="cover"
-            />
+            <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
           ) : (
-            <View style={[styles.productImage, styles.imageFallback]}>
+            <View style={[styles.image, styles.imageFallback]}>
               <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
             </View>
           )}
@@ -189,23 +178,19 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
           )}
         </View>
         <View style={styles.info}>
-          <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
-          <Text style={styles.unitText}>{product.unit}</Text>
-          <View style={styles.ratingRow}>
-            <Ionicons name="star" size={11} color="#F59E0B" />
-            <Text style={styles.ratingText}>{product.rating}</Text>
-          </View>
+          <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
+          <Text style={styles.unit}>{product.unit}</Text>
           <View style={styles.bottomRow}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.price}>{formatPrice(product.price)}</Text>
               {product.originalPrice && (
                 <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
               )}
             </View>
             {inCart ? (
-              <View style={styles.qtyControlSmall}>
+              <View style={styles.qtyRow}>
                 <Pressable
-                  style={styles.qtyBtnSmall}
+                  style={styles.qtyBtn}
                   onPress={() => {
                     if (cartItem.quantity === 1) removeFromCart(product.id);
                     else updateQuantity(product.id, cartItem.quantity - 1);
@@ -213,9 +198,9 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
                 >
                   <Ionicons name="remove" size={12} color={Colors.primary} />
                 </Pressable>
-                <Text style={styles.qtyTextSmall}>{cartItem.quantity}</Text>
+                <Text style={styles.qtyText}>{cartItem.quantity}</Text>
                 <Pressable
-                  style={styles.qtyBtnSmall}
+                  style={styles.qtyBtn}
                   onPress={() => {
                     if (product.stockQuantity && cartItem.quantity >= product.stockQuantity) {
                       Alert.alert("Xatolik", "Omborda yetarli mahsulot yo'q");
@@ -229,12 +214,12 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
               </View>
             ) : (
               <Animated.View style={btnAnimStyle}>
-                <Pressable 
-                  style={[styles.addBtn, !product.inStock && { backgroundColor: Colors.textMuted }]} 
+                <Pressable
+                  style={[styles.addBtn, !product.inStock && { backgroundColor: Colors.textMuted }]}
                   onPress={handleAdd}
                   disabled={!product.inStock}
                 >
-                  <Ionicons name={product.inStock ? "add" : "close"} size={20} color="#fff" />
+                  <Ionicons name={product.inStock ? "add" : "close"} size={18} color="#fff" />
                 </Pressable>
               </Animated.View>
             )}
@@ -248,177 +233,175 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
 const getStyles = (isDarkMode: boolean) => {
   const Colors = getColors(isDarkMode);
   return StyleSheet.create({
-  card: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  imageContainer: {
-    height: 110,
-    backgroundColor: Colors.glass,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  imageFallback: {
-    backgroundColor: "#E8F5E9",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  fallbackText: {
-    fontSize: 36,
-    fontFamily: "Poppins_700Bold",
-    color: "#1A9B5C",
-    textTransform: "uppercase",
-  },
-  productImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 8,
-  },
-  horizontalProductImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 12,
-  },
-  badge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  badgeText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 9,
-    color: "#fff",
-  },
-  info: {
-    padding: 12,
-    gap: 3,
-  },
-    productName: {
+    card: {
+      width: CARD_WIDTH,
+      backgroundColor: Colors.card,
+      borderRadius: 20,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: isDarkMode ? 0.3 : 0.07,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    imageBox: {
+      height: 130,
+      backgroundColor: isDarkMode ? "#242424" : "#F8F9F8",
+      position: "relative",
+    },
+    image: {
+      width: "100%",
+      height: "100%",
+    },
+    imageFallback: {
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#E8F5E9",
+    },
+    fallbackText: {
+      fontSize: 40,
+      fontFamily: "Poppins_700Bold",
+      color: "#16A34A",
+    },
+    badge: {
+      position: "absolute",
+      top: 8,
+      left: 8,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 8,
+    },
+    badgeText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 9,
+      color: "#fff",
+      textTransform: "uppercase",
+    },
+    info: {
+      padding: 12,
+      gap: 3,
+    },
+    name: {
       fontFamily: "Poppins_600SemiBold",
       fontSize: 13,
       color: Colors.text,
       lineHeight: 18,
     },
-    unitText: {
+    unit: {
       fontFamily: "Poppins_400Regular",
       fontSize: 11,
       color: Colors.textMuted,
+      marginBottom: 6,
     },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  ratingText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: Colors.textSecondary,
-  },
-  bottomRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  price: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 13,
-    color: Colors.text,
-  },
-  originalPrice: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    color: Colors.textMuted,
-    textDecorationLine: "line-through",
-  },
-  addBtn: {
-    width: 30,
-    height: 30,
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  horizontalCard: {
-    backgroundColor: Colors.card,
-    borderRadius: 18,
-    flexDirection: "row",
-    marginBottom: 10,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  horizontalImageContainer: {
-    width: 90,
-    height: 90,
-    backgroundColor: Colors.glass,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  horizontalEmoji: {
-    fontSize: 42,
-  },
-  horizontalInfo: {
-    flex: 1,
-    padding: 12,
-    gap: 2,
-  },
-  brandText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    color: Colors.textMuted,
-  },
-  horizontalBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  addBtnSmall: {
-    width: 28,
-    height: 28,
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qtyControlSmall: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.glass,
-    borderRadius: 8,
-    padding: 3,
-    gap: 6,
-  },
-  qtyBtnSmall: {
-    width: 22,
-    height: 22,
-    backgroundColor: Colors.glass,
-    borderRadius: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qtyTextSmall: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 12,
-    color: Colors.primary,
-    minWidth: 16,
-    textAlign: "center",
-  },
+    bottomRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    price: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 14,
+      color: Colors.text,
+    },
+    originalPrice: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 11,
+      color: Colors.textMuted,
+      textDecorationLine: "line-through",
+    },
+    addBtn: {
+      width: 32,
+      height: 32,
+      backgroundColor: Colors.primary,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    qtyRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: isDarkMode ? "#2C2C2E" : "#F4F6F4",
+      borderRadius: 10,
+      padding: 2,
+      gap: 4,
+    },
+    qtyBtn: {
+      width: 24,
+      height: 24,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 8,
+      backgroundColor: Colors.card,
+    },
+    qtyText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 13,
+      color: Colors.primary,
+      minWidth: 18,
+      textAlign: "center",
+    },
+    hCard: {
+      backgroundColor: Colors.card,
+      borderRadius: 20,
+      flexDirection: "row",
+      marginBottom: 12,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: isDarkMode ? 0.3 : 0.06,
+      shadowRadius: 10,
+      elevation: 3,
+    },
+    hImageBox: {
+      width: 100,
+      height: 100,
+      backgroundColor: isDarkMode ? "#242424" : "#F8F9F8",
+      position: "relative",
+    },
+    hImage: {
+      width: "100%",
+      height: "100%",
+    },
+    hInfo: {
+      flex: 1,
+      padding: 14,
+      gap: 3,
+    },
+    hName: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 14,
+      color: Colors.text,
+      lineHeight: 20,
+    },
+    hUnit: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.textMuted,
+    },
+    hBottom: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 6,
+    },
+    hPrice: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 15,
+      color: Colors.text,
+    },
+    hOriginal: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 11,
+      color: Colors.textMuted,
+      textDecorationLine: "line-through",
+    },
+    addBtnSm: {
+      width: 32,
+      height: 32,
+      backgroundColor: Colors.primary,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
   });
 };

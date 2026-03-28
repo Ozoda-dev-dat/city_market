@@ -12,7 +12,6 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice, Product } from "@/constants/data";
@@ -32,7 +31,6 @@ export default function CatalogScreen() {
   const { products: allProducts } = useProducts();
   const { categories } = useApp();
 
-  // Convert SchemaProduct to Product type for ProductCard compatibility
   const convertToProduct = (schemaProduct: any): Product => ({
     id: schemaProduct.id,
     name: schemaProduct.name,
@@ -130,7 +128,7 @@ export default function CatalogScreen() {
             >
               <Ionicons
                 name={cat.icon as any}
-                size={14}
+                size={13}
                 color={activeCategory === cat.id ? "#fff" : Colors.textSecondary}
               />
               <Text
@@ -148,7 +146,9 @@ export default function CatalogScreen() {
 
       {filtered.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="search" size={48} color={Colors.textMuted} />
+          <View style={styles.emptyIconBox}>
+            <Ionicons name="search-outline" size={32} color={Colors.textMuted} />
+          </View>
           <Text style={styles.emptyTitle}>Mahsulot topilmadi</Text>
           <Text style={styles.emptySubtitle}>Qidiruv yoki filtrni o&apos;zgartirib ko&apos;ring</Text>
         </View>
@@ -156,15 +156,16 @@ export default function CatalogScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
           contentContainerStyle={[
             styles.grid,
-            { paddingBottom: Platform.OS === "web" ? 34 : 90 },
+            { paddingBottom: Platform.OS === "web" ? 100 : 110 },
           ]}
           scrollEnabled={!!filtered.length}
           renderItem={({ item }) => (
             <ProductCard
               product={convertToProduct(item)}
-              horizontal
               onPress={() =>
                 router.push({ pathname: "/product/[id]", params: { id: item.id } })
               }
@@ -197,7 +198,7 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_700Bold",
       fontSize: 26,
       color: Colors.text,
-      marginBottom: 16,
+      marginBottom: 14,
     },
     searchRow: {
       flexDirection: "row",
@@ -211,7 +212,7 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 14,
-      paddingVertical: 11,
+      paddingVertical: 12,
       gap: 8,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
@@ -226,8 +227,8 @@ const getStyles = (isDarkMode: boolean) => {
       color: Colors.text,
     },
     sortBtn: {
-      width: 46,
-      height: 46,
+      width: 48,
+      height: 48,
       backgroundColor: Colors.card,
       borderRadius: 14,
       alignItems: "center",
@@ -257,12 +258,14 @@ const getStyles = (isDarkMode: boolean) => {
       paddingVertical: 8,
       borderRadius: 20,
       backgroundColor: Colors.card,
-      borderWidth: 1,
-      borderColor: Colors.cardBorder,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
     },
     catChipActive: {
       backgroundColor: Colors.primary,
-      borderColor: Colors.primary,
     },
     catChipText: {
       fontFamily: "Poppins_500Medium",
@@ -276,6 +279,10 @@ const getStyles = (isDarkMode: boolean) => {
       paddingHorizontal: 16,
       paddingTop: 8,
     },
+    row: {
+      gap: 12,
+      marginBottom: 12,
+    },
     resultsCount: {
       fontFamily: "Poppins_500Medium",
       fontSize: 13,
@@ -286,8 +293,21 @@ const getStyles = (isDarkMode: boolean) => {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
-      paddingBottom: 60,
+      gap: 12,
+      paddingBottom: 80,
+    },
+    emptyIconBox: {
+      width: 72,
+      height: 72,
+      borderRadius: 24,
+      backgroundColor: Colors.card,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 2,
     },
     emptyTitle: {
       fontFamily: "Poppins_600SemiBold",

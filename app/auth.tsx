@@ -10,10 +10,10 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import getColors from "@/constants/colors";
 import { useAuth } from "@/context/AuthContext";
@@ -28,90 +28,35 @@ export default function AuthScreen() {
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
 
-  useEffect(() => {
-    if (user && !authLoading) {
-      console.log("User detected, role:", user.role);
-      // Navigate based on user role
-      if (user.role === "admin") {
-        router.replace("/admin");
-      } else if (user.role === "courier") {
-        router.replace("/courier");
-      } else {
-        router.replace("/(tabs)");
-      }
-    }
-  }, [user, authLoading]);
   const [isLogin, setIsLogin] = useState(true);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
-  // Password validation function
-  const validatePassword = (password: string): string[] => {
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (user.role === "admin") router.replace("/admin");
+      else if (user.role === "courier") router.replace("/courier");
+      else router.replace("/(tabs)");
+    }
+  }, [user, authLoading]);
+
+  const validatePassword = (pwd: string): string[] => {
     const errors: string[] = [];
-
-    // Minimum length requirement
-    if (password.length < 8) {
-      errors.push('Parol kamida 8 ta belgidan iborat bo\'lishi kerak');
-    }
-
-    // Maximum length requirement
-    if (password.length > 128) {
-      errors.push('Parol 128 ta belgidan kam bo\'lishi kerak');
-    }
-
-    // Uppercase letter requirement
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Parolda kamida bitta katta harf bo\'lishi kerak');
-    }
-
-    // Lowercase letter requirement
-    if (!/[a-z]/.test(password)) {
-      errors.push('Parolda kamida bitta kichik harf bo\'lishi kerak');
-    }
-
-    // Number requirement
-    if (!/\d/.test(password)) {
-      errors.push('Parolda kamida bitta raqam bo\'lishi kerak');
-    }
-
-    // Special character requirement
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      errors.push('Parolda kamida bitta maxsus belgi bo\'lishi kerak (!@#$%^&*())');
-    }
-
-    // No common patterns
-    const commonPatterns = [
-      /123456/,
-      /password/i,
-      /qwerty/i,
-      /admin/i,
-      /letmein/i,
-      /welcome/i,
-    ];
-
-    for (const pattern of commonPatterns) {
-      if (pattern.test(password)) {
-        errors.push('Parolda umumiy naqunlar bo\'lmasligi kerak');
-        break;
-      }
-    }
-
-    // No whitespace
-    if (/\s/.test(password)) {
-      errors.push('Parolda bo\'sh joy bo\'lmasligi kerak');
-    }
-
+    if (pwd.length < 8) errors.push("Kamida 8 ta belgi");
+    if (!/[A-Z]/.test(pwd)) errors.push("Kamida 1 ta katta harf");
+    if (!/[a-z]/.test(pwd)) errors.push("Kamida 1 ta kichik harf");
+    if (!/\d/.test(pwd)) errors.push("Kamida 1 ta raqam");
+    if (/\s/.test(pwd)) errors.push("Bo'sh joy bo'lmasligi kerak");
     return errors;
   };
 
-  // Update password errors when password changes
   useEffect(() => {
     if (!isLogin && password) {
-      const errors = validatePassword(password);
-      setPasswordErrors(errors);
+      setPasswordErrors(validatePassword(password));
     } else {
       setPasswordErrors([]);
     }
@@ -122,21 +67,14 @@ export default function AuthScreen() {
       Alert.alert("Xatolik", "Barcha maydonlarni to'ldiring");
       return;
     }
-
-    // Check password validation for registration
     if (!isLogin && passwordErrors.length > 0) {
-      Alert.alert("Xatolik", "Parol talablariga javob bermaydi. Iltimos, quyidagi talablarni qo'llang:\n" + passwordErrors.join('\n'));
+      Alert.alert("Xatolik", "Parol talablariga javob bermaydi:\n" + passwordErrors.join("\n"));
       return;
     }
-
     setLoading(true);
     try {
-      if (isLogin) {
-        await login(phoneNumber, password);
-      } else {
-        await register(phoneNumber, password, name);
-      }
-      // The useEffect will handle redirection
+      if (isLogin) await login(phoneNumber, password);
+      else await register(phoneNumber, password, name);
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
       let errorMessage = t("error_invalid");
@@ -149,7 +87,7 @@ export default function AuthScreen() {
           errorMessage = rawMessage;
         }
       } catch {}
-      Alert.alert(t("error_invalid"), errorMessage);
+      Alert.alert("Xatolik", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -159,112 +97,143 @@ export default function AuthScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.languageSwitch}>
-          <Pressable onPress={() => setLang("uz")}>
-            <Text style={{ opacity: lang === "uz" ? 1 : 0.5 }}>UZ</Text>
-          </Pressable>
-          <Pressable onPress={() => setLang("ru")}>
-            <Text style={{ opacity: lang === "ru" ? 1 : 0.5 }}>RU</Text>
-          </Pressable>
-        </View>
-        <View style={[styles.content, { paddingTop: insets.top + 60 }]}>
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Ionicons name="basket" size={40} color="#fff" />
-            </View>
-            <Text style={styles.title}>{t("welcome")}</Text>
-            <Text style={styles.subtitle}>
-              {isLogin ? t("login") : t("register")}
-            </Text>
+        <LinearGradient
+          colors={["#16A34A", "#22C55E", "#4ADE80"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.heroSection, { paddingTop: insets.top + 40 }]}
+        >
+          <View style={styles.logoCircle}>
+            <Ionicons name="basket" size={36} color="#16A34A" />
+          </View>
+          <Text style={styles.heroTitle}>City Market</Text>
+          <Text style={styles.heroSubtitle}>Tez va qulay yetkazib berish</Text>
+
+          <View style={styles.langRow}>
+            <Pressable
+              style={[styles.langBtn, lang === "uz" && styles.langBtnActive]}
+              onPress={() => setLang("uz")}
+            >
+              <Text style={[styles.langText, lang === "uz" && styles.langTextActive]}>UZ</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.langBtn, lang === "ru" && styles.langBtnActive]}
+              onPress={() => setLang("ru")}
+            >
+              <Text style={[styles.langText, lang === "ru" && styles.langTextActive]}>RU</Text>
+            </Pressable>
+          </View>
+        </LinearGradient>
+
+        <View style={styles.formCard}>
+          <View style={styles.tabRow}>
+            <Pressable
+              style={[styles.tab, isLogin && styles.tabActive]}
+              onPress={() => setIsLogin(true)}
+            >
+              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.tab, !isLogin && styles.tabActive]}
+              onPress={() => setIsLogin(false)}
+            >
+              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Ro'yxat</Text>
+            </Pressable>
           </View>
 
-          <View style={styles.form}>
-            {!isLogin && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>{t("name")}</Text>
+          {!isLogin && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Ism</Text>
+              <View style={styles.inputBox}>
+                <Ionicons name="person-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder={t("name")}
+                  placeholder="Ismingizni kiriting"
+                  placeholderTextColor={Colors.textMuted}
                   value={name}
                   onChangeText={setName}
+                  autoCapitalize="words"
                 />
               </View>
-            )}
+            </View>
+          )}
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>{t("phone")}</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Telefon raqam</Text>
+            <View style={styles.inputBox}>
+              <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="+998 90 123 45 67"
+                placeholderTextColor={Colors.textMuted}
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
               />
             </View>
+          </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>{t("password")}</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Parol</Text>
+            <View style={styles.inputBox}>
+              <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="••••••••"
+                placeholderTextColor={Colors.textMuted}
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!showPassword}
               />
-              {!isLogin && passwordErrors.length > 0 && (
-                <View style={styles.passwordRequirements}>
-                  <Text style={styles.requirementsTitle}>Parol talablari:</Text>
-                  {passwordErrors.map((error, index) => (
-                    <Text key={index} style={styles.requirementError}>• {error}</Text>
-                  ))}
-                </View>
-              )}
-              {!isLogin && passwordErrors.length === 0 && password.length > 0 && (
-                <View style={styles.passwordRequirements}>
-                  <Text style={styles.requirementSuccess}>✓ Parol barcha talablarga javob beradi</Text>
-                </View>
-              )}
+              <Pressable onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={18}
+                  color={Colors.textMuted}
+                />
+              </Pressable>
             </View>
-
-            <Pressable
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleAuth}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>
-                  {isLogin ? t("login") : t("register")}
-                </Text>
-              )}
-            </Pressable>
-
-            <Pressable
-              style={styles.switchBtn}
-              onPress={() => setIsLogin(!isLogin)}
-            >
-              <Text style={styles.switchText}>
-                {isLogin
-                  ? "Hisobingiz yo'qmi? Ro'yxatdan o'ting"
-                  : "Hisobingiz bormi? Kirish"}
-              </Text>
-            </Pressable>
+            {!isLogin && passwordErrors.length > 0 && (
+              <View style={styles.errorList}>
+                {passwordErrors.map((err, i) => (
+                  <View key={i} style={styles.errorItem}>
+                    <Ionicons name="close-circle" size={12} color={Colors.error} />
+                    <Text style={styles.errorText}>{err}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+            {!isLogin && password.length > 0 && passwordErrors.length === 0 && (
+              <View style={styles.successMsg}>
+                <Ionicons name="checkmark-circle" size={14} color={Colors.primary} />
+                <Text style={styles.successText}>Parol talablarga javob beradi</Text>
+              </View>
+            )}
           </View>
-          <View style={{ marginTop: 20, alignItems: 'center' }}>
-            <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5 }}>
-              Admin: +998901234567 / admin
-            </Text>
-            <Text style={{ fontSize: 12, color: Colors.textSecondary, opacity: 0.5, marginTop: 4 }}>
-              Test: +998901234568 / Test@1234
-            </Text>
+
+          <Pressable
+            style={[styles.authBtn, loading && { opacity: 0.7 }]}
+            onPress={handleAuth}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.authBtnText}>
+                {isLogin ? "Kirish" : "Ro'yxatdan o'tish"}
+              </Text>
+            )}
+          </Pressable>
+
+          <View style={styles.creditsBox}>
+            <Text style={styles.creditsLabel}>Test:</Text>
+            <Text style={styles.creditsText}>+998901234568 / Test@1234</Text>
           </View>
         </View>
       </ScrollView>
@@ -274,115 +243,198 @@ export default function AuthScreen() {
 
 const getStyles = (isDarkMode: boolean) => {
   const Colors = getColors(isDarkMode);
-  const screenHeight = Dimensions.get('window').height;
-  
   return StyleSheet.create({
-    container: { flex: 1 },
+    container: {
+      flex: 1,
+      backgroundColor: isDarkMode ? "#0C0C0E" : "#fff",
+    },
     scrollContent: {
       flexGrow: 1,
-      justifyContent: 'center',
-      minHeight: screenHeight,
     },
-    languageSwitch: { flexDirection: "row", justifyContent: "flex-end", padding: 8, gap: 12 },
-    content: { flex: 1, paddingHorizontal: 24 },
-    header: { alignItems: "center", marginBottom: 40 },
-    logoContainer: {
-      width: 80,
-      height: 80,
-      backgroundColor: Colors.primary,
-      borderRadius: 20,
+    heroSection: {
+      paddingHorizontal: 24,
+      paddingBottom: 48,
+      alignItems: "center",
+      gap: 8,
+    },
+    logoCircle: {
+      width: 76,
+      height: 76,
+      borderRadius: 24,
+      backgroundColor: "#fff",
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 16,
+      marginBottom: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 20,
+      elevation: 10,
     },
-    logo: {
-      fontSize: 32,
-      color: Colors.textInverse,
+    heroTitle: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 30,
+      color: "#fff",
+      letterSpacing: -0.5,
     },
-    title: {
-      fontSize: 28,
+    heroSubtitle: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 15,
+      color: "rgba(255,255,255,0.85)",
+    },
+    langRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 8,
+    },
+    langBtn: {
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+      borderRadius: 20,
+      backgroundColor: "rgba(255,255,255,0.2)",
+    },
+    langBtnActive: {
+      backgroundColor: "#fff",
+    },
+    langText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 13,
+      color: "rgba(255,255,255,0.8)",
+    },
+    langTextActive: {
+      color: "#16A34A",
+    },
+    formCard: {
+      flex: 1,
+      backgroundColor: isDarkMode ? "#0C0C0E" : "#fff",
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      marginTop: -20,
+      paddingHorizontal: 24,
+      paddingTop: 28,
+      paddingBottom: 32,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 20,
+      elevation: 12,
+    },
+    tabRow: {
+      flexDirection: "row",
+      backgroundColor: isDarkMode ? "#1C1C1E" : "#F5F6F5",
+      borderRadius: 14,
+      padding: 4,
+      marginBottom: 24,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: "center",
+      borderRadius: 11,
+    },
+    tabActive: {
+      backgroundColor: Colors.card,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    tabText: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.textMuted,
+    },
+    tabTextActive: {
       fontFamily: "Poppins_700Bold",
       color: Colors.text,
-      marginBottom: 8,
     },
-    subtitle: {
-      fontSize: 16,
-      color: Colors.textSecondary,
-      textAlign: "center",
-      marginBottom: 32,
-    },
-    inputContainer: {
+    inputGroup: {
       marginBottom: 16,
     },
     inputLabel: {
-      fontSize: 14,
-      color: Colors.text,
-      marginBottom: 8,
       fontFamily: "Poppins_500Medium",
+      fontSize: 13,
+      color: Colors.textSecondary,
+      marginBottom: 8,
+    },
+    inputBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: isDarkMode ? "#1C1C1E" : "#F5F6F5",
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      gap: 10,
+    },
+    inputIcon: {
+      marginRight: 2,
     },
     input: {
-      borderWidth: 1,
-      borderColor: Colors.cardBorder,
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      fontSize: 16,
+      flex: 1,
       fontFamily: "Poppins_400Regular",
+      fontSize: 15,
       color: Colors.text,
-      backgroundColor: Colors.card,
     },
-    button: {
+    errorList: {
+      marginTop: 8,
+      gap: 4,
+    },
+    errorItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    errorText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.error,
+    },
+    successMsg: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      marginTop: 8,
+    },
+    successText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.primary,
+    },
+    authBtn: {
       backgroundColor: Colors.primary,
-      borderRadius: 12,
+      borderRadius: 16,
       paddingVertical: 16,
       alignItems: "center",
-      marginBottom: 16,
-    },
-    buttonText: {
-      color: Colors.textInverse,
-      fontSize: 16,
-      fontFamily: "Poppins_600SemiBold",
-    },
-    toggleText: {
-      color: Colors.primary,
-      fontSize: 14,
-      fontFamily: "Poppins_500Medium",
-    },
-    switchBtn: { alignItems: "center", marginTop: 8 },
-    switchText: { fontFamily: "Poppins_500Medium", fontSize: 14, color: Colors.primary },
-    form: { marginBottom: 24 },
-    inputGroup: { marginBottom: 16 },
-    label: {
-      fontSize: 14,
-      color: Colors.text,
-      marginBottom: 8,
-      fontFamily: "Poppins_500Medium",
-    },
-    buttonDisabled: { opacity: 0.6 },
-    passwordRequirements: {
       marginTop: 8,
-      padding: 12,
-      backgroundColor: Colors.card,
-      borderRadius: 8,
-      borderLeftWidth: 3,
-      borderLeftColor: Colors.primary,
+      marginBottom: 16,
+      shadowColor: Colors.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
+      elevation: 8,
     },
-    requirementsTitle: {
-      fontSize: 12,
+    authBtnText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 16,
+      color: "#fff",
+    },
+    creditsBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      marginTop: 4,
+    },
+    creditsLabel: {
       fontFamily: "Poppins_600SemiBold",
-      color: Colors.text,
-      marginBottom: 4,
+      fontSize: 12,
+      color: Colors.textMuted,
     },
-    requirementError: {
-      fontSize: 11,
+    creditsText: {
       fontFamily: "Poppins_400Regular",
-      color: Colors.error,
-      marginBottom: 2,
-    },
-    requirementSuccess: {
-      fontSize: 11,
-      fontFamily: "Poppins_400Regular",
-      color: "#22c55e",
+      fontSize: 12,
+      color: Colors.textMuted,
     },
   });
 };
