@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useMemo, ReactNode } from "react";
 import { apiRequest } from "@/lib/query-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Product, Category, Order } from "@/shared/schema";
@@ -26,16 +26,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { data: products = [], isLoading: isLoadingProducts } = useQuery<Product[]>({
     queryKey: ["/api/products"],
     queryFn: () => apiRequest("GET", "/api/products").then(res => res.json()),
+    staleTime: 0,
+    refetchInterval: 30_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
     queryFn: () => apiRequest("GET", "/api/categories").then(res => res.json()),
-  });
-
-  const deleteCategoryMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("DELETE", `/api/categories/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/categories"] }),
+    staleTime: 0,
+    refetchInterval: 30_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
@@ -45,16 +48,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!res.ok) return [];
       return res.json();
     },
+    staleTime: 0,
+    refetchInterval: 10_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const addProductMutation = useMutation({
-    mutationFn: (newProduct: Omit<Product, "id">) => 
+    mutationFn: (newProduct: Omit<Product, "id">) =>
       apiRequest("POST", "/api/products", newProduct),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: (updatedProduct: Product) => 
+    mutationFn: (updatedProduct: Product) =>
       apiRequest("PATCH", `/api/products/${updatedProduct.id}`, updatedProduct),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
   });
@@ -64,15 +71,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/products"] }),
   });
 
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/categories/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/categories"] }),
+  });
+
   const updateOrderStatusMutation = useMutation({
-    mutationFn: ({ id, status, courierId }: { id: string, status: string, courierId?: string }) => 
+    mutationFn: ({ id, status, courierId }: { id: string; status: string; courierId?: string }) =>
       apiRequest("PATCH", `/api/orders/${id}/status`, { status, courierId }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: (newOrder: any) => 
-      apiRequest("POST", "/api/orders", newOrder),
+    mutationFn: (newOrder: any) => apiRequest("POST", "/api/orders", newOrder),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/orders"] }),
   });
 
@@ -81,29 +92,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/promo-codes"] }),
   });
 
-  const addProduct = (product: Omit<Product, "id">) => addProductMutation.mutate(product);
-  const updateProduct = (product: Product) => updateProductMutation.mutate(product);
-  const deleteProduct = (id: string) => deleteProductMutation.mutate(id);
-  const deleteCategory = (id: string) => deleteCategoryMutation.mutate(id);
-  const updateOrderStatus = (id: string, status: string, courierId?: string) => 
-    updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any).then(() => {});
-  const createOrder = (order: any) => createOrderMutation.mutateAsync(order).then(() => {});
-  const createPromoCode = (promo: any) => createPromoCodeMutation.mutateAsync(promo).then(() => {});
-
   const value = useMemo(
-    () => ({ 
-      products, 
-      categories, 
+    () => ({
+      products,
+      categories,
       orders,
-      addProduct, 
-      updateProduct, 
-      deleteProduct, 
-      deleteCategory,
-      updateOrderStatus,
-      createOrder,
-      createPromoCode,
-      createCategory: (cat: any) => apiRequest("POST", "/api/categories", cat).then(() => queryClient.invalidateQueries({ queryKey: ["/api/categories"] })),
-      isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders
+      addProduct: (product: Omit<Product, "id">) => addProductMutation.mutate(product),
+      updateProduct: (product: Product) => updateProductMutation.mutate(product),
+      deleteProduct: (id: string) => deleteProductMutation.mutate(id),
+      deleteCategory: (id: string) => deleteCategoryMutation.mutate(id),
+      updateOrderStatus: (id: string, status: string, courierId?: string) =>
+        updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any).then(() => {}),
+      createOrder: (order: any) => createOrderMutation.mutateAsync(order).then(() => {}),
+      createPromoCode: (promo: any) => createPromoCodeMutation.mutateAsync(promo).then(() => {}),
+      createCategory: (cat: any) =>
+        apiRequest("POST", "/api/categories", cat).then(() =>
+          queryClient.invalidateQueries({ queryKey: ["/api/categories"] })
+        ),
+      isLoading: isLoadingProducts || isLoadingCategories || isLoadingOrders,
     }),
     [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders]
   );
@@ -117,6 +123,5 @@ export function useApp() {
   return ctx;
 }
 
-// Keep backward compatibility for now
 export const useProducts = useApp;
 export const ProductsProvider = AppProvider;
