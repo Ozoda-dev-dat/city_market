@@ -3,6 +3,7 @@ import { createServer, type Server } from "node:http";
 import { storage } from "./db-storage";
 import { setupWebSocket, broadcast } from "./websocket";
 import { insertProductSchema, insertOrderSchema } from "@shared/schema";
+import * as XLSX from "xlsx";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../lib/password";
 import { generateToken } from "../lib/jwt";
 import { validateRequestBody, authSchemas } from "../lib/validation";
@@ -347,6 +348,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error fetching products:", error);
         res.status(500).json({ error: "Failed to fetch products" });
+      }
+    }
+  );
+
+  app.post("/api/products/import",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { fileBase64 } = req.body;
+        if (!fileBase64 || typeof fileBase64 !== "string") {
+          return res.status(400).json({ error: "fileBase64 is required" });
+        }
+
+        const buffer = Buffer.from(fileBase64, "base64");
+        const workbook = XLSX.read(buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        const inserted: string[] = [];
+        const errors: { row: number; error: string }[] = [];
+
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const rowNum = i + 2; // 1-indexed + header row
+
+          const productData = {
+            id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 6)}-${i}`,
+            name: String(row.name || "").trim(),
+            category: String(row.category || "").trim(),
+            price: Number(row.price) || 0,
+            originalPrice: row.originalPrice ? Number(row.originalPrice) : undefined,
+            unit: String(row.unit || "").trim(),
+            image: String(row.image || "").trim(),
+            badge: row.badge ? String(row.badge).trim() : undefined,
+            description: row.description ? String(row.description).trim() : undefined,
+            brand: row.brand ? String(row.brand).trim() : undefined,
+            weight: row.weight ? String(row.weight).trim() : undefined,
+            rating: row.rating ? String(row.rating).trim() : "5.0",
+            stockQuantity: row.stockQuantity !== "" ? Number(row.stockQuantity) : 0,
+            inStock: true,
+          };
+
+          const validation = insertProductSchema.safeParse(productData);
+          if (!validation.success) {
+            const msg = validation.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ");
+            errors.push({ row: rowNum, error: msg });
+            continue;
+          }
+
+          try {
+            await storage.createProduct(validation.data);
+            inserted.push(productData.id);
+          } catch (dbErr: any) {
+            errors.push({ row: rowNum, error: dbErr?.message ?? "DB error" });
+          }
+        }
+
+        broadcast("products-changed");
+        res.json({
+          inserted: inserted.length,
+          total: rows.length,
+          errors,
+        });
+      } catch (error) {
+        console.error("Error importing products:", error);
+        res.status(500).json({ error: "Failed to parse or import Excel file" });
       }
     }
   );

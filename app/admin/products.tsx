@@ -18,11 +18,13 @@ import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/constants/data";
 import { useApp } from "@/context/ProductsContext";
+import ExcelImportModal from "@/components/ExcelImportModal";
 
 export default function AdminProductsScreen() {
   const insets = useSafeAreaInsets();
   const { products, deleteProduct } = useApp();
   const [search, setSearch] = useState("");
+  const [showImport, setShowImport] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -55,12 +57,20 @@ export default function AdminProductsScreen() {
         </Pressable>
         <Text style={styles.title}>Mahsulotlar</Text>
         <Pressable
+          style={styles.importBtn}
+          onPress={() => setShowImport(true)}
+        >
+          <Ionicons name="document-text-outline" size={18} color={Colors.primary} />
+        </Pressable>
+        <Pressable
           style={styles.addBtn}
           onPress={() => router.push("/admin/add-product")}
         >
           <Ionicons name="add" size={22} color="#fff" />
         </Pressable>
       </View>
+
+      <ExcelImportModal visible={showImport} onClose={() => setShowImport(false)} />
 
       <View style={styles.searchBar}>
         <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
@@ -178,6 +188,14 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_700Bold",
       fontSize: 22,
       color: Colors.text,
+    },
+    importBtn: {
+      width: 42,
+      height: 42,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#DCFCE7",
+      borderRadius: 13,
+      alignItems: "center",
+      justifyContent: "center",
     },
     addBtn: {
       width: 42,
