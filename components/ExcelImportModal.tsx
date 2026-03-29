@@ -111,7 +111,7 @@ export default function ExcelImportModal({ visible, onClose }: Props) {
         });
       } else {
         fileBase64 = await FileSystem.readAsStringAsync(asset.uri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64" as any,
         });
       }
 
