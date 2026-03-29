@@ -416,8 +416,8 @@ export const insertProductSchema = createInsertSchema(products, {
   price: z.number().min(0).max(10000000),
   originalPrice: z.number().min(0).max(10000000).optional(),
   unit: z.string().min(1).max(20),
-  rating: z.string().regex(/^\d\.\d$/, "Invalid rating format").optional(),
-  stockQuantity: z.number().min(0).max(10000),
+  rating: z.string().regex(/^\d+(\.\d+)?$/, "Invalid rating format").optional(),
+  stockQuantity: z.number().min(0).max(10000).default(0),
 });
 
 export const insertOrderSchema = createInsertSchema(orders, {

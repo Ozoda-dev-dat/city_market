@@ -387,8 +387,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             description: row.description ? String(row.description).trim() : undefined,
             brand: row.brand ? String(row.brand).trim() : undefined,
             weight: row.weight ? String(row.weight).trim() : undefined,
-            rating: row.rating ? String(row.rating).trim() : "5.0",
-            stockQuantity: row.stockQuantity !== "" ? Number(row.stockQuantity) : 0,
+            rating: (() => {
+              const r = row.rating;
+              if (r == null || r === "") return "5.0";
+              const num = parseFloat(String(r));
+              if (isNaN(num)) return "5.0";
+              return String(Math.min(Math.max(num, 1), 5).toFixed(1));
+            })(),
+            stockQuantity: (() => {
+              const sq = row.stockQuantity;
+              if (sq == null || sq === "") return 0;
+              const num = Number(sq);
+              return isNaN(num) ? 0 : Math.max(0, Math.floor(num));
+            })(),
             inStock: true,
           };
 
