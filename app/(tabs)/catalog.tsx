@@ -25,6 +25,7 @@ import { Product } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/context/ProductsContext";
 import { useApp } from "@/context/ProductsContext";
+import { useCart } from "@/context/CartContext";
 
 function CategoryChip({
   label,
@@ -156,6 +157,10 @@ export default function CatalogScreen() {
   const Colors = getColors(isDarkMode);
   const { products: allProducts } = useProducts();
   const { categories } = useApp();
+  const { items } = useCart();
+  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const cartScale = useSharedValue(1);
+  const cartAnim = useAnimatedStyle(() => ({ transform: [{ scale: cartScale.value }] }));
 
   const sortScale = useSharedValue(1);
   const sortAnim = useAnimatedStyle(() => ({ transform: [{ scale: sortScale.value }] }));
@@ -208,7 +213,35 @@ export default function CatalogScreen() {
       ]} />
 
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <Text style={[styles.title, { color: Colors.text }]}>Katalog</Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: Colors.text }]}>Katalog</Text>
+          <Animated.View style={cartAnim}>
+            <Pressable
+              style={[
+                styles.cartBtn,
+                {
+                  backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
+                  borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+                },
+              ]}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push("/(tabs)/cart");
+              }}
+              onPressIn={() => { cartScale.value = withSpring(0.88, { damping: 12 }); }}
+              onPressOut={() => { cartScale.value = withSpring(1, { damping: 12 }); }}
+            >
+              <Ionicons name="bag-outline" size={22} color={Colors.text} />
+              {cartCount > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </Animated.View>
+        </View>
 
         <View style={styles.searchRow}>
           <View style={[
@@ -363,10 +396,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
   title: {
     fontFamily: "Poppins_700Bold",
     fontSize: 28,
-    marginBottom: 14,
+  },
+  cartBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  cartBadge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#16A34A",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  cartBadgeText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 10,
+    color: "#fff",
   },
   searchRow: {
     flexDirection: "row",
