@@ -35,13 +35,13 @@ export default function AddCourierScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} /></Pressable>
+        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>Yangi kuryer</Text>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-        <TextInput style={styles.input} placeholder="Ism familiya" value={name} onChangeText={setName} />
-        <TextInput style={styles.input} placeholder="Telefon raqam" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-        <TextInput style={styles.input} placeholder="Parol" value={password} onChangeText={setPassword} secureTextEntry />
+        <TextInput style={styles.input} placeholder="Ism familiya" placeholderTextColor={Colors.textMuted} value={name} onChangeText={setName} />
+        <TextInput style={styles.input} placeholder="Telefon raqam" placeholderTextColor={Colors.textMuted} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <TextInput style={styles.input} placeholder="Parol" placeholderTextColor={Colors.textMuted} value={password} onChangeText={setPassword} secureTextEntry />
         <Pressable style={styles.btn} onPress={handleSave} disabled={loading}>
           <Text style={{ color: "#fff", fontWeight: "bold" }}>Saqlash</Text>
         </Pressable>

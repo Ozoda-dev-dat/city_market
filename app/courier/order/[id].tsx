@@ -46,14 +46,24 @@ export default function CourierOrderDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} /></Pressable>
+        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>Buyurtma ma&apos;lumoti</Text>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>📍 {order.address}</Text>
-          <Text style={styles.infoValue}>📞 {order.phoneNumber}</Text>
-          <Text style={styles.infoValue}>👤 {order.customerName}</Text>
+          <Text style={styles.sectionTitle}>Yetkazish ma&apos;lumotlari</Text>
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={16} color={Colors.primary} />
+            <Text style={styles.infoValue}>{order.address}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="call-outline" size={16} color={Colors.primary} />
+            <Text style={styles.infoValue}>{order.phoneNumber}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="person-outline" size={16} color={Colors.primary} />
+            <Text style={styles.infoValue}>{order.customerName}</Text>
+          </View>
         </View>
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Mahsulotlar</Text>
@@ -79,8 +89,9 @@ const getStyles = (isDarkMode: boolean) => {
     header: { flexDirection: "row", alignItems: "center", padding: 16, gap: 16 },
     title: { fontFamily: "Poppins_700Bold", fontSize: 18, color: Colors.text },
     card: { backgroundColor: Colors.card, borderRadius: 20, padding: 16 },
-    sectionTitle: { fontFamily: "Poppins_700Bold", fontSize: 16, marginBottom: 8, color: Colors.text },
-    infoValue: { fontFamily: "Poppins_400Regular", color: Colors.textSecondary, marginBottom: 4 },
+    sectionTitle: { fontFamily: "Poppins_700Bold", fontSize: 16, marginBottom: 12, color: Colors.text },
+    infoRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+    infoValue: { fontFamily: "Poppins_400Regular", color: Colors.textSecondary, flex: 1 },
     footer: { padding: 16 },
     mainBtn: { height: 56, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
     mainBtnText: { fontFamily: "Poppins_700Bold", color: "#fff" },

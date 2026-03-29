@@ -43,12 +43,12 @@ export default function AdminCategoriesScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} /></Pressable>
+        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>Kataloglar</Text>
       </View>
       
       <View style={styles.form}>
-        <TextInput style={styles.input} placeholder="Katalog nomi" value={name} onChangeText={setName} />
+        <TextInput style={styles.input} placeholder="Katalog nomi" placeholderTextColor={Colors.textMuted} value={name} onChangeText={setName} />
         <Pressable style={styles.btn} onPress={handleCreate}>
           <Text style={{ color: "#fff", fontWeight: "bold" }}>Yaratish</Text>
         </Pressable>

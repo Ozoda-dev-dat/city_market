@@ -135,7 +135,7 @@ export default function AddProductScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} /><Text>{t("back")}</Text></Pressable>
+        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>{isEdit ? t("edit") : t("add")}</Text>
         <Pressable onPress={handleSave} style={styles.saveBtn}><Text style={{ color: "#fff" }}>{t("save")}</Text></Pressable>
       </View>

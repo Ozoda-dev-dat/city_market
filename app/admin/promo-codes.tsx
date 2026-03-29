@@ -43,13 +43,13 @@ export default function AdminPromoCodesScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} /></Pressable>
+        <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>Promokodlar</Text>
       </View>
       
       <View style={styles.form}>
-        <TextInput style={styles.input} placeholder="KOD (masalan: SPRING20)" value={code} onChangeText={setCode} autoCapitalize="characters" />
-        <TextInput style={styles.input} placeholder="Chegirma % (masalan: 20)" value={discount} onChangeText={setDiscount} keyboardType="numeric" />
+        <TextInput style={styles.input} placeholder="KOD (masalan: SPRING20)" placeholderTextColor={Colors.textMuted} value={code} onChangeText={setCode} autoCapitalize="characters" />
+        <TextInput style={styles.input} placeholder="Chegirma % (masalan: 20)" placeholderTextColor={Colors.textMuted} value={discount} onChangeText={setDiscount} keyboardType="numeric" />
         <Pressable style={styles.btn} onPress={handleCreate} disabled={createMutation.isPending}>
           <Text style={{ color: "#fff", fontWeight: "bold" }}>Yaratish</Text>
         </Pressable>
