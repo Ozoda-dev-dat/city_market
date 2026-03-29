@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const STATUS_CONFIG = {
     pending: { label: "Kutilmoqda", color: "#F59E0B", bg: "#FFFBEB", icon: "time" as const },
     preparing: { label: "Tayyorlanmoqda", color: "#3B82F6", bg: "#EFF6FF", icon: "restaurant" as const },
-    transit: { label: "Yo'lda", color: "#8B5CF6", bg: "#F5F3FF", icon: "bicycle" as const },
+    delivering: { label: "Yo'lda", color: "#8B5CF6", bg: "#F5F3FF", icon: "bicycle" as const },
     delivered: { label: "Yetkazildi", color: "#FFFFFF", bg: Colors.primary, icon: "checkmark-circle" as const },
     cancelled: { label: "Bekor qilingan", color: Colors.error, bg: "#FEF2F2", icon: "close-circle" as const },
   };

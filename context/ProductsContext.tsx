@@ -44,8 +44,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true,
   });
 
-  // Admins see all orders; customers/couriers see only their own
-  const ordersEndpoint = user?.role === "admin" ? "/api/orders" : "/api/orders/my";
+  // Admins and couriers see all orders; customers see only their own
+  const ordersEndpoint =
+    user?.role === "admin" || user?.role === "courier"
+      ? "/api/orders"
+      : "/api/orders/my";
 
   // Orders require auth — only run after user is confirmed logged in
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({

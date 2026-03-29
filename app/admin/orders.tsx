@@ -105,7 +105,7 @@ export default function AdminOrdersScreen() {
 
   const handleAssign = async (orderId: string, courierId: string) => {
     try {
-      await updateOrderStatus(orderId, "preparing");
+      await updateOrderStatus(orderId, "delivering", courierId);
       Alert.alert("Muvaffaqiyat", "Buyurtma kuryerga biriktirildi");
       setShowCourierList(null);
     } catch (e) {
@@ -199,8 +199,22 @@ export default function AdminOrdersScreen() {
                 <View style={styles.expanded}>
                   <View style={styles.divider} />
                   <View style={styles.customerInfo}>
-                    <Text style={styles.infoText}>📍 {item.address}</Text>
-                    <Text style={styles.infoText}>📞 {item.phoneNumber}</Text>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
+                      <Text style={styles.infoText}>{item.address}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="call-outline" size={14} color={Colors.textSecondary} />
+                      <Text style={styles.infoText}>{item.phoneNumber}</Text>
+                    </View>
+                    {item.courierId && (
+                      <View style={styles.infoRow}>
+                        <Ionicons name="bicycle" size={14} color={Colors.primary} />
+                        <Text style={[styles.infoText, { color: Colors.primary }]}>
+                          {couriers.find((c: any) => c.id === item.courierId)?.name ?? "Kuryer biriktirilgan"}
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
                   <Text style={styles.itemsTitle}>Mahsulotlar:</Text>
@@ -293,8 +307,9 @@ const getStyles = (isDarkMode: boolean) => {
     metaText: { fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textSecondary },
     expanded: { marginTop: 12 },
     divider: { height: 1, backgroundColor: Colors.divider, marginBottom: 14 },
-    customerInfo: { gap: 6, marginBottom: 14 },
-    infoText: { fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary },
+    customerInfo: { gap: 8, marginBottom: 14 },
+    infoRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+    infoText: { fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary, flex: 1 },
     itemsTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 13, color: Colors.text, marginBottom: 8 },
     itemRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
     itemName: { flex: 1, fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary },

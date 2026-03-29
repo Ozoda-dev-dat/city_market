@@ -58,7 +58,7 @@ export default function CourierDashboard() {
     <View style={[styles.container, { paddingTop: topPad + 12 }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Xayrli kun! 👋</Text>
+          <Text style={styles.greeting}>Xayrli kun!</Text>
           <Text style={styles.title}>Kuryer paneli</Text>
         </View>
         <Pressable style={styles.profileBtn} onPress={async () => { await logout(); }}>
