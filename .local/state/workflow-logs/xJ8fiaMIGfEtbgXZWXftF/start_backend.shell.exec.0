@@ -1,0 +1,120 @@
+
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K[dotenv@17.3.1] injecting env (0) from .env [2m-- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }[0m
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+✅ Environment validation passed
+📊 Environment: development
+🌐 Port: 5001
+🔐 Log Level: info
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+[2026-03-30T06:06:46.876Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+[2026-03-30T06:06:46.881Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 206ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:06:47.080Z] [INFO] GET /api/categories - 304 - 204ms - IP: 127.0.0.1
+GET /api/products 304 in 2060ms :: [{"id":"apple-1","name":"Qizil olma","catego…
+[2026-03-30T06:06:48.940Z] [INFO] GET /api/products - 304 - 2059ms - IP: 127.0.0.1
+[2026-03-30T06:06:59.699Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/products 200 in 201ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:06:59.900Z] [INFO] GET /api/products - 200 - 201ms - IP: 127.0.0.1
+[2026-03-30T06:07:00.107Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/categories 200 in 207ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:07:00.315Z] [INFO] GET /api/categories - 200 - 208ms - IP: 127.0.0.1
+[2026-03-30T06:07:13.949Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 201ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:07:14.150Z] [INFO] GET /api/products - 304 - 201ms - IP: 127.0.0.1
+[2026-03-30T06:07:14.772Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 208ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:07:14.979Z] [INFO] GET /api/categories - 304 - 207ms - IP: 127.0.0.1
+[2026-03-30T06:08:00.539Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/products 304 in 201ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:08:00.741Z] [INFO] GET /api/products - 304 - 202ms - IP: 127.0.0.1
+[2026-03-30T06:08:00.972Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/categories 304 in 207ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:08:01.179Z] [INFO] GET /api/categories - 304 - 207ms - IP: 127.0.0.1
+[2026-03-30T06:08:15.145Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 398ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:08:15.542Z] [INFO] GET /api/products - 304 - 397ms - IP: 127.0.0.1
+[2026-03-30T06:08:15.972Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 208ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:08:16.180Z] [INFO] GET /api/categories - 304 - 208ms - IP: 127.0.0.1
+[2026-03-30T06:08:52.423Z] POST /api/auth/login - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+[INFO] Login attempt { phoneNumber: [32m'+99****67'[39m }
+Database: Looking for phone: +998901234567
+Database: Found users: [
+  {
+    id: [32m'c3830208-45b5-428a-893c-c3e8b18bedd6'[39m,
+    phoneNumber: [32m'+998901234567'[39m,
+    password: [32m'$2b$10$hmL4M.XC4ZVcrzx3pySL.OOS0LmzArV2bcltrkaaInkwg6BZX76vy'[39m,
+    role: [32m'admin'[39m,
+    name: [32m'Admin'[39m,
+    address: [1mnull[22m,
+    latitude: [1mnull[22m,
+    longitude: [1mnull[22m,
+    isActive: [33mtrue[39m,
+    deletedAt: [1mnull[22m,
+    createdAt: [35m2026-03-25T05:55:26.498Z[39m,
+    updatedAt: [35m2026-03-25T05:55:32.466Z[39m
+  }
+]
+Database: Returning first user: {
+  id: [32m'c3830208-45b5-428a-893c-c3e8b18bedd6'[39m,
+  phoneNumber: [32m'+998901234567'[39m,
+  password: [32m'$2b$10$hmL4M.XC4ZVcrzx3pySL.OOS0LmzArV2bcltrkaaInkwg6BZX76vy'[39m,
+  role: [32m'admin'[39m,
+  name: [32m'Admin'[39m,
+  address: [1mnull[22m,
+  latitude: [1mnull[22m,
+  longitude: [1mnull[22m,
+  isActive: [33mtrue[39m,
+  deletedAt: [1mnull[22m,
+  createdAt: [35m2026-03-25T05:55:26.498Z[39m,
+  updatedAt: [35m2026-03-25T05:55:32.466Z[39m
+}
+[INFO] Login successful {
+  userId: [32m'c3830208-45b5-428a-893c-c3e8b18bedd6'[39m,
+  phoneNumber: [32m'+99****67'[39m,
+  role: [32m'admin'[39m
+}
+POST /api/auth/login 200 in 462ms :: {"user":{"id":"c3830208-45b5-428a-893c-c3e…
+[2026-03-30T06:08:52.884Z] [INFO] POST /api/auth/login - 200 - 461ms - IP: 127.0.0.1
+[2026-03-30T06:08:53.280Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 210ms :: [{"id":"order-1774769460840","customerId":"0159…
+[2026-03-30T06:08:53.490Z] [INFO] GET /api/orders - 304 - 210ms - IP: 127.0.0.1
+[2026-03-30T06:09:01.318Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/products 304 in 202ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:09:01.519Z] [INFO] GET /api/products - 304 - 201ms - IP: 127.0.0.1
+[2026-03-30T06:09:01.750Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+GET /api/categories 304 in 206ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:09:01.957Z] [INFO] GET /api/categories - 304 - 206ms - IP: 127.0.0.1
+[2026-03-30T06:09:03.827Z] POST /api/products/import - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+[2026-03-30T06:09:04.474Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+POST /api/products/import 200 in 843ms :: {"inserted":0,"total":2,"errors":[{"r…
+[2026-03-30T06:09:04.670Z] [INFO] POST /api/products/import - 200 - 843ms - IP: 127.0.0.1
+GET /api/orders 304 in 201ms :: [{"id":"order-1774769460840","customerId":"0159…
+[2026-03-30T06:09:04.675Z] [INFO] GET /api/orders - 304 - 201ms - IP: 127.0.0.1
+[2026-03-30T06:09:04.826Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.300.31 Darwin/25.2.0
+[2026-03-30T06:09:04.916Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+[2026-03-30T06:09:04.957Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 207ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:09:05.033Z] [INFO] GET /api/products - 304 - 207ms - IP: 127.0.0.1
+GET /api/products 304 in 397ms :: [{"id":"apple-1","name":"Qizil olma","categor…
+[2026-03-30T06:09:05.313Z] [INFO] GET /api/products - 304 - 397ms - IP: 127.0.0.1
+GET /api/products 304 in 2096ms :: [{"id":"apple-1","name":"Qizil olma","catego…
+[2026-03-30T06:09:07.052Z] [INFO] GET /api/products - 304 - 2095ms - IP: 127.0.0.1
+[2026-03-30T06:09:15.674Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 207ms :: [{"id":"order-1774769460840","customerId":"0159…
+[2026-03-30T06:09:15.882Z] [INFO] GET /api/orders - 304 - 208ms - IP: 127.0.0.1
+[2026-03-30T06:09:16.467Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 202ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-03-30T06:09:16.669Z] [INFO] GET /api/categories - 304 - 202ms - IP: 127.0.0.1
+[2026-03-30T06:09:26.894Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 210ms :: [{"id":"order-1774769460840","customerId":"0159…
+[2026-03-30T06:09:27.104Z] [INFO] GET /api/orders - 304 - 210ms - IP: 127.0.0.1
+[2026-03-30T06:09:38.070Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/1017756 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 209ms :: [{"id":"order-1774769460840","customerId":"0159…
+[2026-03-30T06:09:38.278Z] [INFO] GET /api/orders - 304 - 208ms - IP: 127.0.0.1
