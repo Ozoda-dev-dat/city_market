@@ -368,11 +368,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sheet = workbook.Sheets[sheetName];
         const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
+        // Normalize a row by mapping common Uzbek/Russian column aliases to English keys
+        const normalizeRow = (raw: any): any => {
+          const aliases: Record<string, string[]> = {
+            name:          ["nomi", "mahsulot_nomi", "mahsulot nomi", "название", "nаme"],
+            category:      ["kategoriya", "kategoriyа", "kategoria", "категория"],
+            price:         ["narx", "нарх", "цена"],
+            originalPrice: ["asl_narx", "asl narx", "original_price", "original price", "старая цена"],
+            unit:          ["birlik", "o'lchov", "olchov", "birlik/o'lchov", "birlik/olchov", "единица"],
+            image:         ["rasm", "rasm_url", "rasm url", "изображение", "img"],
+            badge:         ["yorliq", "badge", "метка"],
+            description:   ["tavsif", "описание", "desc"],
+            brand:         ["brend", "бренд"],
+            weight:        ["og'irlik", "ogirlik", "og'irlik/hajm", "вес"],
+            stockQuantity: ["ombor", "miqdor", "stock", "stock_quantity", "запас"],
+            rating:        ["reyting", "рейтинг"],
+          };
+
+          const normalized: any = { ...raw };
+          for (const [key, alts] of Object.entries(aliases)) {
+            if (normalized[key] == null || normalized[key] === "") {
+              for (const alt of alts) {
+                const found = Object.keys(raw).find(
+                  (k) => k.trim().toLowerCase() === alt.toLowerCase()
+                );
+                if (found && raw[found] != null && raw[found] !== "") {
+                  normalized[key] = raw[found];
+                  break;
+                }
+              }
+            }
+          }
+          return normalized;
+        };
+
         const inserted: string[] = [];
         const errors: { row: number; error: string }[] = [];
 
         for (let i = 0; i < rows.length; i++) {
-          const row = rows[i];
+          const row = normalizeRow(rows[i]);
           const rowNum = i + 2; // 1-indexed + header row
 
           const productData = {
@@ -381,8 +415,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             category: String(row.category || "").trim(),
             price: Number(row.price) || 0,
             originalPrice: row.originalPrice ? Number(row.originalPrice) : undefined,
-            unit: String(row.unit || "").trim(),
-            image: String(row.image || "").trim(),
+            unit: String(row.unit || "").trim() || "dona",
+            image: String(row.image || "").trim() || "https://via.placeholder.com/300",
             badge: row.badge ? String(row.badge).trim() : undefined,
             description: row.description ? String(row.description).trim() : undefined,
             brand: row.brand ? String(row.brand).trim() : undefined,
