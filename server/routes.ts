@@ -405,14 +405,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const inserted: string[] = [];
         const errors: { row: number; error: string }[] = [];
 
+        // Pre-load all categories for matching
+        const existingCategories = await storage.getCategories();
+        const categoryById = new Map(existingCategories.map((c) => [c.id.toLowerCase(), c.id]));
+        const categoryByName = new Map(existingCategories.map((c) => [c.name.toLowerCase(), c.id]));
+
+        // Resolve or auto-create a category given a raw value from Excel
+        const resolveCategory = async (raw: string): Promise<string> => {
+          const val = raw.trim().toLowerCase();
+          if (!val) return existingCategories[0]?.id ?? "other";
+
+          // Match by exact ID
+          if (categoryById.has(val)) return categoryById.get(val)!;
+
+          // Match by name
+          if (categoryByName.has(val)) return categoryByName.get(val)!;
+
+          // Partial name match
+          for (const [name, id] of categoryByName) {
+            if (name.includes(val) || val.includes(name)) return id;
+          }
+
+          // Auto-create the category
+          const newId = val.replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 30) || `cat-${Date.now()}`;
+          const colors = ["#16A34A", "#2563EB", "#DC2626", "#D97706", "#7C3AED", "#0891B2"];
+          const color = colors[existingCategories.length % colors.length];
+          const newCat = await storage.createCategory({
+            id: newId,
+            name: raw.trim(),
+            icon: "grid-outline",
+            color,
+            bgColor: color + "22",
+          });
+          categoryById.set(newCat.id.toLowerCase(), newCat.id);
+          categoryByName.set(newCat.name.toLowerCase(), newCat.id);
+          existingCategories.push(newCat);
+          return newCat.id;
+        };
+
         for (let i = 0; i < rows.length; i++) {
           const row = normalizeRow(rows[i]);
           const rowNum = i + 2; // 1-indexed + header row
 
+          const rawCategory = String(row.category || "").trim();
+          const resolvedCategory = await resolveCategory(rawCategory);
+
           const productData = {
             id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 6)}-${i}`,
             name: String(row.name || "").trim(),
-            category: String(row.category || "").trim(),
+            category: resolvedCategory,
             price: Number(row.price) || 0,
             originalPrice: row.originalPrice ? Number(row.originalPrice) : undefined,
             unit: String(row.unit || "").trim() || "dona",
