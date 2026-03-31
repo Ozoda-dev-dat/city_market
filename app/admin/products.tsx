@@ -22,8 +22,10 @@ import ExcelImportModal from "@/components/ExcelImportModal";
 
 export default function AdminProductsScreen() {
   const insets = useSafeAreaInsets();
-  const { products, deleteProduct } = useApp();
+  const { products, categories, deleteProduct } = useApp();
   const [search, setSearch] = useState("");
+  const categoryName = (id: string) =>
+    categories.find((c) => c.id === id)?.name ?? id;
   const [showImport, setShowImport] = useState(false);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
@@ -118,7 +120,7 @@ export default function AdminProductsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.productCategory}>{item.category}</Text>
+              <Text style={styles.productCategory}>{categoryName(item.category)}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={styles.productPrice}>{formatPrice(item.price)}</Text>
                 {item.originalPrice && (

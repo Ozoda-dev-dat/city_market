@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { handleError, handleAsyncError } = useErrorHandler({ component: 'AuthProvider' });
+  const { handleError } = useErrorHandler({ component: 'AuthProvider' });
 
   useEffect(() => {
     loadUser();
@@ -43,23 +43,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (phoneNumber: string, password: string) => {
-    return handleAsyncError(async () => {
-      const res = await apiRequest("POST", "/api/auth/login", { phoneNumber, password });
-      const authData = await res.json();
-      setUser(authData.user);
-      setToken(authData.token);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
-    }, 'login');
+    const res = await apiRequest("POST", "/api/auth/login", { phoneNumber, password });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(JSON.stringify(body));
+    }
+    const authData = await res.json();
+    setUser(authData.user);
+    setToken(authData.token);
+    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   };
 
   const register = async (phoneNumber: string, password: string, name: string) => {
-    return handleAsyncError(async () => {
-      const res = await apiRequest("POST", "/api/auth/register", { phoneNumber, password, name });
-      const authData = await res.json();
-      setUser(authData.user);
-      setToken(authData.token);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
-    }, 'register');
+    const res = await apiRequest("POST", "/api/auth/register", { phoneNumber, password, name });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(JSON.stringify(body));
+    }
+    const authData = await res.json();
+    setUser(authData.user);
+    setToken(authData.token);
+    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   };
 
   const logout = async () => {
@@ -69,17 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (name: string) => {
-    return handleAsyncError(async () => {
-      const res = await apiRequest("PATCH", "/api/profile", { name });
-      const data = await res.json();
-      const updatedUser = data.user;
-      setUser(updatedUser);
-      const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const authData = JSON.parse(stored);
-        await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ ...authData, user: updatedUser }));
-      }
-    }, 'updateProfile');
+    const res = await apiRequest("PATCH", "/api/profile", { name });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(JSON.stringify(body));
+    }
+    const data = await res.json();
+    const updatedUser = data.user;
+    setUser(updatedUser);
+    const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+    if (stored) {
+      const authData = JSON.parse(stored);
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ ...authData, user: updatedUser }));
+    }
   };
 
   const value = useMemo(() => ({
