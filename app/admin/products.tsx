@@ -142,7 +142,7 @@ export default function AdminProductsScreen() {
                   router.push({ pathname: "/admin/add-product", params: { id: item.id } })
                 }
               >
-                <Ionicons name="pencil" size={16} color={Colors.primary} />
+                <Ionicons name="pencil" size={16} color="#fff" />
               </Pressable>
               <Pressable
                 style={styles.deleteBtn}
