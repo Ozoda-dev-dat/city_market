@@ -29,8 +29,9 @@ export default function AuthScreen() {
   const styles = getStyles(isDarkMode);
 
   const [isLogin, setIsLogin] = useState(true);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneSuffix, setPhoneSuffix] = useState("");
   const [password, setPassword] = useState("");
+  const phoneNumber = "+998" + phoneSuffix;
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -135,13 +136,13 @@ export default function AuthScreen() {
           <View style={styles.tabRow}>
             <Pressable
               style={[styles.tab, isLogin && styles.tabActive]}
-              onPress={() => setIsLogin(true)}
+              onPress={() => { setIsLogin(true); setPhoneSuffix(""); setPassword(""); setName(""); }}
             >
               <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
             </Pressable>
             <Pressable
               style={[styles.tab, !isLogin && styles.tabActive]}
-              onPress={() => setIsLogin(false)}
+              onPress={() => { setIsLogin(false); setPhoneSuffix(""); setPassword(""); setName(""); }}
             >
               <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Ro'yxat</Text>
             </Pressable>
@@ -168,13 +169,21 @@ export default function AuthScreen() {
             <Text style={styles.inputLabel}>Telefon raqam</Text>
             <View style={styles.inputBox}>
               <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+              <View style={styles.prefixBadge}>
+                <Text style={styles.prefixText}>+998</Text>
+              </View>
+              <View style={styles.prefixDivider} />
               <TextInput
                 style={styles.input}
-                placeholder="+998 90 123 45 67"
+                placeholder="90 123 45 67"
                 placeholderTextColor={Colors.textMuted}
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
+                value={phoneSuffix}
+                onChangeText={(text) => {
+                  const digits = text.replace(/\D/g, "").slice(0, 9);
+                  setPhoneSuffix(digits);
+                }}
+                keyboardType="number-pad"
+                maxLength={9}
               />
             </View>
           </View>
@@ -375,6 +384,23 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_400Regular",
       fontSize: 15,
       color: Colors.text,
+    },
+    prefixBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 6,
+      backgroundColor: isDarkMode ? "#2A2A2E" : "#E8F5E9",
+    },
+    prefixText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 15,
+      color: Colors.primary,
+    },
+    prefixDivider: {
+      width: 1,
+      height: 20,
+      backgroundColor: Colors.divider,
+      marginHorizontal: 4,
     },
     errorList: {
       marginTop: 8,
