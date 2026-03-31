@@ -142,7 +142,7 @@ export default function AdminProductsScreen() {
                   router.push({ pathname: "/admin/add-product", params: { id: item.id } })
                 }
               >
-                <Ionicons name="pencil" size={16} color="#fff" />
+                <Ionicons name="create-outline" size={17} color={Colors.primary} />
               </Pressable>
               <Pressable
                 style={styles.deleteBtn}
@@ -293,7 +293,7 @@ const getStyles = (isDarkMode: boolean) => {
     editBtn: {
       width: 38,
       height: 38,
-      backgroundColor: Colors.primary,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#DCFCE7",
       borderRadius: 11,
       alignItems: "center",
       justifyContent: "center",

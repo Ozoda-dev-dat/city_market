@@ -454,8 +454,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 6)}-${i}`,
             name: String(row.name || "").trim(),
             category: resolvedCategory,
-            price: Number(row.price) || 0,
-            originalPrice: row.originalPrice ? Number(row.originalPrice) : undefined,
+            price: (() => {
+              const raw = String(row.price ?? "").replace(/[\s,]/g, "").replace(/[^0-9.]/g, "");
+              const num = parseFloat(raw);
+              return isNaN(num) ? 0 : Math.round(num);
+            })(),
+            originalPrice: (() => {
+              if (!row.originalPrice) return undefined;
+              const raw = String(row.originalPrice).replace(/[\s,]/g, "").replace(/[^0-9.]/g, "");
+              const num = parseFloat(raw);
+              return isNaN(num) ? undefined : Math.round(num);
+            })(),
             unit: String(row.unit || "").trim() || "dona",
             image: String(row.image || "").trim() || "https://via.placeholder.com/300",
             badge: row.badge ? String(row.badge).trim() : undefined,
