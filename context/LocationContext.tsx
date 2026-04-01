@@ -13,6 +13,7 @@ interface LocationContextValue {
   getCurrentLocation: () => Promise<void>;
   isLoading: boolean;
   permissionGranted: boolean;
+  locationError: string | null;
 }
 
 const LocationContext = createContext<LocationContextValue | null>(null);
@@ -23,6 +24,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [location, setLocation] = useState<LocationContextValue['location']>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     loadLocation();
@@ -59,50 +61,73 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const buildAddress = async (latitude: number, longitude: number): Promise<string> => {
+    let address = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+    try {
+      const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
+      if (place) {
+        const parts: string[] = [];
+        if (place.street) parts.push(place.street);
+        if (place.district) parts.push(place.district);
+        if (place.city) parts.push(place.city);
+        if (parts.length > 0) {
+          address = parts.join(", ");
+        } else if (place.region) {
+          address = place.region;
+        }
+      }
+    } catch (_) {}
+    return address;
+  };
+
   const getCurrentLocation = async () => {
     setIsLoading(true);
-    
+    setLocationError(null);
+
     try {
       const hasPermission = await checkPermissions();
       setPermissionGranted(hasPermission);
 
       if (!hasPermission) {
+        setLocationError("Joylashuvga ruxsat berilmagan. Sozlamalardan ruxsat bering.");
         setIsLoading(false);
         return;
       }
 
-      const currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      let coords: { latitude: number; longitude: number } | null = null;
 
-      const { latitude, longitude } = currentLocation.coords;
-
-      let address = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
       try {
-        const [place] = await Location.reverseGeocodeAsync({ latitude, longitude });
-        if (place) {
-          const parts: string[] = [];
-          if (place.street) parts.push(place.street);
-          if (place.district) parts.push(place.district);
-          if (place.city) parts.push(place.city);
-          if (parts.length > 0) {
-            address = parts.join(", ");
-          } else if (place.region) {
-            address = place.region;
-          }
-        }
-      } catch (_) {}
+        // Try accurate current position first (may fail on simulator or indoors)
+        const result = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        coords = result.coords;
+      } catch (_) {
+        // Fallback: use last known position if GPS fix failed
+        try {
+          const last = await Location.getLastKnownPositionAsync();
+          if (last) coords = last.coords;
+        } catch (__) {}
+      }
 
-      const locationData = {
+      if (!coords) {
+        setLocationError("Joylashuv aniqlanmadi. GPS ishlayotganini tekshiring yoki manzilni qo'lda kiriting.");
+        setIsLoading(false);
+        return;
+      }
+
+      const { latitude, longitude } = coords;
+      const address = await buildAddress(latitude, longitude);
+
+      await saveLocation({
         latitude: latitude.toString(),
         longitude: longitude.toString(),
         address,
-      };
-
-      await saveLocation(locationData);
-      setIsLoading(false);
+      });
     } catch (error) {
-      console.error("Error getting location:", error);
+      console.warn("Location error (non-critical):", error);
+      setLocationError("Joylashuv aniqlanmadi. Manzilni qo'lda kiriting.");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -162,6 +187,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     getCurrentLocation,
     isLoading,
     permissionGranted,
+    locationError,
   };
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;

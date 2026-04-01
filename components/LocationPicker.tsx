@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -24,18 +24,23 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
-  const { updateUserLocation, getCurrentLocation, isLoading, permissionGranted } = useLocation();
+  const { updateUserLocation, getCurrentLocation, isLoading, permissionGranted, locationError, location } = useLocation();
   
   const [address, setAddress] = useState("");
   const [manualMode, setManualMode] = useState(false);
+  const fetchingRef = useRef(false);
+
+  // Close the modal automatically once location is successfully obtained
+  useEffect(() => {
+    if (fetchingRef.current && !isLoading && location && !locationError) {
+      fetchingRef.current = false;
+      onClose();
+    }
+  }, [isLoading, location, locationError]);
 
   const handleGetCurrentLocation = async () => {
-    try {
-      await getCurrentLocation();
-      onClose();
-    } catch (error) {
-      Alert.alert("Xatolik", "Joylashuvni aniqlashda xatolik yuz berdi. Iltimos, qo&apos;lda manzil kiriting.");
-    }
+    fetchingRef.current = true;
+    await getCurrentLocation();
   };
 
   const handleManualLocation = async () => {
@@ -109,11 +114,16 @@ export function LocationPicker({ visible, onClose }: LocationPickerProps) {
                 </>
               )}
             </Pressable>
-            {!permissionGranted && (
+            {locationError ? (
+              <View style={styles.errorBox}>
+                <Ionicons name="warning-outline" size={16} color="#DC2626" />
+                <Text style={styles.errorText}>{locationError}</Text>
+              </View>
+            ) : !permissionGranted ? (
               <Pressable style={styles.permissionBtn} onPress={requestLocationPermission}>
                 <Text style={styles.permissionBtnText}>GPS ruxsatini berish</Text>
               </Pressable>
-            )}
+            ) : null}
           </View>
 
           <View style={styles.optionCard}>
@@ -247,6 +257,21 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_400Regular",
       fontSize: 12,
       color: Colors.primary,
+    },
+    errorBox: {
+      marginTop: 12,
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 6,
+      backgroundColor: "#FEF2F2",
+      borderRadius: 8,
+      padding: 10,
+    },
+    errorText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: "#DC2626",
+      flex: 1,
     },
     toggleBtn: {
       backgroundColor: Colors.glass,
