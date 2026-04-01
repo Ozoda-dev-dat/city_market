@@ -371,29 +371,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Normalize a row by mapping common Uzbek/Russian column aliases to English keys
         const normalizeRow = (raw: any): any => {
           const aliases: Record<string, string[]> = {
-            name:          ["nomi", "mahsulot_nomi", "mahsulot nomi", "название", "nаme"],
-            category:      ["kategoriya", "kategoriyа", "kategoria", "категория"],
-            price:         ["narx", "нарх", "цена"],
-            originalPrice: ["asl_narx", "asl narx", "original_price", "original price", "старая цена"],
-            unit:          ["birlik", "o'lchov", "olchov", "birlik/o'lchov", "birlik/olchov", "единица"],
-            image:         ["rasm", "rasm_url", "rasm url", "изображение", "img"],
-            badge:         ["yorliq", "badge", "метка"],
-            description:   ["tavsif", "описание", "desc"],
-            brand:         ["brend", "бренд"],
-            weight:        ["og'irlik", "ogirlik", "og'irlik/hajm", "вес"],
-            stockQuantity: ["ombor", "miqdor", "stock", "stock_quantity", "запас"],
-            rating:        ["reyting", "рейтинг"],
+            name:          ["nomi", "mahsulot_nomi", "mahsulot nomi", "название", "nаme", "product name", "product_name"],
+            category:      ["kategoriya", "kategoriyа", "kategoria", "категория", "cat", "kategory"],
+            price:         ["narx", "narxi", "нарх", "цена", "cost", "soum", "sum", "summa"],
+            originalPrice: ["asl_narx", "asl narx", "asl_narxi", "original_price", "original price", "старая цена", "old_price", "old price"],
+            unit:          ["birlik", "o'lchov", "olchov", "birlik/o'lchov", "birlik/olchov", "единица", "measure"],
+            image:         ["rasm", "rasm_url", "rasm url", "изображение", "img", "photo", "foto"],
+            badge:         ["yorliq", "badge", "метка", "label", "yorliq/nishon"],
+            description:   ["tavsif", "описание", "desc", "info", "malumot"],
+            brand:         ["brend", "бренд", "ishlab_chiqaruvchi", "manufacturer"],
+            weight:        ["og'irlik", "ogirlik", "og'irlik/hajm", "вес", "vazn", "hajm"],
+            stockQuantity: ["ombor", "miqdor", "stock", "stock_quantity", "запас", "qoldiq", "soni"],
+            rating:        ["reyting", "рейтинг", "baho"],
           };
 
           const normalized: any = { ...raw };
           for (const [key, alts] of Object.entries(aliases)) {
             if (normalized[key] == null || normalized[key] === "") {
               for (const alt of alts) {
-                const found = Object.keys(raw).find(
+                // Exact match first
+                const exactMatch = Object.keys(raw).find(
                   (k) => k.trim().toLowerCase() === alt.toLowerCase()
                 );
-                if (found && raw[found] != null && raw[found] !== "") {
-                  normalized[key] = raw[found];
+                if (exactMatch && raw[exactMatch] != null && raw[exactMatch] !== "") {
+                  normalized[key] = raw[exactMatch];
+                  break;
+                }
+                // Partial match: column header starts with or contains the alias
+                const partialMatch = Object.keys(raw).find(
+                  (k) => k.trim().toLowerCase().startsWith(alt.toLowerCase())
+                );
+                if (partialMatch && raw[partialMatch] != null && raw[partialMatch] !== "") {
+                  normalized[key] = raw[partialMatch];
                   break;
                 }
               }
@@ -455,14 +464,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: String(row.name || "").trim(),
             category: resolvedCategory,
             price: (() => {
-              const raw = String(row.price ?? "").replace(/[\s,]/g, "").replace(/[^0-9.]/g, "");
-              const num = parseFloat(raw);
+              // If XLSX already gave us a JS number, use it directly
+              if (typeof row.price === "number" && !isNaN(row.price)) return Math.round(row.price);
+              const s = String(row.price ?? "").trim();
+              if (!s) return 0;
+              // Strip thousand separators: spaces, non-breaking spaces, apostrophes, commas
+              // Then keep only digits and a single period as decimal point
+              let cleaned = s.replace(/[\s\u00a0\u202f\u2009',]/g, "");
+              // If the only non-digit is a comma used as decimal (e.g. "12000,50"), replace it
+              if (/^\d+,\d{1,2}$/.test(s.trim())) cleaned = s.trim().replace(",", ".");
+              cleaned = cleaned.replace(/[^0-9.]/g, "");
+              const num = parseFloat(cleaned);
               return isNaN(num) ? 0 : Math.round(num);
             })(),
             originalPrice: (() => {
               if (!row.originalPrice) return undefined;
-              const raw = String(row.originalPrice).replace(/[\s,]/g, "").replace(/[^0-9.]/g, "");
-              const num = parseFloat(raw);
+              if (typeof row.originalPrice === "number" && !isNaN(row.originalPrice)) return Math.round(row.originalPrice);
+              const s = String(row.originalPrice).trim();
+              let cleaned = s.replace(/[\s\u00a0\u202f\u2009',]/g, "");
+              if (/^\d+,\d{1,2}$/.test(s)) cleaned = s.replace(",", ".");
+              cleaned = cleaned.replace(/[^0-9.]/g, "");
+              const num = parseFloat(cleaned);
               return isNaN(num) ? undefined : Math.round(num);
             })(),
             unit: String(row.unit || "").trim() || "dona",
@@ -486,6 +508,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })(),
             inStock: true,
           };
+
+          if (!productData.name) {
+            errors.push({ row: rowNum, error: "Mahsulot nomi bo'sh (name ustuni topilmadi yoki bo'sh)" });
+            continue;
+          }
+          if (!productData.price || productData.price <= 0) {
+            const rawPriceVal = row.price ?? "(topilmadi)";
+            errors.push({ row: rowNum, error: `Narx noto'g'ri yoki topilmadi. Qiymat: "${rawPriceVal}". Ustun nomi "price", "narx", "narxi" yoki "цена" bo'lishi kerak.` });
+            continue;
+          }
 
           const validation = insertProductSchema.safeParse(productData);
           if (!validation.success) {
