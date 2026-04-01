@@ -376,6 +376,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Normalize a row by mapping common Uzbek/Russian column aliases to English keys
         const normalizeRow = (raw: any): any => {
+          // First pass: trim all column header keys to remove accidental leading/trailing spaces
+          const trimmedRaw: any = {};
+          for (const key of Object.keys(raw)) {
+            trimmedRaw[key.trim()] = raw[key];
+          }
+          raw = trimmedRaw;
+
           const aliases: Record<string, string[]> = {
             name:          ["nomi", "mahsulot_nomi", "mahsulot nomi", "название", "nаme", "product name", "product_name"],
             category:      ["kategoriya", "kategoriyа", "kategoria", "категория", "cat", "kategory"],
