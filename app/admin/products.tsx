@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ export default function AdminProductsScreen() {
   const categoryName = (id: string) =>
     categories.find((c) => c.id === id)?.name ?? id;
   const [showImport, setShowImport] = useState(false);
+  const deletingIds = useRef<Set<string>>(new Set());
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -37,6 +38,7 @@ export default function AdminProductsScreen() {
   );
 
   const handleDelete = (id: string, name: string) => {
+    if (deletingIds.current.has(id)) return;
     Alert.alert(
       "Mahsulotni o'chirish",
       `"${name}" ni o'chirmoqchimisiz?`,
@@ -45,7 +47,12 @@ export default function AdminProductsScreen() {
         {
           text: "O'chirish",
           style: "destructive",
-          onPress: () => deleteProduct(id),
+          onPress: () => {
+            if (deletingIds.current.has(id)) return;
+            deletingIds.current.add(id);
+            deleteProduct(id);
+            setTimeout(() => deletingIds.current.delete(id), 5000);
+          },
         },
       ]
     );

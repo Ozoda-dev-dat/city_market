@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -62,7 +62,26 @@ export default function AddProductScreen() {
   const [originalPrice, setOriginalPrice] = useState(existing?.originalPrice ? String(existing.originalPrice) : "");
   const [stockQuantity, setStockQuantity] = useState(existing?.stockQuantity ? String(existing.stockQuantity) : "0");
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [badge, setBadge] = useState<string>(existing?.badge ?? "");
+  const populated = useRef(!!existing);
+
+  // Populate form once products data arrives (React Query may still be loading when screen mounts)
+  useEffect(() => {
+    if (!populated.current && existing) {
+      setName(existing.name ?? "");
+      setCategory(existing.category ?? (categories[0]?.id ?? ""));
+      setPrice(existing.price ? String(existing.price) : "");
+      setUnit(existing.unit ?? "kg");
+      setImage(existing.image ?? "");
+      setImagePreview(existing.image ?? "");
+      setDescription(existing.description ?? "");
+      setOriginalPrice(existing.originalPrice ? String(existing.originalPrice) : "");
+      setStockQuantity(existing.stockQuantity ? String(existing.stockQuantity) : "0");
+      setBadge(existing.badge ?? "");
+      populated.current = true;
+    }
+  }, [existing]);
 
   const pickImage = async () => {
     try {
@@ -103,6 +122,7 @@ export default function AddProductScreen() {
   };
 
   const handleSave = async () => {
+    if (saving) return;
     if (!name || !price) return Alert.alert(t("error_fill"), t("product_name") + " va " + t("price") + " majburiy");
     
     const productData = {
@@ -118,6 +138,7 @@ export default function AddProductScreen() {
       inStock: Math.round(Number(stockQuantity)) > 0,
     };
 
+    setSaving(true);
     try {
       if (isEdit && existing) {
         await updateProduct({ ...productData, id: existing.id } as any);
@@ -129,6 +150,8 @@ export default function AddProductScreen() {
       console.error("Save error:", e);
       const errorMsg = e?.message || (lang === "uz" ? "Saqlashda xatolik yuz berdi" : "Ошибка при сохранении");
       Alert.alert(lang === "uz" ? "Xatolik" : "Ошибка", errorMsg);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -137,7 +160,12 @@ export default function AddProductScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable onPress={() => router.back()}><Ionicons name="arrow-back" size={24} color={Colors.text} /></Pressable>
         <Text style={styles.title}>{isEdit ? t("edit") : t("add")}</Text>
-        <Pressable onPress={handleSave} style={styles.saveBtn}><Text style={{ color: "#fff" }}>{t("save")}</Text></Pressable>
+        <Pressable onPress={handleSave} style={[styles.saveBtn, saving && { opacity: 0.6 }]} disabled={saving}>
+          {saving
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <Text style={{ color: "#fff", fontFamily: "Poppins_600SemiBold" }}>{t("save")}</Text>
+          }
+        </Pressable>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <LabeledInput label={t("product_name")} value={name} onChangeText={setName} required />

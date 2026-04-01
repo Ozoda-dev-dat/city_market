@@ -8,8 +8,8 @@ interface AppContextValue {
   products: Product[];
   categories: Category[];
   orders: Order[];
-  addProduct: (product: Omit<Product, "id">) => void;
-  updateProduct: (product: Product) => void;
+  addProduct: (product: Omit<Product, "id">) => Promise<void>;
+  updateProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   deleteCategory: (id: string) => void;
   createCategory: (category: any) => Promise<void>;
@@ -124,8 +124,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       products,
       categories,
       orders,
-      addProduct: (product: Omit<Product, "id">) => addProductMutation.mutate(product),
-      updateProduct: (product: Product) => updateProductMutation.mutate(product),
+      addProduct: (product: Omit<Product, "id">) => addProductMutation.mutateAsync(product).then(() => {}),
+      updateProduct: (product: Product) => updateProductMutation.mutateAsync(product).then(() => {}),
       deleteProduct: (id: string) => deleteProductMutation.mutate(id),
       deleteCategory: (id: string) => deleteCategoryMutation.mutate(id),
       updateOrderStatus: (id: string, status: string, courierId?: string) =>
