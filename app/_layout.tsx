@@ -87,6 +87,7 @@ function RootLayoutNav() {
           headerTitle: "",
           headerTransparent: true,
           headerTintColor: "#fff",
+          headerBackTitle: "",
         }}
       />
       <Stack.Screen name="order" options={{ headerShown: false }} />

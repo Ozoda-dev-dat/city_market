@@ -35,6 +35,7 @@ function ClassicTabLayout() {
           marginHorizontal: 48,
           height: 62,
           borderRadius: 31,
+          paddingHorizontal: 12,
           backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
