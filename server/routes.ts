@@ -376,10 +376,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Normalize a row by mapping common Uzbek/Russian column aliases to English keys
         const normalizeRow = (raw: any): any => {
-          // First pass: trim all column header keys to remove accidental leading/trailing spaces
+          // First pass: normalize all column header keys — trim whitespace and lowercase
+          // This handles headers like "price " (trailing space), "Unit", "Original Price", etc.
           const trimmedRaw: any = {};
           for (const key of Object.keys(raw)) {
-            trimmedRaw[key.trim()] = raw[key];
+            trimmedRaw[key.trim().toLowerCase()] = raw[key];
           }
           raw = trimmedRaw;
 
@@ -501,7 +502,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return isNaN(num) ? undefined : Math.round(num);
             })(),
             unit: String(row.unit || "").trim() || "dona",
-            image: String(row.image || "").trim() || "https://via.placeholder.com/300",
+            image: (() => {
+              const img = String(row.image || "").trim();
+              // Reject embedded base64 images — store a placeholder instead
+              if (!img || img.startsWith("data:")) return "https://placehold.co/300x300/e2e8f0/64748b?text=Rasm+yo%27q";
+              return img;
+            })(),
             badge: row.badge ? String(row.badge).trim() : undefined,
             description: row.description ? String(row.description).trim() : undefined,
             brand: row.brand ? String(row.brand).trim() : undefined,
