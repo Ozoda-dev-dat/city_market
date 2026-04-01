@@ -368,6 +368,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sheet = workbook.Sheets[sheetName];
         const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
+        // Debug: log the column headers and first row so we can diagnose import issues
+        if (rows.length > 0) {
+          console.log("[IMPORT] Column headers found:", Object.keys(rows[0]));
+          console.log("[IMPORT] First row raw data:", rows[0]);
+        }
+
         // Normalize a row by mapping common Uzbek/Russian column aliases to English keys
         const normalizeRow = (raw: any): any => {
           const aliases: Record<string, string[]> = {
