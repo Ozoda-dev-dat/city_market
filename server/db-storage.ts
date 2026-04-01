@@ -278,7 +278,7 @@ export class DbStorage implements IStorage {
   }
 
   async getProducts(): Promise<Product[]> {
-    return await this.db.select().from(schema.products);
+    return await this.db.select().from(schema.products).where(isNull(schema.products.deletedAt));
   }
 
   async getProduct(id: string): Promise<Product | undefined> {
@@ -321,7 +321,7 @@ export class DbStorage implements IStorage {
   }
 
   async getCategories(): Promise<Category[]> {
-    return await this.db.select().from(schema.categories);
+    return await this.db.select().from(schema.categories).where(isNull(schema.categories.deletedAt));
   }
 
   async createCategory(category: any): Promise<Category> {
