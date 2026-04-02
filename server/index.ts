@@ -109,7 +109,6 @@ function validateInput(req: Request, res: Response, next: NextFunction) {
   // SQL Injection Protection
   const detectSqlInjection = (str: string): boolean => {
     const sqlPatterns = [
-      /[';|*]/i,
       /(exec(\s|\+)+(s|x)p\w+)/i,
       /(union(.*?)select)/i,
       /(select(.*?)from)/i,
