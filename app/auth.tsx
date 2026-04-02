@@ -257,10 +257,11 @@ const getStyles = (isDarkMode: boolean) => {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDarkMode ? "#0C0C0E" : "#fff",
+      backgroundColor: isDarkMode ? "#0C0C0E" : "#16A34A",
     },
     scrollContent: {
       flexGrow: 1,
+      backgroundColor: isDarkMode ? "#0C0C0E" : "#16A34A",
     },
     heroSection: {
       paddingHorizontal: 24,
