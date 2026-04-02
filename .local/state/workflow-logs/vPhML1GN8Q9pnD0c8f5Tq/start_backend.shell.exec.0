@@ -1,0 +1,125 @@
+
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K[dotenv@17.3.1] injecting env (0) from .env [2m-- tip: ⚡️ secrets for agents: https://dotenvx.com/as2[0m
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+✅ Environment validation passed
+📊 Environment: development
+🌐 Port: 5001
+🔐 Log Level: info
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+[2026-04-02T09:30:27.481Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 48ms :: [{"id":"prod-1775121925876-r67fwi-0","name":"N…
+[2026-04-02T09:30:27.527Z] [INFO] GET /api/products - 304 - 46ms - IP: 127.0.0.1
+[2026-04-02T09:30:32.471Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 24ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:30:32.496Z] [INFO] GET /api/orders - 304 - 25ms - IP: 127.0.0.1
+[2026-04-02T09:30:42.628Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:30:42.651Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:30:52.780Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:30:52.803Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:30:58.886Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 22ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-04-02T09:30:58.908Z] [INFO] GET /api/categories - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:31:02.945Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:02.968Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:31:13.098Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:13.120Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:31:23.248Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:23.270Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:31:27.645Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 23ms :: [{"id":"prod-1775121925876-r67fwi-0","name":"N…
+[2026-04-02T09:31:27.668Z] [INFO] GET /api/products - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:31:33.387Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:33.409Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:31:43.532Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 25ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:43.556Z] [INFO] GET /api/orders - 304 - 24ms - IP: 127.0.0.1
+[2026-04-02T09:31:53.681Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:31:53.704Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:31:59.025Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 41ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-04-02T09:31:59.065Z] [INFO] GET /api/categories - 304 - 40ms - IP: 127.0.0.1
+[2026-04-02T09:32:03.824Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:03.847Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:32:13.966Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 24ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:13.989Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:32:24.117Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:24.140Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:32:27.773Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 22ms :: [{"id":"prod-1775121925876-r67fwi-0","name":"N…
+[2026-04-02T09:32:27.795Z] [INFO] GET /api/products - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:32:34.251Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:34.273Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:32:44.399Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:44.422Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:32:54.564Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:32:54.586Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:32:59.179Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 21ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-04-02T09:32:59.201Z] [INFO] GET /api/categories - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:04.709Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:04.731Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:14.873Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:14.895Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:25.008Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:25.030Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:27.907Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 22ms :: [{"id":"prod-1775121925876-r67fwi-0","name":"N…
+[2026-04-02T09:33:27.929Z] [INFO] GET /api/products - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:35.147Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:35.170Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:33:45.311Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:45.333Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:55.464Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:33:55.486Z] [INFO] GET /api/orders - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:33:59.315Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 23ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-04-02T09:33:59.337Z] [INFO] GET /api/categories - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:34:05.604Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:05.627Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:34:15.771Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:15.794Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:34:25.919Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:25.940Z] [INFO] GET /api/orders - 304 - 21ms - IP: 127.0.0.1
+[2026-04-02T09:34:28.053Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/products 304 in 22ms :: [{"id":"prod-1775121925876-r67fwi-0","name":"N…
+[2026-04-02T09:34:28.075Z] [INFO] GET /api/products - 304 - 22ms - IP: 127.0.0.1
+[2026-04-02T09:34:36.061Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:36.084Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:34:46.219Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 22ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:46.240Z] [INFO] GET /api/orders - 304 - 21ms - IP: 127.0.0.1
+[2026-04-02T09:34:56.369Z] GET /api/orders - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/orders 304 in 23ms :: [{"id":"order-1774769460840","customerId":"0159b…
+[2026-04-02T09:34:56.392Z] [INFO] GET /api/orders - 304 - 23ms - IP: 127.0.0.1
+[2026-04-02T09:34:59.444Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Expo/54.0.6 CFNetwork/3860.400.51 Darwin/25.3.0
+GET /api/categories 304 in 23ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-04-02T09:34:59.466Z] [INFO] GET /api/categories - 304 - 22ms - IP: 127.0.0.1
