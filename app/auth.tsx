@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -112,9 +113,11 @@ export default function AuthScreen() {
           end={{ x: 1, y: 1 }}
           style={[styles.heroSection, { paddingTop: insets.top + 40 }]}
         >
-          <View style={styles.logoCircle}>
-            <Ionicons name="basket" size={36} color="#16A34A" />
-          </View>
+          <Image
+            source={require("@/assets/logo.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.heroTitle}>City Market</Text>
           <Text style={styles.heroSubtitle}>Tez va qulay yetkazib berish</Text>
 
@@ -269,19 +272,11 @@ const getStyles = (isDarkMode: boolean) => {
       alignItems: "center",
       gap: 8,
     },
-    logoCircle: {
-      width: 76,
-      height: 76,
-      borderRadius: 24,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
+    logoImage: {
+      width: 160,
+      height: 90,
+      borderRadius: 18,
       marginBottom: 4,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.15,
-      shadowRadius: 20,
-      elevation: 10,
     },
     heroTitle: {
       fontFamily: "Poppins_700Bold",

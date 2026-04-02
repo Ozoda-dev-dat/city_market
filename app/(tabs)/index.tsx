@@ -429,10 +429,17 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.content, { paddingTop: topPadding + 12 }]}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.logoBanner}>
+          <Image
+            source={require("@/assets/logo.png")}
+            style={styles.logoBannerImage}
+            resizeMode="contain"
+          />
+        </View>
+
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
-            <Text style={[styles.storeName, { color: Colors.text }]}>City Market</Text>
             <Pressable
               style={styles.locationRow}
               onPress={() => setShowLocationModal(true)}
@@ -657,6 +664,17 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
   },
+  logoBanner: {
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  logoBannerImage: {
+    width: 180,
+    height: 72,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -666,11 +684,6 @@ const styles = StyleSheet.create({
   greeting: {
     fontFamily: "Poppins_400Regular",
     fontSize: 13,
-  },
-  storeName: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 28,
-    lineHeight: 34,
   },
   locationRow: {
     flexDirection: "row",
