@@ -23,7 +23,6 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import { I18nProvider } from "@/lib/I18nProvider";
-import LangToggle from "@/components/LangToggle";
 import { NetworkProvider } from "@/components/OfflineComponents";
 import { useRealtime } from "@/hooks/useRealtime";
 
@@ -145,7 +144,6 @@ export default function RootLayout() {
                           <CartProvider>
                             <I18nProvider>
                               <ThemedBackground>
-                                <LangToggle />
                                 <RootLayoutNav />
                               </ThemedBackground>
                             </I18nProvider>
