@@ -28,14 +28,15 @@ function ClassicTabLayout() {
         tabBarInactiveTintColor: Colors.textMuted,
         tabBarItemStyle: {
           paddingVertical: 0,
+          marginHorizontal: 4,
         },
         tabBarStyle: {
           position: "absolute",
           bottom: tabBarBottom,
-          marginHorizontal: 48,
+          marginHorizontal: 40,
           height: 62,
           borderRadius: 31,
-          paddingHorizontal: 12,
+          paddingHorizontal: 20,
           backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 8 },
