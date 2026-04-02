@@ -162,6 +162,9 @@ export default function CartScreen() {
   const checkoutAnim = useAnimatedStyle(() => ({ transform: [{ scale: checkoutScale.value }] }));
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const TAB_BAR_HEIGHT = 62;
+  const tabBarBottomInset = Platform.OS === "web" ? 20 : Math.max(insets.bottom, 8) + 8;
+  const footerBottomOffset = Platform.OS === "web" ? 20 : tabBarBottomInset + TAB_BAR_HEIGHT + 8;
   const delivery = totalPrice > 100000 ? 0 : 15000;
   const finalTotal = Math.max(0, totalPrice + delivery - (totalPrice * discount / 100));
 
@@ -265,7 +268,7 @@ export default function CartScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: footerBottomOffset + 80 }]}
         showsVerticalScrollIndicator={false}
       >
         {items.map((item) => (
@@ -349,10 +352,7 @@ export default function CartScreen() {
 
       <View style={[
         styles.footer,
-        {
-          backgroundColor: "transparent",
-          paddingBottom: Platform.OS === "web" ? 24 : insets.bottom + 12,
-        }
+        { bottom: footerBottomOffset },
       ]}>
         <Animated.View style={checkoutAnim}>
           <Pressable
@@ -561,8 +561,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   footer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
     paddingTop: 10,
+    paddingBottom: 10,
   },
   checkoutBtn: {
     backgroundColor: "#16A34A",
