@@ -82,11 +82,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="product/[id]"
         options={{
-          headerShown: true,
-          headerTitle: "",
-          headerTransparent: true,
-          headerTintColor: "#fff",
-          headerBackTitle: "",
+          headerShown: false,
         }}
       />
       <Stack.Screen name="order" options={{ headerShown: false }} />
