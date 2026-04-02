@@ -106,9 +106,18 @@ export default function CourierOrderDetail() {
         return;
       }
 
-      const current = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      let current: Location.LocationObject | null = null;
+      try {
+        current = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+      } catch {
+        current = await Location.getLastKnownPositionAsync();
+      }
+      if (!current) {
+        setLocationError("Joylashuv aniqlanmadi");
+        return;
+      }
       const from: Coord = {
         latitude: current.coords.latitude,
         longitude: current.coords.longitude,
