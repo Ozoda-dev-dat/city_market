@@ -170,13 +170,25 @@ export default function CartScreen() {
 
   const applyPromo = async () => {
     try {
-      const res = await apiRequest("GET", `/api/promo-codes/${promo}`);
+      const res = await apiRequest("GET", `/api/promo-codes/${promo}?cartTotal=${totalPrice}`);
       const data = await res.json();
+      if (!res.ok) {
+        if (data.error === "MIN_AMOUNT_NOT_MET") {
+          const minFmt = data.minAmount.toLocaleString("uz-UZ");
+          Alert.alert(
+            "Minimal summa yetarli emas",
+            `Bu promokod faqat ${minFmt} so'm va undan yuqori buyurtmalar uchun amal qiladi.`
+          );
+        } else {
+          Alert.alert("Xatolik", "Promokod noto'g'ri yoki faol emas");
+        }
+        return;
+      }
       setDiscount(data.discountPercent);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Muvaffaqiyat", `${data.discountPercent}% chegirma qo'llanildi`);
     } catch (e) {
-      Alert.alert("Xatolik", "Promokod noto'g'ri");
+      Alert.alert("Xatolik", "Promokod noto'g'ri yoki faol emas");
     }
   };
 

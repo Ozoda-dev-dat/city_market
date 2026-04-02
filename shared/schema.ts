@@ -70,6 +70,7 @@ export const promoCodes = pgTable("promo_codes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   code: text("code").notNull().unique(),
   discountPercent: integer("discount_percent").notNull(),
+  minAmount: integer("min_amount").default(0).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   maxUses: integer("max_uses").default(100).notNull(),
   usedCount: integer("used_count").default(0).notNull(),
@@ -432,6 +433,7 @@ export const insertOrderSchema = createInsertSchema(orders, {
 export const insertPromoCodeSchema = createInsertSchema(promoCodes, {
   code: z.string().min(3).max(20).regex(/^[A-Z0-9]+$/, "Promo code must be uppercase alphanumeric"),
   discountPercent: z.number().min(1).max(100),
+  minAmount: z.number().min(0).default(0),
   maxUses: z.number().min(1).max(10000),
   usedCount: z.number().min(0).max(10000),
 });

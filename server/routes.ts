@@ -330,6 +330,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!promo || !promo.isActive) {
           return res.status(404).json({ error: "Invalid or inactive promo code" });
         }
+        const cartTotal = req.query.cartTotal ? Number(req.query.cartTotal) : null;
+        if (cartTotal !== null && promo.minAmount > 0 && cartTotal < promo.minAmount) {
+          return res.status(400).json({
+            error: "MIN_AMOUNT_NOT_MET",
+            minAmount: promo.minAmount,
+            cartTotal,
+          });
+        }
         res.json(promo);
       } catch (error) {
         console.error("Error fetching promo code:", error);
