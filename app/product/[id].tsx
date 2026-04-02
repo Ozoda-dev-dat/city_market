@@ -210,28 +210,38 @@ export default function ProductDetailScreen() {
             </Pressable>
           </Animated.View>
         ) : (
-          <View style={styles.cartControls}>
-            <Text style={styles.totalText}>
-              {formatPrice(product.price * cartItemCount)}
-            </Text>
-            <View style={styles.qtyRow}>
-              <Pressable
-                style={styles.qtyBtn}
-                onPress={() => {
-                  if (cartItemCount === 1) removeFromCart(product.id);
-                  else updateQuantity(product.id, cartItemCount - 1);
-                }}
-              >
-                <Ionicons name="remove" size={18} color="#fff" />
-              </Pressable>
-              <Text style={styles.qtyText}>{cartItemCount}</Text>
-              <Pressable
-                style={styles.qtyBtn}
-                onPress={() => updateQuantity(product.id, cartItemCount + 1)}
-              >
-                <Ionicons name="add" size={18} color="#fff" />
-              </Pressable>
+          <View style={{ gap: 10 }}>
+            <View style={styles.cartControls}>
+              <Text style={styles.totalText}>
+                {formatPrice(product.price * cartItemCount)}
+              </Text>
+              <View style={styles.qtyRow}>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={() => {
+                    if (cartItemCount === 1) removeFromCart(product.id);
+                    else updateQuantity(product.id, cartItemCount - 1);
+                  }}
+                >
+                  <Ionicons name="remove" size={18} color="#fff" />
+                </Pressable>
+                <Text style={styles.qtyText}>{cartItemCount}</Text>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={() => updateQuantity(product.id, cartItemCount + 1)}
+                >
+                  <Ionicons name="add" size={18} color="#fff" />
+                </Pressable>
+              </View>
             </View>
+            <Pressable
+              style={styles.goToCartBtn}
+              onPress={() => router.push("/(tabs)/cart")}
+            >
+              <Ionicons name="cart" size={18} color="#16A34A" />
+              <Text style={styles.goToCartText}>Savatga o'tish</Text>
+              <Ionicons name="arrow-forward" size={16} color="#16A34A" />
+            </Pressable>
           </View>
         )}
       </View>
@@ -524,6 +534,22 @@ const getStyles = (isDarkMode: boolean) => {
       color: "#fff",
       minWidth: 28,
       textAlign: "center",
+    },
+    goToCartBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#DCFCE7",
+      borderRadius: 14,
+      paddingVertical: 12,
+      borderWidth: 1.5,
+      borderColor: isDarkMode ? "rgba(22,163,74,0.35)" : "#BBF7D0",
+    },
+    goToCartText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 15,
+      color: "#16A34A",
     },
     notFound: {
       fontFamily: "Poppins_600SemiBold",
