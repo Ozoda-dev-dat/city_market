@@ -124,10 +124,21 @@ export default function CourierDashboard() {
             <View style={styles.orderFooter}>
               <Text style={styles.customer}>{item.customerName}</Text>
               <View style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {activeTab === "available" ? "Olish" : "Yo'lda"}
+                <Text style={[
+                  styles.badgeText,
+                  item.status === "delivered" && { color: "#10B981" }
+                ]}>
+                  {activeTab === "available"
+                    ? "Olish"
+                    : item.status === "delivered"
+                    ? "Bajarildi ✓"
+                    : "Yo'lda"}
                 </Text>
-                <Ionicons name="chevron-forward" size={12} color={Colors.primary} />
+                <Ionicons
+                  name={item.status === "delivered" ? "checkmark-circle" : "chevron-forward"}
+                  size={12}
+                  color={item.status === "delivered" ? "#10B981" : Colors.primary}
+                />
               </View>
             </View>
           </Pressable>
