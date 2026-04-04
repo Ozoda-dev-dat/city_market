@@ -62,7 +62,7 @@ export default function AdminOrdersScreen() {
       label: "Tayyorlanmoqda",
       color: "#3B82F6",
       bg: "#EFF6FF",
-      icon: "restaurant",
+      icon: "bag-handle",
       next: "ready",
       nextLabel: "Tayyor deb belgilash",
     },

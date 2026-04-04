@@ -95,7 +95,7 @@ export default function EnhancedOrderTrackingScreen() {
     { 
       key: "preparing", 
       label: "Tayyorlanmoqda", 
-      icon: "restaurant",
+      icon: "bag-handle",
       description: "Buyurtma tayyorlanmoqda",
       time: order.status === 'preparing' || order.status === 'ready' || order.status === 'delivering' || order.status === 'delivered' ? '15:30' : ''
     },
@@ -139,11 +139,24 @@ export default function EnhancedOrderTrackingScreen() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Kutilmoqda';
+      case 'confirmed': return 'Tasdiqlandi';
+      case 'preparing': return 'Tayyorlanmoqda';
+      case 'ready': return 'Tayyor';
+      case 'delivering': return "Yo'lda";
+      case 'delivered': return 'Yetkazildi';
+      case 'cancelled': return 'Bekor qilingan';
+      default: return status;
+    }
+  };
+
   const getStatusEmoji = (status: string) => {
     switch (status) {
       case 'pending': return '⏳';
       case 'confirmed': return '✔️';
-      case 'preparing': return '👨‍🍳';
+      case 'preparing': return '🛒';
       case 'ready': return '📦';
       case 'delivering': return '🚴';
       case 'delivered': return '✅';
@@ -177,7 +190,7 @@ export default function EnhancedOrderTrackingScreen() {
               </Text>
             </View>
             <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{getStatusEmoji(order.status)} {order.status}</Text>
+              <Text style={styles.statusText}>{getStatusEmoji(order.status)} {getStatusLabel(order.status)}</Text>
             </View>
           </View>
           <View style={styles.orderTotal}>
