@@ -85,7 +85,7 @@ export default function AdminOrdersScreen() {
     delivered: {
       label: "Yetkazildi",
       color: Colors.primary,
-      bg: Colors.primary,
+      bg: "#DCFCE7",
       icon: "checkmark-circle",
     },
     cancelled: {
