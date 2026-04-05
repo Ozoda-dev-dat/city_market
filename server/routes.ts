@@ -637,6 +637,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Subcategories endpoints
+  app.get("/api/subcategories",
+    optionalAuth,
+    async (_req, res) => {
+      try {
+        const subcategories = await storage.getSubcategories();
+        res.json(subcategories);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        res.status(500).json({ error: "Failed to fetch subcategories" });
+      }
+    }
+  );
+
+  app.get("/api/categories/:id/subcategories",
+    optionalAuth,
+    async (req, res) => {
+      try {
+        const subcategories = await storage.getSubcategoriesByCategory(req.params.id);
+        res.json(subcategories);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        res.status(500).json({ error: "Failed to fetch subcategories" });
+      }
+    }
+  );
+
+  app.post("/api/subcategories",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const subcategory = await storage.createSubcategory(req.body);
+        broadcast("categories-changed");
+        res.json(subcategory);
+      } catch (error) {
+        console.error("Error creating subcategory:", error);
+        res.status(500).json({ error: "Failed to create subcategory" });
+      }
+    }
+  );
+
+  app.delete("/api/subcategories/:id",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        await storage.softDeleteSubcategory(req.params.id);
+        broadcast("categories-changed");
+        res.sendStatus(204);
+      } catch (error) {
+        console.error("Error deleting subcategory:", error);
+        res.status(500).json({ error: "Failed to delete subcategory" });
+      }
+    }
+  );
+
   app.post("/api/categories", 
     authenticateToken,
     requireAdmin,

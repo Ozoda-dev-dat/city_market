@@ -38,10 +38,28 @@ export const categories = pgTable("categories", {
   activeIdx: index("idx_categories_active").on(table.isActive),
 }));
 
+export const subcategories = pgTable("subcategories", {
+  id: varchar("id").primaryKey(),
+  name: text("name").notNull(),
+  icon: text("icon").notNull(),
+  color: text("color").notNull(),
+  bgColor: text("bg_color").notNull(),
+  categoryId: varchar("category_id").notNull().references(() => categories.id, { onDelete: "cascade" }),
+  isActive: boolean("is_active").default(true).notNull(),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  nameIdx: index("idx_subcategories_name").on(table.name),
+  categoryIdx: index("idx_subcategories_category").on(table.categoryId),
+  activeIdx: index("idx_subcategories_active").on(table.isActive),
+}));
+
 export const products = pgTable("products", {
   id: varchar("id").primaryKey(),
   name: text("name").notNull(),
   category: text("category").notNull().references(() => categories.id, { onDelete: "restrict" }),
+  subcategoryId: varchar("subcategory_id").references(() => subcategories.id, { onDelete: "set null" }),
   price: integer("price").notNull(),
   originalPrice: integer("original_price"),
   unit: text("unit").notNull(),
@@ -448,6 +466,7 @@ export const insertCategorySchema = createInsertSchema(categories, {
 export type User = typeof users.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Category = typeof categories.$inferSelect;
+export type Subcategory = typeof subcategories.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type PromoCode = typeof promoCodes.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;

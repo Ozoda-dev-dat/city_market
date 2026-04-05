@@ -1,18 +1,21 @@
 import React, { createContext, useContext, useEffect, useMemo, ReactNode } from "react";
 import { apiRequest } from "@/lib/query-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Product, Category, Order } from "@/shared/schema";
+import { Product, Category, Order, Subcategory } from "@/shared/schema";
 import { useAuth } from "@/context/AuthContext";
 
 interface AppContextValue {
   products: Product[];
   categories: Category[];
+  subcategories: Subcategory[];
   orders: Order[];
   addProduct: (product: Omit<Product, "id">) => Promise<void>;
   updateProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   deleteCategory: (id: string) => void;
   createCategory: (category: any) => Promise<void>;
+  createSubcategory: (subcategory: any) => Promise<void>;
+  deleteSubcategory: (id: string) => void;
   updateOrderStatus: (id: string, status: string, courierId?: string) => Promise<void>;
   createOrder: (order: any) => Promise<void>;
   createPromoCode: (promo: any) => Promise<void>;
@@ -44,13 +47,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true,
   });
 
-  // Admins and couriers see all orders; customers see only their own
+  const { data: subcategories = [] } = useQuery<Subcategory[]>({
+    queryKey: ["/api/subcategories"],
+    queryFn: () => apiRequest("GET", "/api/subcategories").then(res => res.json()),
+    staleTime: 0,
+    refetchInterval: 60_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
   const ordersEndpoint =
     user?.role === "admin" || user?.role === "courier"
       ? "/api/orders"
       : "/api/orders/my";
 
-  // Orders require auth — only run after user is confirmed logged in
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
     queryKey: [ordersEndpoint],
     queryFn: async () => {
@@ -69,7 +79,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refetchOnWindowFocus: true,
   });
 
-  // When user logs in, immediately fetch orders
   useEffect(() => {
     if (isAuthenticated) {
       queryClient.invalidateQueries({ queryKey: [ordersEndpoint] });
@@ -98,6 +107,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/categories"] }),
   });
 
+  const deleteSubcategoryMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/subcategories/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/subcategories"] }),
+  });
+
   const invalidateOrders = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
@@ -123,11 +137,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       products,
       categories,
+      subcategories,
       orders,
       addProduct: (product: Omit<Product, "id">) => addProductMutation.mutateAsync(product).then(() => {}),
       updateProduct: (product: Product) => updateProductMutation.mutateAsync(product).then(() => {}),
       deleteProduct: (id: string) => deleteProductMutation.mutate(id),
       deleteCategory: (id: string) => deleteCategoryMutation.mutate(id),
+      deleteSubcategory: (id: string) => deleteSubcategoryMutation.mutate(id),
       updateOrderStatus: (id: string, status: string, courierId?: string) =>
         updateOrderStatusMutation.mutateAsync({ id, status, courierId } as any).then(() => {}),
       createOrder: (order: any) => createOrderMutation.mutateAsync(order).then(() => {}),
@@ -136,9 +152,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         apiRequest("POST", "/api/categories", cat).then(() =>
           queryClient.invalidateQueries({ queryKey: ["/api/categories"] })
         ),
+      createSubcategory: (sub: any) =>
+        apiRequest("POST", "/api/subcategories", sub).then(() =>
+          queryClient.invalidateQueries({ queryKey: ["/api/subcategories"] })
+        ),
       isLoading: isLoadingProducts || isLoadingCategories || (isAuthenticated && isLoadingOrders),
     }),
-    [products, categories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders, isAuthenticated]
+    [products, categories, subcategories, orders, isLoadingProducts, isLoadingCategories, isLoadingOrders, isAuthenticated]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

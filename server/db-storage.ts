@@ -1,5 +1,5 @@
 import { 
-  type User, type Product, type Category, type Order, type PromoCode 
+  type User, type Product, type Category, type Order, type PromoCode, type Subcategory
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { eq, and, isNull, desc, sql } from "drizzle-orm";
@@ -30,6 +30,11 @@ export interface IStorage {
   createCategory(category: any): Promise<Category>;
   softDeleteCategory(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<void>;
   restoreCategory(id: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<Category>;
+
+  getSubcategories(): Promise<Subcategory[]>;
+  getSubcategoriesByCategory(categoryId: string): Promise<Subcategory[]>;
+  createSubcategory(subcategory: any): Promise<Subcategory>;
+  softDeleteSubcategory(id: string, userId?: string): Promise<void>;
   
   getOrders(): Promise<Order[]>;
   getOrdersByCustomer(customerId: string): Promise<Order[]>;
@@ -346,6 +351,31 @@ export class DbStorage implements IStorage {
       .returning();
     await auditService.logRestore("categories", id, userId, ipAddress, userAgent);
     return result[0];
+  }
+
+  async getSubcategories(): Promise<Subcategory[]> {
+    return await this.db.select().from(schema.subcategories).where(isNull(schema.subcategories.deletedAt));
+  }
+
+  async getSubcategoriesByCategory(categoryId: string): Promise<Subcategory[]> {
+    return await this.db.select().from(schema.subcategories).where(
+      and(
+        eq(schema.subcategories.categoryId, categoryId),
+        isNull(schema.subcategories.deletedAt)
+      )
+    );
+  }
+
+  async createSubcategory(subcategory: any): Promise<Subcategory> {
+    const result = await this.db.insert(schema.subcategories).values(subcategory).returning();
+    return result[0];
+  }
+
+  async softDeleteSubcategory(id: string, userId?: string): Promise<void> {
+    await this.db
+      .update(schema.subcategories)
+      .set({ deletedAt: new Date() })
+      .where(eq(schema.subcategories.id, id));
   }
 
   async getOrders(): Promise<Order[]> {

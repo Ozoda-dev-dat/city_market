@@ -228,16 +228,19 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-const CARD_W = Math.floor((width - 32 - 8) / 2);
-
-function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () => void; isDarkMode: boolean }) {
+function CategoryCard({ item, onPress, isDarkMode, productCount }: {
+  item: any;
+  onPress: () => void;
+  isDarkMode: boolean;
+  productCount: number;
+}) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const accentColor: string = item.color ?? "#16A34A";
   const accentBg: string = item.bgColor ?? "#F0FDF4";
 
   return (
-    <Animated.View style={[catStyles.cell, anim]}>
+    <Animated.View style={[catStyles.card, anim]}>
       <Pressable
         style={{ flex: 1 }}
         onPress={() => {
@@ -248,25 +251,23 @@ function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () =>
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <View style={[
-          catStyles.card,
+          catStyles.inner,
           {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.78)" : "#fff",
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.82)" : "#fff",
             borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
           }
         ]}>
-          <View style={[catStyles.iconArea, { backgroundColor: isDarkMode ? accentColor + "22" : accentBg }]}>
-            <Ionicons name={item.icon as any} size={28} color={accentColor} />
+          <View style={[catStyles.iconCircle, { backgroundColor: isDarkMode ? accentColor + "25" : accentBg }]}>
+            <Ionicons name={item.icon as any} size={30} color={accentColor} />
           </View>
-
-          <View style={catStyles.textArea}>
-            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
-              {item.name}
-            </Text>
-            {item.count ? (
-              <View style={[catStyles.countPill, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "#F0FDF4" }]}>
-                <Text style={[catStyles.countText, { color: accentColor }]}>{item.count} ta</Text>
-              </View>
-            ) : null}
+          <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
+            {item.name}
+          </Text>
+          <View style={[catStyles.countPill, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : accentBg }]}>
+            <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta</Text>
+          </View>
+          <View style={[catStyles.arrow, { backgroundColor: isDarkMode ? accentColor + "20" : accentBg }]}>
+            <Ionicons name="chevron-forward" size={13} color={accentColor} />
           </View>
         </View>
       </Pressable>
@@ -275,35 +276,30 @@ function CategoryCard({ item, onPress, isDarkMode }: { item: any; onPress: () =>
 }
 
 const catStyles = StyleSheet.create({
-  cell: {
-    width: CARD_W,
-  },
   card: {
-    height: 88,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingLeft: 14,
-    paddingRight: 12,
-    gap: 13,
+    width: 130,
+    marginRight: 10,
+  },
+  inner: {
+    borderRadius: 22,
+    paddingHorizontal: 14,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 8,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.07,
     shadowRadius: 10,
     elevation: 4,
+    alignItems: "flex-start",
   },
-  iconArea: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
-  },
-  textArea: {
-    flex: 1,
-    gap: 5,
   },
   label: {
     fontFamily: "Poppins_600SemiBold",
@@ -311,14 +307,22 @@ const catStyles = StyleSheet.create({
     lineHeight: 18,
   },
   countPill: {
-    alignSelf: "flex-start",
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
   },
   countText: {
     fontFamily: "Poppins_500Medium",
     fontSize: 10,
+  },
+  arrow: {
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-end",
+    marginTop: 2,
   },
 });
 
@@ -557,18 +561,30 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
+          <Pressable onPress={() => router.push("/(tabs)/catalog")}>
+            <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
+          </Pressable>
         </View>
 
-        <View style={styles.categoryGrid}>
-          {categories.map((cat) => (
-            <CategoryCard
-              key={cat.id}
-              item={cat}
-              isDarkMode={isDarkMode}
-              onPress={() => router.push({ pathname: "/(tabs)/catalog", params: { category: cat.id } })}
-            />
-          ))}
-        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.catScroll}
+          contentContainerStyle={styles.catScrollContent}
+        >
+          {categories.map((cat) => {
+            const count = products.filter((p) => p.category === cat.id).length;
+            return (
+              <CategoryCard
+                key={cat.id}
+                item={cat}
+                isDarkMode={isDarkMode}
+                productCount={count}
+                onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+              />
+            );
+          })}
+        </ScrollView>
 
         {featuredProducts.length > 0 && (
           <>
@@ -804,11 +820,13 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
   },
-  categoryGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 6,
+  catScroll: {
+    marginHorizontal: -16,
+    overflow: "visible",
+  },
+  catScrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 6,
   },
   sectionHeader: {
     flexDirection: "row",
