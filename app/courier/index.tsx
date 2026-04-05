@@ -21,7 +21,7 @@ export default function CourierDashboard() {
   const insets = useSafeAreaInsets();
   const { orders } = useApp();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"available" | "my-orders">("available");
+  const [activeTab, setActiveTab] = useState<"active" | "completed">("active");
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -39,20 +39,19 @@ export default function CourierDashboard() {
     );
   }
 
-  // For prototype, we'll filter based on status
-  const availableOrders = orders.filter(o => o.status === "ready");
-  const myOrders = orders.filter(o => o.status === "delivering" || o.status === "delivered");
+  const activeOrders = orders.filter(o => o.status === "ready" || o.status === "delivering");
+  const completedOrders = orders.filter(o => o.status === "delivered");
 
-  // Calculate real statistics
-  const todayOrders = myOrders.filter(o => {
+  // Stats: today's completed deliveries and earnings
+  const todayCompleted = completedOrders.filter(o => {
     const orderDate = new Date(o.createdAt);
     const today = new Date();
     return orderDate.toDateString() === today.toDateString();
   });
-  
-  const todayEarnings = todayOrders.reduce((sum, o) => sum + o.total, 0);
 
-  const displayOrders = activeTab === "available" ? availableOrders : myOrders;
+  const todayEarnings = todayCompleted.reduce((sum, o) => sum + o.total, 0);
+
+  const displayOrders = activeTab === "active" ? activeOrders : completedOrders;
 
   return (
     <View style={[styles.container, { paddingTop: topPad + 12 }]}>
@@ -69,7 +68,7 @@ export default function CourierDashboard() {
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Bugun</Text>
-          <Text style={styles.statValue}>{todayOrders.length} ta</Text>
+          <Text style={styles.statValue}>{todayCompleted.length} ta</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Daromad</Text>
@@ -81,19 +80,19 @@ export default function CourierDashboard() {
 
       <View style={styles.tabs}>
         <Pressable
-          style={[styles.tab, activeTab === "available" && styles.tabActive]}
-          onPress={() => setActiveTab("available")}
+          style={[styles.tab, activeTab === "active" && styles.tabActive]}
+          onPress={() => setActiveTab("active")}
         >
-          <Text style={[styles.tabText, activeTab === "available" && styles.tabTextActive]}>
-            Mavjud ({availableOrders.length})
+          <Text style={[styles.tabText, activeTab === "active" && styles.tabTextActive]}>
+            Faol ({activeOrders.length})
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.tab, activeTab === "my-orders" && styles.tabActive]}
-          onPress={() => setActiveTab("my-orders")}
+          style={[styles.tab, activeTab === "completed" && styles.tabActive]}
+          onPress={() => setActiveTab("completed")}
         >
-          <Text style={[styles.tabText, activeTab === "my-orders" && styles.tabTextActive]}>
-            Faol ({myOrders.length})
+          <Text style={[styles.tabText, activeTab === "completed" && styles.tabTextActive]}>
+            Bajarilgan ({completedOrders.length})
           </Text>
         </Pressable>
       </View>
@@ -126,13 +125,13 @@ export default function CourierDashboard() {
               <View style={styles.badge}>
                 <Text style={[
                   styles.badgeText,
-                  item.status === "delivered" && { color: "#10B981" }
+                  item.status === "delivered" && { color: "#10B981" },
                 ]}>
-                  {activeTab === "available"
+                  {item.status === "ready"
                     ? "Olish"
-                    : item.status === "delivered"
-                    ? "Bajarildi ✓"
-                    : "Yo'lda"}
+                    : item.status === "delivering"
+                    ? "Yo'lda"
+                    : "Bajarildi ✓"}
                 </Text>
                 <Ionicons
                   name={item.status === "delivered" ? "checkmark-circle" : "chevron-forward"}
