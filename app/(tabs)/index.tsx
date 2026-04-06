@@ -237,7 +237,9 @@ function CategoryCard({ item, onPress, isDarkMode, productCount }: {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const accentColor: string = item.color ?? "#16A34A";
-  const accentBg: string = item.bgColor ?? "#F0FDF4";
+
+  const gradStart = accentColor + (isDarkMode ? "40" : "22");
+  const gradEnd = accentColor + (isDarkMode ? "10" : "06");
 
   return (
     <Animated.View style={[catStyles.card, anim]}>
@@ -253,21 +255,31 @@ function CategoryCard({ item, onPress, isDarkMode, productCount }: {
         <View style={[
           catStyles.inner,
           {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.82)" : "#fff",
-            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.88)" : "#fff",
+            borderColor: isDarkMode ? accentColor + "30" : accentColor + "25",
           }
         ]}>
-          <View style={[catStyles.iconCircle, { backgroundColor: isDarkMode ? accentColor + "25" : accentBg }]}>
-            <Ionicons name={item.icon as any} size={30} color={accentColor} />
+          <LinearGradient
+            colors={[gradStart, gradEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+            borderRadius={22}
+          />
+          <View style={[catStyles.iconCircle, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
+            <Ionicons name={item.icon as any} size={32} color={accentColor} />
           </View>
-          <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <View style={[catStyles.countPill, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : accentBg }]}>
-            <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta</Text>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
+              {item.name}
+            </Text>
+            <View style={[catStyles.countPill, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
+              <Ionicons name="cube-outline" size={11} color={accentColor} />
+              <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta mahsulot</Text>
+            </View>
           </View>
-          <View style={[catStyles.arrow, { backgroundColor: isDarkMode ? accentColor + "20" : accentBg }]}>
-            <Ionicons name="chevron-forward" size={13} color={accentColor} />
+          <View style={[catStyles.arrow, { backgroundColor: accentColor + (isDarkMode ? "25" : "15") }]}>
+            <Ionicons name="chevron-forward" size={14} color={accentColor} />
           </View>
         </View>
       </Pressable>
@@ -277,22 +289,23 @@ function CategoryCard({ item, onPress, isDarkMode, productCount }: {
 
 const catStyles = StyleSheet.create({
   card: {
-    width: 130,
-    marginRight: 10,
+    width: "48.5%" as any,
+    marginBottom: 12,
   },
   inner: {
     borderRadius: 22,
-    paddingHorizontal: 14,
-    paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingTop: 18,
     paddingBottom: 14,
-    gap: 8,
-    borderWidth: 1,
+    gap: 10,
+    borderWidth: 1.5,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 4,
-    alignItems: "flex-start",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 5,
+    minHeight: 140,
+    overflow: "hidden",
   },
   iconCircle: {
     width: 56,
@@ -302,27 +315,30 @@ const catStyles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    lineHeight: 18,
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    lineHeight: 20,
   },
   countPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 10,
+    alignSelf: "flex-start" as const,
   },
   countText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 10,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 11,
   },
   arrow: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "flex-end",
-    marginTop: 2,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    alignSelf: "flex-end" as const,
   },
 });
 
@@ -566,12 +582,7 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.catScroll}
-          contentContainerStyle={styles.catScrollContent}
-        >
+        <View style={styles.catGrid}>
           {categories.map((cat) => {
             const count = products.filter((p) => p.category === cat.id).length;
             return (
@@ -584,7 +595,7 @@ export default function HomeScreen() {
               />
             );
           })}
-        </ScrollView>
+        </View>
 
         {featuredProducts.length > 0 && (
           <>
@@ -820,13 +831,11 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
   },
-  catScroll: {
-    marginHorizontal: -16,
-    overflow: "visible",
-  },
-  catScrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 6,
+  catGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 0,
   },
   sectionHeader: {
     flexDirection: "row",

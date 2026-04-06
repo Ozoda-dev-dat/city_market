@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   Pressable,
   FlatList,
   Platform,
-  TextInput,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,138 +25,125 @@ import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/constants/data";
 
-function SubcategoryChip({
-  label,
-  icon,
-  color,
-  bgColor,
-  count,
-  isActive,
-  onPress,
+function SubcategoryCard({
+  sub,
+  productCount,
   isDarkMode,
+  onPress,
 }: {
-  label: string;
-  icon?: string;
-  color?: string;
-  bgColor?: string;
-  count?: number;
-  isActive: boolean;
-  onPress: () => void;
+  sub: any;
+  productCount: number;
   isDarkMode: boolean;
+  onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const chipColor = color || "#16A34A";
-  const chipBg = bgColor || "#F0FDF4";
+  const color = sub.color || "#16A34A";
+  const bgColor = sub.bgColor || "#F0FDF4";
+  const gradStart = color + (isDarkMode ? "40" : "22");
+  const gradEnd = color + (isDarkMode ? "08" : "05");
 
   return (
-    <Animated.View style={anim}>
+    <Animated.View style={[scStyles.card, anim]}>
       <Pressable
+        style={{ flex: 1 }}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.91, { damping: 11 }); }}
+        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
-        style={[
-          chipStyles.chip,
-          isActive
-            ? [chipStyles.chipActive, { backgroundColor: chipColor, borderColor: chipColor, shadowColor: chipColor }]
-            : {
-                backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.85)",
-                borderColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-              },
-        ]}
       >
-        {icon && (
-          <View style={[
-            chipStyles.iconWrap,
-            { backgroundColor: isActive ? "rgba(255,255,255,0.22)" : isDarkMode ? "rgba(255,255,255,0.08)" : chipBg }
-          ]}>
-            <Ionicons name={icon as any} size={14} color={isActive ? "#fff" : chipColor} />
+        <View style={[
+          scStyles.inner,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
+            borderColor: isDarkMode ? color + "30" : color + "28",
+          }
+        ]}>
+          <LinearGradient
+            colors={[gradStart, gradEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+            borderRadius={20}
+          />
+          <View style={[scStyles.iconWrap, { backgroundColor: color + (isDarkMode ? "28" : "18") }]}>
+            <Ionicons name={(sub.icon as any) ?? "grid-outline"} size={30} color={color} />
           </View>
-        )}
-        {!icon && (
-          <View style={[chipStyles.iconWrap, { backgroundColor: isActive ? "rgba(255,255,255,0.22)" : isDarkMode ? "rgba(255,255,255,0.08)" : "#F0FDF4" }]}>
-            <Ionicons name="grid" size={14} color={isActive ? "#fff" : "#16A34A"} />
-          </View>
-        )}
-        <Text style={[chipStyles.chipText, { color: isActive ? "#fff" : isDarkMode ? "#E4E4E7" : "#374151" }]}>
-          {label}
-        </Text>
-        {count !== undefined && !isActive && (
-          <View style={[chipStyles.countBadge, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : chipColor + "18" }]}>
-            <Text style={[chipStyles.countText, { color: isDarkMode ? "rgba(255,255,255,0.5)" : chipColor }]}>
-              {count}
+          <View style={{ flex: 1, gap: 5 }}>
+            <Text style={[scStyles.name, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
+              {sub.name}
             </Text>
+            <View style={[scStyles.countBadge, { backgroundColor: color + (isDarkMode ? "28" : "15") }]}>
+              <Ionicons name="cube-outline" size={11} color={color} />
+              <Text style={[scStyles.countText, { color }]}>{productCount} ta mahsulot</Text>
+            </View>
           </View>
-        )}
+          <View style={[scStyles.arrowBtn, { backgroundColor: color + (isDarkMode ? "22" : "12") }]}>
+            <Ionicons name="arrow-forward" size={15} color={color} />
+          </View>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-const chipStyles = StyleSheet.create({
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 24,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+const scStyles = StyleSheet.create({
+  card: {
+    width: "48.5%" as any,
+    marginBottom: 12,
   },
-  chipActive: {
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 5,
+  inner: {
+    borderRadius: 20,
+    padding: 16,
+    gap: 10,
+    borderWidth: 1.5,
+    minHeight: 138,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.09,
+    shadowRadius: 12,
+    elevation: 4,
   },
   iconWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  chipText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
+  name: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    lineHeight: 20,
   },
   countBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
   countText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 11,
   },
+  arrowBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-end",
+  },
 });
 
-export default function CategoryDetailScreen() {
-  const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { isDarkMode } = useTheme();
-  const Colors = getColors(isDarkMode);
-  const { products: allProducts, categories, subcategories } = useApp();
-  const { items } = useCart();
-  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
-
-  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc">("default");
-
-  const category = categories.find((c) => c.id === id);
-  const catSubcategories = subcategories.filter((s) => s.categoryId === id);
-  const accentColor = category?.color ?? "#16A34A";
-  const accentBg = category?.bgColor ?? "#F0FDF4";
-
-  const convertToProduct = (p: any): Product => ({
+function convertToProduct(p: any): Product {
+  return {
     id: p.id,
     name: p.name,
     category: p.category,
@@ -172,29 +158,34 @@ export default function CategoryDetailScreen() {
     weight: p.weight,
     inStock: p.inStock,
     stockQuantity: p.stockQuantity,
-  });
+  };
+}
 
-  const filtered = useMemo(() => {
-    let list = allProducts.filter((p) => p.category === id);
-    if (activeSubcategory) {
-      list = list.filter((p) => (p as any).subcategoryId === activeSubcategory);
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter((p) => p.name.toLowerCase().includes(q));
-    }
-    if (sortBy === "price_asc") list = [...list].sort((a, b) => a.price - b.price);
-    if (sortBy === "price_desc") list = [...list].sort((a, b) => b.price - a.price);
-    return list;
-  }, [allProducts, id, activeSubcategory, search, sortBy]);
+export default function CategoryDetailScreen() {
+  const insets = useSafeAreaInsets();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { isDarkMode } = useTheme();
+  const Colors = getColors(isDarkMode);
+  const { products: allProducts, categories, subcategories } = useApp();
+  const { items } = useCart();
+  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  const category = categories.find((c) => c.id === id);
+  const catSubcategories = subcategories.filter((s) => s.categoryId === id);
+  const hasSubcategories = catSubcategories.length > 0;
+  const accentColor = category?.color ?? "#16A34A";
+  const accentBg = category?.bgColor ?? "#F0FDF4";
+
+  const directProducts = useMemo(
+    () => allProducts.filter((p) => p.category === id),
+    [allProducts, id]
+  );
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bgColors: [string, string, string] = isDarkMode
     ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
     : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
 
-  const sortScale = useSharedValue(1);
-  const sortAnim = useAnimatedStyle(() => ({ transform: [{ scale: sortScale.value }] }));
   const cartScale = useSharedValue(1);
   const cartAnim = useAnimatedStyle(() => ({ transform: [{ scale: cartScale.value }] }));
 
@@ -204,10 +195,10 @@ export default function CategoryDetailScreen() {
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <View style={styles.headerTop}>
+        <View style={styles.headerRow}>
           <Pressable
             style={[styles.backBtn, {
-              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
+              backgroundColor: isDarkMode ? "rgba(28,28,30,0.75)" : "rgba(255,255,255,0.8)",
               borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
             }]}
             onPress={() => router.back()}
@@ -216,157 +207,163 @@ export default function CategoryDetailScreen() {
           </Pressable>
 
           <View style={styles.titleBlock}>
-            <View style={[styles.catIconWrap, { backgroundColor: isDarkMode ? accentColor + "25" : accentBg }]}>
+            <View style={[styles.catIconWrap, { backgroundColor: isDarkMode ? accentColor + "28" : accentBg }]}>
               <Ionicons name={(category?.icon as any) ?? "grid"} size={22} color={accentColor} />
             </View>
             <View>
               <Text style={[styles.catName, { color: Colors.text }]}>{category?.name ?? "Kategoriya"}</Text>
-              <Text style={[styles.catCount, { color: Colors.textSecondary }]}>
-                {allProducts.filter(p => p.category === id).length} ta mahsulot
+              <Text style={[styles.catSub, { color: Colors.textSecondary }]}>
+                {hasSubcategories
+                  ? `${catSubcategories.length} ta bo'lim`
+                  : `${directProducts.length} ta mahsulot`}
               </Text>
             </View>
           </View>
 
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Animated.View style={sortAnim}>
-              <Pressable
-                style={[styles.iconBtn, {
-                  backgroundColor: sortBy !== "default" ? accentColor : isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
-                  borderColor: sortBy !== "default" ? accentColor : isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-                }]}
-                onPress={() => {
-                  if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  sortScale.value = withSpring(0.85, { damping: 10 }, () => { sortScale.value = withSpring(1, { damping: 12 }); });
-                  setSortBy(prev => prev === "default" ? "price_asc" : prev === "price_asc" ? "price_desc" : "default");
-                }}
-              >
-                <Ionicons
-                  name={sortBy === "price_asc" ? "arrow-up" : sortBy === "price_desc" ? "arrow-down" : "swap-vertical"}
-                  size={18}
-                  color={sortBy !== "default" ? "#fff" : Colors.text}
-                />
-              </Pressable>
-            </Animated.View>
-            <Animated.View style={cartAnim}>
-              <Pressable
-                style={[styles.iconBtn, {
-                  backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
-                  borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-                }]}
-                onPress={() => {
-                  if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push("/(tabs)/cart");
-                }}
-                onPressIn={() => { cartScale.value = withSpring(0.88, { damping: 12 }); }}
-                onPressOut={() => { cartScale.value = withSpring(1, { damping: 12 }); }}
-              >
-                <Ionicons name="bag-outline" size={20} color={Colors.text} />
-                {cartCount > 0 && (
-                  <View style={[styles.cartBadge, { backgroundColor: accentColor }]}>
-                    <Text style={styles.cartBadgeText}>{cartCount > 9 ? "9+" : cartCount}</Text>
-                  </View>
-                )}
-              </Pressable>
-            </Animated.View>
-          </View>
-        </View>
-
-        {/* Search */}
-        <View style={[styles.searchBar, {
-          backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
-          borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-        }]}>
-          <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? accentColor + "30" : accentBg }]}>
-            <Ionicons name="search" size={16} color={accentColor} />
-          </View>
-          <TextInput
-            style={[styles.searchInput, { color: Colors.text }]}
-            placeholder="Mahsulot qidirish..."
-            placeholderTextColor={Colors.textMuted}
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+          <Animated.View style={cartAnim}>
+            <Pressable
+              style={[styles.iconBtn, {
+                backgroundColor: isDarkMode ? "rgba(28,28,30,0.75)" : "rgba(255,255,255,0.8)",
+                borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+              }]}
+              onPress={() => router.push("/(tabs)/cart")}
+              onPressIn={() => { cartScale.value = withSpring(0.88, { damping: 12 }); }}
+              onPressOut={() => { cartScale.value = withSpring(1, { damping: 12 }); }}
+            >
+              <Ionicons name="bag-outline" size={20} color={Colors.text} />
+              {cartCount > 0 && (
+                <View style={[styles.cartBadge, { backgroundColor: accentColor }]}>
+                  <Text style={styles.cartBadgeText}>{cartCount > 9 ? "9+" : cartCount}</Text>
+                </View>
+              )}
             </Pressable>
-          )}
+          </Animated.View>
         </View>
+      </View>
 
-        {/* Subcategory chips — only if subcategories exist */}
-        {catSubcategories.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.chipScroll}
-            contentContainerStyle={styles.chipContent}
-          >
-            <SubcategoryChip
-              label="Barchasi"
-              isActive={!activeSubcategory}
-              onPress={() => setActiveSubcategory(null)}
-              isDarkMode={isDarkMode}
-              color={accentColor}
-              bgColor={accentBg}
-              count={allProducts.filter(p => p.category === id).length}
+      {/* CASE 1: Has subcategories → show subcategory cards */}
+      {hasSubcategories ? (
+        <ScrollView
+          contentContainerStyle={[styles.grid, { paddingBottom: Platform.OS === "web" ? 100 : 120 }]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Subcategory header banner */}
+          <View style={[styles.sectionBanner, {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.6)" : "rgba(255,255,255,0.6)",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : accentColor + "20",
+          }]}>
+            <LinearGradient
+              colors={isDarkMode
+                ? [accentColor + "25", "transparent"]
+                : [accentColor + "12", "transparent"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+              borderRadius={16}
             />
+            <View style={[styles.sectionBannerIcon, { backgroundColor: accentColor + "22" }]}>
+              <Ionicons name="apps" size={20} color={accentColor} />
+            </View>
+            <View>
+              <Text style={[styles.sectionBannerTitle, { color: Colors.text }]}>Bo'limlar</Text>
+              <Text style={[styles.sectionBannerSub, { color: Colors.textSecondary }]}>
+                Kerakli bo'limni tanlang
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.cardGrid}>
             {catSubcategories.map((sub) => {
-              const subCount = allProducts.filter(p => (p as any).subcategoryId === sub.id).length;
+              const count = allProducts.filter((p) => (p as any).subcategoryId === sub.id).length;
               return (
-                <SubcategoryChip
+                <SubcategoryCard
                   key={sub.id}
-                  label={sub.name}
-                  icon={sub.icon}
-                  color={sub.color}
-                  bgColor={sub.bgColor}
-                  count={subCount}
-                  isActive={activeSubcategory === sub.id}
-                  onPress={() => setActiveSubcategory(activeSubcategory === sub.id ? null : sub.id)}
+                  sub={sub}
+                  productCount={count}
                   isDarkMode={isDarkMode}
+                  onPress={() =>
+                    router.push({ pathname: "/subcategory/[id]", params: { id: sub.id } })
+                  }
                 />
               );
             })}
-          </ScrollView>
-        )}
-      </View>
-
-      {/* Products grid */}
-      {filtered.length === 0 ? (
-        <View style={styles.emptyState}>
-          <View style={[styles.emptyIconBox, {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.65)" : "rgba(255,255,255,0.72)",
-            borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.85)",
-          }]}>
-            <Ionicons name="search-outline" size={32} color={Colors.textMuted} />
           </View>
-          <Text style={[styles.emptyTitle, { color: Colors.text }]}>Mahsulot topilmadi</Text>
-          <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
-            Qidiruv yoki filtrni o&apos;zgartirib ko&apos;ring
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={[styles.grid, { paddingBottom: Platform.OS === "web" ? 100 : 120 }]}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <ProductCard
-              product={convertToProduct(item)}
-              onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id } })}
-            />
+
+          {/* Also show all products of this category below */}
+          {directProducts.length > 0 && (
+            <>
+              <View style={[styles.allProductsBanner, {
+                backgroundColor: isDarkMode ? "rgba(28,28,30,0.6)" : "rgba(255,255,255,0.6)",
+                borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : accentColor + "20",
+              }]}>
+                <LinearGradient
+                  colors={isDarkMode
+                    ? [accentColor + "25", "transparent"]
+                    : [accentColor + "12", "transparent"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFill}
+                  borderRadius={16}
+                />
+                <View style={[styles.sectionBannerIcon, { backgroundColor: accentColor + "22" }]}>
+                  <Ionicons name="grid" size={20} color={accentColor} />
+                </View>
+                <View>
+                  <Text style={[styles.sectionBannerTitle, { color: Colors.text }]}>Barcha mahsulotlar</Text>
+                  <Text style={[styles.sectionBannerSub, { color: Colors.textSecondary }]}>
+                    {directProducts.length} ta mahsulot
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.productRow}>
+                {directProducts.map((p) => (
+                  <View key={p.id} style={styles.productCol}>
+                    <ProductCard
+                      product={convertToProduct(p)}
+                      onPress={() => router.push({ pathname: "/product/[id]", params: { id: p.id } })}
+                    />
+                  </View>
+                ))}
+              </View>
+            </>
           )}
-          ListHeaderComponent={
-            <Text style={[styles.resultsCount, { color: Colors.textSecondary }]}>
-              {filtered.length} ta mahsulot
-              {activeSubcategory && catSubcategories.length > 0
-                ? ` · ${catSubcategories.find(s => s.id === activeSubcategory)?.name ?? ""}`
-                : ""}
+        </ScrollView>
+      ) : (
+        /* CASE 2: No subcategories → show products directly */
+        directProducts.length === 0 ? (
+          <View style={styles.emptyState}>
+            <View style={[styles.emptyIconBox, {
+              backgroundColor: isDarkMode ? "rgba(28,28,30,0.65)" : "rgba(255,255,255,0.72)",
+              borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.85)",
+            }]}>
+              <Ionicons name="cube-outline" size={32} color={Colors.textMuted} />
+            </View>
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>Mahsulot yo'q</Text>
+            <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
+              Bu kategoriyada hali mahsulot qo'shilmagan
             </Text>
-          }
-        />
+          </View>
+        ) : (
+          <FlatList
+            data={directProducts}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.row}
+            contentContainerStyle={[styles.grid, { paddingBottom: Platform.OS === "web" ? 100 : 120 }]}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <ProductCard
+                product={convertToProduct(item)}
+                onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id } })}
+              />
+            )}
+            ListHeaderComponent={
+              <Text style={[styles.resultsCount, { color: Colors.textSecondary }]}>
+                {directProducts.length} ta mahsulot
+              </Text>
+            }
+          />
+        )
       )}
     </View>
   );
@@ -375,13 +372,11 @@ export default function CategoryDetailScreen() {
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 14,
   },
-  headerTop: {
+  headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 14,
     gap: 10,
   },
   backBtn: {
@@ -404,8 +399,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   catIconWrap: {
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
@@ -415,7 +410,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
   },
-  catCount: {
+  catSub: {
     fontFamily: "Poppins_400Regular",
     fontSize: 12,
   },
@@ -442,52 +437,80 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: "transparent",
   },
   cartBadgeText: {
     fontFamily: "Poppins_700Bold",
     fontSize: 10,
     color: "#fff",
   },
-  searchBar: {
-    borderRadius: 16,
+  grid: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+  },
+  sectionBanner: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    gap: 10,
+    gap: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 14,
     borderWidth: 1,
-    marginBottom: 10,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.07,
+    shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 3,
   },
-  searchIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+  allProductsBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 14,
+    marginTop: 8,
+    borderWidth: 1,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  sectionBannerIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
   },
-  searchInput: {
-    flex: 1,
+  sectionBannerTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  sectionBannerSub: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 14,
+    fontSize: 12,
   },
-  chipScroll: {
-    marginHorizontal: -16,
+  cardGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 4,
   },
-  chipContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-    paddingBottom: 10,
+  productRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 0,
   },
-  grid: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+  productCol: {
+    width: "48.5%" as any,
+    marginBottom: 12,
   },
   row: {
     gap: 12,
