@@ -41,7 +41,10 @@ When running in Replit, this is set to `$REPLIT_DEV_DOMAIN` so the Expo app conn
 All tables are managed via Drizzle ORM schema in `shared/schema.ts`.
 Tables: users, categories, products, promo_codes, orders, wishlists, product_reviews,
 notifications, payment_transactions, payment_methods, refunds, admin_settings,
-inventory_movements, system_logs, audit_logs.
+inventory_movements, system_logs, audit_logs, subcategories.
+
+`subcategories` table: id (varchar UUID), category_id (varchar FK → categories.id), name, icon, color, bgColor, created_at.
+`products` table has nullable `subcategory_id` column FK → subcategories.id.
 
 ## Known Issues Fixed
 
