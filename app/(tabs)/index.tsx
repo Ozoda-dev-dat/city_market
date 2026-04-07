@@ -394,7 +394,7 @@ export default function HomeScreen() {
       unit: product.unit,
       image: product.image,
       badge: product.badge || null,
-      rating: product.rating.toString(),
+      rating: product.rating != null ? product.rating.toString() : null,
       description: product.description || null,
       brand: product.brand || null,
       weight: product.weight || null,
