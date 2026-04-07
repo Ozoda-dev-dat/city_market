@@ -124,18 +124,32 @@ export default function AddProductScreen() {
   const handleSave = async () => {
     if (saving) return;
     if (!name || !price) return Alert.alert(t("error_fill"), t("product_name") + " va " + t("price") + " majburiy");
-    
+
+    const parsedPrice = Number(price);
+    const parsedOriginalPrice = originalPrice ? Number(originalPrice) : null;
+    const parsedStock = Number(stockQuantity);
+
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return Alert.alert("Xatolik", "Narx to'g'ri raqam bo'lishi kerak");
+    }
+    if (parsedOriginalPrice !== null && isNaN(parsedOriginalPrice)) {
+      return Alert.alert("Xatolik", "Eski narx to'g'ri raqam bo'lishi kerak");
+    }
+    if (isNaN(parsedStock) || parsedStock < 0) {
+      return Alert.alert("Xatolik", "Ombordagi miqdor to'g'ri raqam bo'lishi kerak");
+    }
+
     const productData = {
       name: name.trim(),
       category,
-      price: Math.round(Number(price)),
-      originalPrice: originalPrice ? Math.round(Number(originalPrice)) : null,
+      price: Math.round(parsedPrice),
+      originalPrice: parsedOriginalPrice !== null ? Math.round(parsedOriginalPrice) : null,
       unit,
       image,
       badge: badge || null,
       description: description.trim(),
-      stockQuantity: Math.round(Number(stockQuantity)),
-      inStock: Math.round(Number(stockQuantity)) > 0,
+      stockQuantity: Math.round(parsedStock),
+      inStock: Math.round(parsedStock) > 0,
     };
 
     setSaving(true);
