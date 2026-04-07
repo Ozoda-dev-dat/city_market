@@ -6,7 +6,7 @@ import {
   ScrollView,
   Pressable,
   FlatList,
-  Dimensions,
+  useWindowDimensions,
   Platform,
   Alert,
   Image,
@@ -41,7 +41,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 
-const { width } = Dimensions.get("window");
 
 const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
   id: schemaProduct.id,
@@ -73,12 +72,12 @@ function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: bo
   return <Animated.View style={[styles.dot, { backgroundColor: "#16A34A" }, style]} />;
 }
 
-function Banner({ item, onPress }: { item: (typeof BANNERS)[0]; onPress: () => void }) {
+function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View style={[bannerStyles.card, anim]}>
+    <Animated.View style={[bannerStyles.card, { width: bannerWidth }, anim]}>
       <Pressable
         style={{ flex: 1 }}
         onPress={onPress}
@@ -124,12 +123,10 @@ function Banner({ item, onPress }: { item: (typeof BANNERS)[0]; onPress: () => v
   );
 }
 
-const BANNER_W = width - 32;
 const BANNER_H = 210;
 
 const bannerStyles = StyleSheet.create({
   card: {
-    width: BANNER_W,
     height: BANNER_H,
     borderRadius: 26,
     marginHorizontal: 16,
@@ -343,6 +340,8 @@ const catStyles = StyleSheet.create({
 });
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
+  const BANNER_W = width - 32;
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
@@ -561,6 +560,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <Banner
               item={item}
+              bannerWidth={BANNER_W}
               onPress={() => router.push("/(tabs)/catalog")}
             />
           )}
