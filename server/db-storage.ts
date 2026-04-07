@@ -78,20 +78,43 @@ export class DbStorage implements IStorage {
       const existingCats = await this.db.select().from(schema.categories);
       
       if (existingCats.length === 0) {
-        // Create default categories
+        // Create default main categories
         const cats = [
-          { id: "fruits", name: "Mevalar", icon: "nutrition", color: "#1A9B5C", bgColor: "#E8F5E9" },
-          { id: "vegetables", name: "Sabzavotlar", icon: "leaf", color: "#2ECC71", bgColor: "#F1F8E9" },
-          { id: "dairy", name: "Sut mahsulotlari", icon: "water", color: "#3498DB", bgColor: "#EBF5FB" },
-          { id: "bakery", name: "Non mahsulotlari", icon: "cafe", color: "#E74C3C", bgColor: "#FDEDEC" },
-          { id: "meat", name: "Go'sht mahsulotlari", icon: "restaurant", color: "#9B59B6", bgColor: "#F4ECF7" },
+          { id: "fruits",      name: "Mevalar",           icon: "nutrition",  color: "#1A9B5C", bgColor: "#E8F5E9" },
+          { id: "vegetables",  name: "Sabzavotlar",        icon: "leaf",       color: "#2ECC71", bgColor: "#F1F8E9" },
+          { id: "dairy",       name: "Sut mahsulotlari",   icon: "water",      color: "#3498DB", bgColor: "#EBF5FB" },
+          { id: "bakery",      name: "Non mahsulotlari",   icon: "cafe",       color: "#E74C3C", bgColor: "#FDEDEC" },
+          { id: "meat",        name: "Go'sht mahsulotlari",icon: "restaurant", color: "#9B59B6", bgColor: "#F4ECF7" },
+          { id: "ichimliklar", name: "Ichimliklar",        icon: "wine",       color: "#7C3AED", bgColor: "#EDE9FE" },
+          { id: "shokoladlar", name: "Shokoladlar",        icon: "ice-cream",  color: "#B45309", bgColor: "#FEF3C7" },
+          { id: "konservalar", name: "Konservalar",        icon: "archive",    color: "#374151", bgColor: "#F3F4F6" },
         ];
         
         for (const cat of cats) {
           await this.db.insert(schema.categories).values(cat);
         }
+
+        // Create default subcategories
+        const subcats = [
+          // Under ichimliklar
+          { id: "sub-coffee",     name: "Coffee",               icon: "cafe",       color: "#6F4E37", bgColor: "#F5ECE5", categoryId: "ichimliklar" },
+          { id: "sub-energetik",  name: "Energetik ichimliklar",icon: "flash",      color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
+          { id: "sub-sharbatlar", name: "Sharbatlar",           icon: "wine",       color: "#F97316", bgColor: "#FFF7ED", categoryId: "ichimliklar" },
+          // Under meat
+          { id: "sub-parranda",   name: "Go'sht va parranda",   icon: "restaurant", color: "#9B59B6", bgColor: "#F4ECF7", categoryId: "meat" },
+          { id: "sub-kolbasa",    name: "Kolbasa mahsulotlari", icon: "fast-food",  color: "#DC2626", bgColor: "#FEF2F2", categoryId: "meat" },
+          // Under dairy
+          { id: "sub-pishloq",    name: "Pishloq",              icon: "restaurant", color: "#FBBF24", bgColor: "#FFFBEB", categoryId: "dairy" },
+          { id: "sub-qatiq",      name: "Qatiq mahsulotlari",   icon: "water",      color: "#3B82F6", bgColor: "#EFF6FF", categoryId: "dairy" },
+          { id: "sub-tuxum",      name: "Tuxum mahsulotlari",   icon: "egg",        color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "dairy" },
+          { id: "sub-yogurt",     name: "Yogurt",               icon: "water",      color: "#8B5CF6", bgColor: "#F5F3FF", categoryId: "dairy" },
+        ];
+
+        for (const sub of subcats) {
+          await this.db.insert(schema.subcategories).values(sub);
+        }
         
-        console.log("✅ Default categories created");
+        console.log("✅ Default categories and subcategories created");
       }
 
       // Check if admin user exists
