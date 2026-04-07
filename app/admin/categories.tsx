@@ -18,7 +18,7 @@ export default function AdminCategoriesScreen() {
   const styles = getStyles(isDarkMode);
 
   const [catName, setCatName] = useState("");
-  const [catIcon, setCatIcon] = useState("nutrition");
+  const [catIcon, setCatIcon] = useState("grid");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [subName, setSubName] = useState<Record<string, string>>({});
 
@@ -106,7 +106,7 @@ export default function AdminCategoriesScreen() {
             />
             <TextInput
               style={styles.input}
-              placeholder="Icon nomi (masalan: nutrition)"
+              placeholder="Icon: cafe, leaf, water, wine, restaurant, fast-food, nutrition, flash, archive, ice-cream, egg"
               placeholderTextColor={Colors.textMuted}
               value={catIcon}
               onChangeText={setCatIcon}

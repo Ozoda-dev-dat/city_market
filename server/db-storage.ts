@@ -82,9 +82,9 @@ export class DbStorage implements IStorage {
         const cats = [
           { id: "fruits", name: "Mevalar", icon: "nutrition", color: "#1A9B5C", bgColor: "#E8F5E9" },
           { id: "vegetables", name: "Sabzavotlar", icon: "leaf", color: "#2ECC71", bgColor: "#F1F8E9" },
-          { id: "dairy", name: "Sut mahsulotlari", icon: "restaurant", color: "#3498DB", bgColor: "#EBF5FB" },
-          { id: "bakery", name: "Non mahsulotlari", icon: "pizza", color: "#E74C3C", bgColor: "#FDEDEC" },
-          { id: "meat", name: "Go'sht mahsulotlari", icon: "nutrition", color: "#9B59B6", bgColor: "#F4ECF7" },
+          { id: "dairy", name: "Sut mahsulotlari", icon: "water", color: "#3498DB", bgColor: "#EBF5FB" },
+          { id: "bakery", name: "Non mahsulotlari", icon: "cafe", color: "#E74C3C", bgColor: "#FDEDEC" },
+          { id: "meat", name: "Go'sht mahsulotlari", icon: "restaurant", color: "#9B59B6", bgColor: "#F4ECF7" },
         ];
         
         for (const cat of cats) {
