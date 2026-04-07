@@ -18,7 +18,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import Colors from "@/constants/colors";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/constants/data";
