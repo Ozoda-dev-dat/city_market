@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -157,9 +157,22 @@ export default function CartScreen() {
   const Colors = getColors(isDarkMode);
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [appliedPromoMin, setAppliedPromoMin] = useState(0);
 
   const checkoutScale = useSharedValue(1);
   const checkoutAnim = useAnimatedStyle(() => ({ transform: [{ scale: checkoutScale.value }] }));
+
+  useEffect(() => {
+    if (discount > 0 && appliedPromoMin > 0 && totalPrice < appliedPromoMin) {
+      setDiscount(0);
+      setAppliedPromoMin(0);
+      setPromo("");
+      Alert.alert(
+        "Promokod bekor qilindi",
+        `Savat summasi minimal talabdan past tushib ketgani uchun chegirma olib tashlandi.`
+      );
+    }
+  }, [totalPrice]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const TAB_BAR_HEIGHT = 62;
@@ -185,6 +198,7 @@ export default function CartScreen() {
         return;
       }
       setDiscount(data.discountPercent);
+      setAppliedPromoMin(data.minAmount ?? 0);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Muvaffaqiyat", `${data.discountPercent}% chegirma qo'llanildi`);
     } catch (e) {
