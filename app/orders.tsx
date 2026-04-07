@@ -53,7 +53,7 @@ export default function UserOrdersScreen() {
     const query = searchQuery.toLowerCase();
     return (
       order.id.toLowerCase().includes(query) ||
-      (order.items && (order.items as any[]).some((item: any) => item.name.toLowerCase().includes(query))) ||
+      (Array.isArray(order.items) && (order.items as any[]).some((item: any) => item?.name?.toLowerCase().includes(query))) ||
       (order.address && order.address.toLowerCase().includes(query))
     );
   });
