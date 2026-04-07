@@ -307,7 +307,7 @@ export default function ProfileScreen() {
                     </Text>
                     <Text style={{ color: Colors.textMuted }}> · </Text>
                     <Text style={[styles.orderDate, { color: Colors.textSecondary }]}>
-                      {(order.items as any[]).length} ta mahsulot
+                      {((order.items as any[]) ?? []).length} ta mahsulot
                     </Text>
                   </View>
                   <View style={styles.orderFooter}>

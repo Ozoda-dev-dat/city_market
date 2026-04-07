@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated, Dimensions, Linking, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated, Linking, ActivityIndicator } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,8 +10,6 @@ import { formatPrice } from "@/constants/data";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
 import { Order } from "@/shared/schema";
-
-const { width } = Dimensions.get("window");
 
 export default function EnhancedOrderTrackingScreen() {
   const insets = useSafeAreaInsets();
@@ -36,21 +34,19 @@ export default function EnhancedOrderTrackingScreen() {
   const order = adminOrders.find(o => o.id === id) ?? myOrders.find(o => o.id === id);
 
   useEffect(() => {
-    // Animate progress on mount
+    if (!order) return;
     Animated.timing(animatedValue, {
       toValue: 1,
       duration: 1000,
       useNativeDriver: false,
     }).start();
-    
-    // Animate progress bar
     const currentStep = getCurrentStep();
     Animated.timing(progressValue, {
       toValue: (currentStep / 4) * 100,
       duration: 1500,
       useNativeDriver: false,
     }).start();
-  }, []);
+  }, [order?.status]);
   
   const getCurrentStep = () => {
     if (!order) return 0;
@@ -97,21 +93,21 @@ export default function EnhancedOrderTrackingScreen() {
       label: "Tayyorlanmoqda", 
       icon: "bag-handle",
       description: "Buyurtma tayyorlanmoqda",
-      time: order.status === 'preparing' || order.status === 'ready' || order.status === 'delivering' || order.status === 'delivered' ? '15:30' : ''
+      time: ''
     },
     { 
       key: "delivering", 
       label: "Yo'lda", 
       icon: "bicycle",
       description: "Kuryer yo'lda",
-      time: order.status === 'delivering' || order.status === 'delivered' ? '16:00' : ''
+      time: ''
     },
     { 
       key: "delivered", 
       label: "Yetkazildi", 
       icon: "home",
       description: "Buyurtma muvaffaqiyatli yetkazildi",
-      time: order.status === 'delivered' ? '16:30' : ''
+      time: ''
     },
   ];
 

@@ -411,16 +411,23 @@ export default function HomeScreen() {
   const featuredProducts = products.filter((p) => p.badge === "hot" || p.badge === "new");
   const saleProducts = products.filter((p) => p.badge === "sale");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const bannerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startBannerAutoScroll = useCallback(() => {
+    if (bannerIntervalRef.current) clearInterval(bannerIntervalRef.current);
+    bannerIntervalRef.current = setInterval(() => {
       setActiveBanner((prev) => {
         const next = (prev + 1) % BANNERS.length;
         scrollRef.current?.scrollToIndex({ index: next, animated: true });
         return next;
       });
     }, 3500);
-    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    startBannerAutoScroll();
+    return () => { if (bannerIntervalRef.current) clearInterval(bannerIntervalRef.current); };
+  }, [startBannerAutoScroll]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
   const bgColors: [string, string, string] = isDarkMode
@@ -556,6 +563,7 @@ export default function HomeScreen() {
           onMomentumScrollEnd={(e) => {
             const index = Math.round(e.nativeEvent.contentOffset.x / width);
             setActiveBanner(index);
+            startBannerAutoScroll();
           }}
           renderItem={({ item }) => (
             <Banner

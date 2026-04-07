@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -158,6 +159,7 @@ export default function CartScreen() {
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedPromoMin, setAppliedPromoMin] = useState(0);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const checkoutScale = useSharedValue(1);
   const checkoutAnim = useAnimatedStyle(() => ({ transform: [{ scale: checkoutScale.value }] }));
@@ -207,31 +209,33 @@ export default function CartScreen() {
   };
 
   const handleCheckout = async () => {
+    if (isCheckingOut) return;
+    setIsCheckingOut(true);
     checkoutScale.value = withSequence(
       withSpring(0.96, { damping: 10 }),
       withSpring(1, { damping: 12 })
     );
 
-    let userLocation = null;
     try {
-      const locationData = await AsyncStorage.getItem("@user_location");
-      if (locationData) userLocation = JSON.parse(locationData);
-    } catch (e) {}
+      let userLocation = null;
+      try {
+        const locationData = await AsyncStorage.getItem("@user_location");
+        if (locationData) userLocation = JSON.parse(locationData);
+      } catch (e) {}
 
-    const data = {
-      id: `order-${Date.now()}`,
-      customerId: user?.id,
-      customerName: user?.name || "Mehmon",
-      phoneNumber: user?.phoneNumber || "",
-      address: userLocation?.address || "Toshkent shahri",
-      latitude: userLocation?.latitude || null,
-      longitude: userLocation?.longitude || null,
-      total: finalTotal,
-      discount,
-      items: items.map((i) => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
-    };
+      const data = {
+        id: `order-${Date.now()}`,
+        customerId: user?.id,
+        customerName: user?.name || "Mehmon",
+        phoneNumber: user?.phoneNumber || "",
+        address: userLocation?.address || "Toshkent shahri",
+        latitude: userLocation?.latitude || null,
+        longitude: userLocation?.longitude || null,
+        total: finalTotal,
+        discount,
+        items: items.map((i) => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
+      };
 
-    try {
       const res = await apiRequest("POST", "/api/orders", data);
       const newOrder = await res.json();
       await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -241,6 +245,7 @@ export default function CartScreen() {
       router.push(`/order/${newOrder.id}`);
     } catch (e) {
       Alert.alert("Xatolik", "Buyurtma berishda xatolik yuz berdi");
+      setIsCheckingOut(false);
     }
   };
 
@@ -382,18 +387,25 @@ export default function CartScreen() {
       ]}>
         <Animated.View style={checkoutAnim}>
           <Pressable
-            style={styles.checkoutBtn}
+            style={[styles.checkoutBtn, isCheckingOut && { opacity: 0.7 }]}
             onPress={handleCheckout}
-            onPressIn={() => { checkoutScale.value = withSpring(0.97, { damping: 12 }); }}
-            onPressOut={() => { checkoutScale.value = withSpring(1, { damping: 12 }); }}
+            disabled={isCheckingOut}
+            onPressIn={() => { if (!isCheckingOut) checkoutScale.value = withSpring(0.97, { damping: 12 }); }}
+            onPressOut={() => { if (!isCheckingOut) checkoutScale.value = withSpring(1, { damping: 12 }); }}
           >
             <View style={styles.checkoutLeft}>
-              <Ionicons name="bag-check-outline" size={20} color="#fff" />
-              <Text style={styles.checkoutText}>Buyurtma berish</Text>
+              {isCheckingOut
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Ionicons name="bag-check-outline" size={20} color="#fff" />}
+              <Text style={styles.checkoutText}>
+                {isCheckingOut ? "Yuklanmoqda..." : "Buyurtma berish"}
+              </Text>
             </View>
-            <View style={styles.checkoutBadge}>
-              <Text style={styles.checkoutBadgeText}>{formatPrice(finalTotal)}</Text>
-            </View>
+            {!isCheckingOut && (
+              <View style={styles.checkoutBadge}>
+                <Text style={styles.checkoutBadgeText}>{formatPrice(finalTotal)}</Text>
+              </View>
+            )}
           </Pressable>
         </Animated.View>
       </View>
