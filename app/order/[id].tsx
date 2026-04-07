@@ -314,7 +314,7 @@ export default function EnhancedOrderTrackingScreen() {
               </View>
             </View>
             
-            {order.status === 'transit' && (
+            {order.status === 'delivering' && (
               <View style={styles.deliveryRow}>
                 <Ionicons name="bicycle" size={20} color={Colors.primary} />
                 <View style={styles.deliveryInfo}>
