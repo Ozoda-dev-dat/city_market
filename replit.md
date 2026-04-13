@@ -99,13 +99,14 @@ Scan with Expo Go app to open on a physical device.
 
 ## Product Images
 
-61 AI-generated product images are stored in `assets/product-images/` and served by the backend at `/assets/product-images/<filename>.png`.
+All 149 products use real stock photos from Unsplash and Pexels (free CDNs, no API key required).
 
-- Images cover all 8 categories: fruits (22 items), vegetables (17), dairy (11), bakery (11), meat (15), drinks (38), canned goods (11), sweets (15)
-- Image paths in the DB are relative: `/assets/product-images/apple.png` etc.
-- `resolveImageUrl(path)` in `lib/query-client.ts` prepends `getApiUrl()` to convert relative paths to full URLs
-- `ProductCard`, `app/product/[id].tsx`, and `app/(tabs)/cart.tsx` all use `resolveImageUrl` before rendering images
-- Backend fix: `/assets` static middleware is registered BEFORE the Metro proxy middleware so image requests are served correctly (not proxied to Metro)
+- **Unsplash**: `https://images.unsplash.com/photo-{ID}?w=400&q=80`
+- **Pexels**: `https://images.pexels.com/photos/{ID}/pexels-photo-{ID}.jpeg?auto=compress&cs=tinysrgb&w=400`
+- Full external URLs are stored directly in the `products.image` column
+- `resolveImageUrl(path)` in `lib/query-client.ts` returns external URLs unchanged; prepends `getApiUrl()` only for relative server paths
+- `ProductCard`, `app/product/[id].tsx`, and `app/(tabs)/cart.tsx` all call `resolveImageUrl` before rendering images
+- Backend: `/assets` static middleware registered BEFORE the Metro proxy so any local assets are also served correctly
 
 ## Key Dependencies
 
