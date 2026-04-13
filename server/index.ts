@@ -312,7 +312,7 @@ function configureExpoAndLanding(app: express.Application) {
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.path.startsWith("/api") || req.path.startsWith("/assets")) {
+    if (req.path.startsWith("/api")) {
       return next();
     }
 
