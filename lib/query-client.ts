@@ -3,9 +3,16 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /**
- * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
- * @returns {string} The API base URL
+ * Resolves a product image URL — absolute URLs are returned as-is,
+ * server-relative paths (starting with "/") are prefixed with the API base URL.
  */
+export function resolveImageUrl(url: string): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  const base = getApiUrl().replace(/\/$/, "");
+  return `${base}${url.startsWith("/") ? url : "/" + url}`;
+}
+
 export function getApiUrl(): string {
   let host = process.env.EXPO_PUBLIC_DOMAIN;
   

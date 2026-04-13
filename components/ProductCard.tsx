@@ -23,6 +23,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { Product, formatPrice } from "@/constants/data";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { useCart } from "@/context/CartContext";
+import { resolveImageUrl } from "@/lib/query-client";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 44) / 2;
@@ -75,8 +76,9 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const btnAnimStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
 
+  const resolvedImage = resolveImageUrl(product.image || "");
   const isValidImageUri = (uri: string) =>
-    uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+    !!uri && (uri.startsWith("http") || uri.startsWith("data:image"));
 
   const handleAdd = () => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -103,8 +105,8 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
           onPressOut={() => { scale.value = withSpring(1, { damping: 14 }); }}
         >
           <View style={styles.hImageBox}>
-            {isValidImageUri(product.image) ? (
-              <Image source={{ uri: product.image }} style={styles.hImage} resizeMode="cover" />
+            {isValidImageUri(resolvedImage) ? (
+              <Image source={{ uri: resolvedImage }} style={styles.hImage} resizeMode="cover" />
             ) : (
               <View style={[styles.hImage, styles.imageFallback]}>
                 <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
@@ -168,8 +170,8 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
         style={{ flex: 1 }}
       >
         <View style={styles.imageBox}>
-          {isValidImageUri(product.image) ? (
-            <Image source={{ uri: product.image }} style={styles.image} resizeMode="cover" />
+          {isValidImageUri(resolvedImage) ? (
+            <Image source={{ uri: resolvedImage }} style={styles.image} resizeMode="cover" />
           ) : (
             <View style={[styles.image, styles.imageFallback]}>
               <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>

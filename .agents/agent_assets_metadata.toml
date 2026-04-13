@@ -1,5 +1,334 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "8GzrQ2dmzk4yq6u0KXNIj"
+uri = "file://assets/product-images/mandarin.png"
+type = "image"
+title = "mandarin"
+
+[[generated]]
+id = "-cWAQn_0n41f4cWC0jc8H"
+uri = "file://assets/product-images/mango.png"
+type = "image"
+title = "mango"
+
+[[generated]]
+id = "Goaz1R23j3X1eMnBFRxXC"
+uri = "file://assets/product-images/fig.png"
+type = "image"
+title = "fig"
+
+[[generated]]
+id = "65AMtvfClF6hddzRENbXt"
+uri = "file://assets/product-images/cherry.png"
+type = "image"
+title = "cherry"
+
+[[generated]]
+id = "aHl-IzLn5q7a8vGa1eoPo"
+uri = "file://assets/product-images/pear.png"
+type = "image"
+title = "pear"
+
+[[generated]]
+id = "HDFvBF2YVAoqy0HzbBiAv"
+uri = "file://assets/product-images/banana.png"
+type = "image"
+title = "banana"
+
+[[generated]]
+id = "rBlr7umUIpCWtEIE5JQqE"
+uri = "file://assets/product-images/plum.png"
+type = "image"
+title = "plum"
+
+[[generated]]
+id = "Cv-A_AaFZP7lvjia04tOv"
+uri = "file://assets/product-images/orange.png"
+type = "image"
+title = "orange"
+
+[[generated]]
+id = "ISNgITDK9UbmUlJ603T7d"
+uri = "file://assets/product-images/tomato.png"
+type = "image"
+title = "tomato"
+
+[[generated]]
+id = "gt3zOjPqFIdPEq-jNUi3I"
+uri = "file://assets/product-images/grape.png"
+type = "image"
+title = "grape"
+
+[[generated]]
+id = "ZTaiez1WTUKkdzy9BihfH"
+uri = "file://assets/product-images/cucumber.png"
+type = "image"
+title = "cucumber"
+
+[[generated]]
+id = "ffs1dyq3LRtSr2NANS_8-"
+uri = "file://assets/product-images/watermelon.png"
+type = "image"
+title = "watermelon"
+
+[[generated]]
+id = "FE2fnA2iSF4TEytJ_daMW"
+uri = "file://assets/product-images/carrot.png"
+type = "image"
+title = "carrot"
+
+[[generated]]
+id = "Gee286e_kn6mvMpVmhOFI"
+uri = "file://assets/product-images/kefir.png"
+type = "image"
+title = "kefir"
+
+[[generated]]
+id = "390DmSBzRY-mN0jRvztkI"
+uri = "file://assets/product-images/potato.png"
+type = "image"
+title = "potato"
+
+[[generated]]
+id = "ISCD3BKjM04T7LidYUP3I"
+uri = "file://assets/product-images/uzbek-bread.png"
+type = "image"
+title = "uzbek bread"
+
+[[generated]]
+id = "3gowC3bUL2Gg9RuydrUub"
+uri = "file://assets/product-images/pomegranate.png"
+type = "image"
+title = "pomegranate"
+
+[[generated]]
+id = "0Pe833Od6jr-5JwNYPFA3"
+uri = "file://assets/product-images/toast-bread.png"
+type = "image"
+title = "toast bread"
+
+[[generated]]
+id = "EkP2Hk2CmoGZ_-jMAd_2D"
+uri = "file://assets/product-images/strawberry.png"
+type = "image"
+title = "strawberry"
+
+[[generated]]
+id = "dGUqAImDmDFlTlsppcn4e"
+uri = "file://assets/product-images/croissant.png"
+type = "image"
+title = "croissant"
+
+[[generated]]
+id = "wlw2HIUvv_sINnpSqcLzt"
+uri = "file://assets/product-images/cracker.png"
+type = "image"
+title = "cracker"
+
+[[generated]]
+id = "uf0j1rgmaQq6ar1mhhBw5"
+uri = "file://assets/product-images/lemon.png"
+type = "image"
+title = "lemon"
+
+[[generated]]
+id = "YeGjWQ_jOZZBLUxN-lelj"
+uri = "file://assets/product-images/water-bottle.png"
+type = "image"
+title = "water bottle"
+
+[[generated]]
+id = "TXBoQonDZE21pHBw4ebkL"
+uri = "file://assets/product-images/cola.png"
+type = "image"
+title = "cola bottle"
+
+[[generated]]
+id = "jHkK7ujGBH2fS5EmsbCkc"
+uri = "file://assets/product-images/pepsi.png"
+type = "image"
+title = "pepsi bottle"
+
+[[generated]]
+id = "NT7F2iupWfZ5CdM1Vz7Nd"
+uri = "file://assets/product-images/7up.png"
+type = "image"
+title = "7up bottle"
+
+[[generated]]
+id = "X3LgJ780M6gwcp1eQfsMi"
+uri = "file://assets/product-images/onion.png"
+type = "image"
+title = "onion"
+
+[[generated]]
+id = "z_kLXBkAyHVtvPYl4uocl"
+uri = "file://assets/product-images/garlic.png"
+type = "image"
+title = "garlic"
+
+[[generated]]
+id = "ADRi7qeWAuECIBFVZbG2y"
+uri = "file://assets/product-images/cabbage.png"
+type = "image"
+title = "cabbage"
+
+[[generated]]
+id = "N9fjPc9cDVuhLszYvW4IG"
+uri = "file://assets/product-images/bell-pepper.png"
+type = "image"
+title = "bell pepper"
+
+[[generated]]
+id = "0ati9OngUY84FK0CA8xvi"
+uri = "file://assets/product-images/eggplant.png"
+type = "image"
+title = "eggplant"
+
+[[generated]]
+id = "GEOYGlu4Nx_Rgwb2AXUBt"
+uri = "file://assets/product-images/pumpkin.png"
+type = "image"
+title = "pumpkin"
+
+[[generated]]
+id = "hYAdoeCzOnv5CxedJnG4b"
+uri = "file://assets/product-images/beef.png"
+type = "image"
+title = "beef"
+
+[[generated]]
+id = "JfaSXjduq0ymDv0K8qKY6"
+uri = "file://assets/product-images/corn.png"
+type = "image"
+title = "corn"
+
+[[generated]]
+id = "sJT3340KXH4SUY2sy8nz1"
+uri = "file://assets/product-images/lamb.png"
+type = "image"
+title = "lamb"
+
+[[generated]]
+id = "i3G9XO_z6QM6oq7OOdC89"
+uri = "file://assets/product-images/dill.png"
+type = "image"
+title = "dill"
+
+[[generated]]
+id = "A1jnJpnPyXxSS_QCi_ay9"
+uri = "file://assets/product-images/chicken-breast.png"
+type = "image"
+title = "chicken breast"
+
+[[generated]]
+id = "h_B-c6Zk_DtT8x8iB1Fg4"
+uri = "file://assets/product-images/beet.png"
+type = "image"
+title = "beet"
+
+[[generated]]
+id = "UCUb-Gds6PteN03n2uhSF"
+uri = "file://assets/product-images/whole-chicken.png"
+type = "image"
+title = "whole chicken"
+
+[[generated]]
+id = "puofqbbF8JIzPNbTSSfcJ"
+uri = "file://assets/product-images/red-bull.png"
+type = "image"
+title = "red bull"
+
+[[generated]]
+id = "53gKKerpTCQqihAIAfiS-"
+uri = "file://assets/product-images/parsley.png"
+type = "image"
+title = "parsley"
+
+[[generated]]
+id = "X11NNs7FVgoJptklzOCqT"
+uri = "file://assets/product-images/sausage.png"
+type = "image"
+title = "sausage"
+
+[[generated]]
+id = "JxWBHt0o1dezIzng2bM6q"
+uri = "file://assets/product-images/monster.png"
+type = "image"
+title = "monster energy"
+
+[[generated]]
+id = "WV9rMS7R-4o_W2jb2CO35"
+uri = "file://assets/product-images/milk.png"
+type = "image"
+title = "milk carton"
+
+[[generated]]
+id = "WCG8XQkodDmGZxJMSgCxa"
+uri = "file://assets/product-images/apple-juice.png"
+type = "image"
+title = "apple juice"
+
+[[generated]]
+id = "x7-sMzATgbDC7I4HwxU_1"
+uri = "file://assets/product-images/butter.png"
+type = "image"
+title = "butter"
+
+[[generated]]
+id = "z2KSi7F2LiJu_xaD8cp2U"
+uri = "file://assets/product-images/orange-juice.png"
+type = "image"
+title = "orange juice"
+
+[[generated]]
+id = "6aKSLe4wKznDO1EtzxnAl"
+uri = "file://assets/product-images/eggs.png"
+type = "image"
+title = "eggs"
+
+[[generated]]
+id = "8WNV2Eeae_acDkauGqD5L"
+uri = "file://assets/product-images/tuna-can.png"
+type = "image"
+title = "tuna can"
+
+[[generated]]
+id = "cVvtrKJhTppluDKqbtuUO"
+uri = "file://assets/product-images/corn-can.png"
+type = "image"
+title = "corn can"
+
+[[generated]]
+id = "bNLKCP-BsCU-fred-lAZa"
+uri = "file://assets/product-images/tomato-paste.png"
+type = "image"
+title = "tomato paste"
+
+[[generated]]
+id = "PjXj33qzvInVbWG-gtTwD"
+uri = "file://assets/product-images/chocolate-bar.png"
+type = "image"
+title = "chocolate bar"
+
+[[generated]]
+id = "wsM9Vb1I7Vsd1ngUSroGj"
+uri = "file://assets/product-images/kitkat.png"
+type = "image"
+title = "kitkat"
+
+[[generated]]
+id = "wK24AXwvjSuE1xfexx5y9"
+uri = "file://assets/product-images/snickers.png"
+type = "image"
+title = "snickers"
+
+[[generated]]
+id = "eC0YJdigjOBh8PLx4jrb3"
+uri = "file://assets/product-images/pineapple.png"
+type = "image"
+title = "pineapple"
 
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"

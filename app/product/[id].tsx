@@ -24,6 +24,7 @@ import { formatPrice } from "@/constants/data";
 import { useCart } from "@/context/CartContext";
 import { useProducts } from "@/context/ProductsContext";
 import { useTranslation } from "@/lib/I18nProvider";
+import { resolveImageUrl } from "@/lib/query-client";
 
 const BADGE_CONFIG: Record<string, { label: string; color: string }> = {
   sale: { label: "Chegirma", color: "#EF4444" },
@@ -91,7 +92,7 @@ export default function ProductDetailScreen() {
       >
         <View style={[styles.hero, { paddingTop: topPad + 60 }]}>
           <Image 
-            source={{ uri: product.image }} 
+            source={{ uri: resolveImageUrl(product.image || "") }} 
             style={styles.heroImage}
             resizeMode="cover"
           />

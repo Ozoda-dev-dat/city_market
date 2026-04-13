@@ -309,8 +309,10 @@ function configureExpoAndLanding(app: express.Application) {
 
   log("Serving static Expo files with dynamic manifest routing");
 
+  app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
+
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.path.startsWith("/api")) {
+    if (req.path.startsWith("/api") || req.path.startsWith("/assets")) {
       return next();
     }
 
@@ -332,7 +334,6 @@ function configureExpoAndLanding(app: express.Application) {
     return proxyToMetro(req, res);
   });
 
-  app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
   app.use(express.static(path.resolve(process.cwd(), "static-build")));
 
   log("Expo routing: Proxying Expo Go requests to Metro on port 8080");

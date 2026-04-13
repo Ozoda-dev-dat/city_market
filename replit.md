@@ -97,6 +97,16 @@ Scan with Expo Go app to open on a physical device.
 - **Customer/Courier**: `GET /api/orders/my` — own orders only
 - `ProductsContext.tsx` auto-selects endpoint based on `user.role`
 
+## Product Images
+
+61 AI-generated product images are stored in `assets/product-images/` and served by the backend at `/assets/product-images/<filename>.png`.
+
+- Images cover all 8 categories: fruits (22 items), vegetables (17), dairy (11), bakery (11), meat (15), drinks (38), canned goods (11), sweets (15)
+- Image paths in the DB are relative: `/assets/product-images/apple.png` etc.
+- `resolveImageUrl(path)` in `lib/query-client.ts` prepends `getApiUrl()` to convert relative paths to full URLs
+- `ProductCard`, `app/product/[id].tsx`, and `app/(tabs)/cart.tsx` all use `resolveImageUrl` before rendering images
+- Backend fix: `/assets` static middleware is registered BEFORE the Metro proxy middleware so image requests are served correctly (not proxied to Metro)
+
 ## Key Dependencies
 
 - expo-router@6.0.23 for navigation (must match Expo SDK 54)

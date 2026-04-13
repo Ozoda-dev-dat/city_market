@@ -25,7 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { apiRequest, queryClient } from "@/lib/query-client";
+import { apiRequest, queryClient, resolveImageUrl } from "@/lib/query-client";
 import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
@@ -45,7 +45,7 @@ function CartItemRow({
 }) {
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const isValidImage = (uri: string) => uri && (uri.startsWith("http") || uri.startsWith("data:image"));
+  const isValidImage = (uri: string) => !!uri && (uri.startsWith("http") || uri.startsWith("data:image"));
 
   const handleQty = (delta: number) => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -65,8 +65,8 @@ function CartItemRow({
       animStyle,
     ]}>
       <View style={itemStyles.imageBox}>
-        {isValidImage(item.product.image) ? (
-          <Image source={{ uri: item.product.image }} style={itemStyles.image} resizeMode="cover" />
+        {isValidImage(resolveImageUrl(item.product.image || "")) ? (
+          <Image source={{ uri: resolveImageUrl(item.product.image || "") }} style={itemStyles.image} resizeMode="cover" />
         ) : (
           <View style={[itemStyles.image, itemStyles.imageFallback]}>
             <Text style={itemStyles.imageLetter}>{item.product.name.charAt(0).toUpperCase()}</Text>
