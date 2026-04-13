@@ -22,6 +22,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { Ionicons } from "@expo/vector-icons";
 import { I18nProvider } from "@/lib/I18nProvider";
 import { NetworkProvider } from "@/components/OfflineComponents";
 import { useRealtime } from "@/hooks/useRealtime";
@@ -96,6 +97,7 @@ export default function RootLayout() {
     Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
+    ...Ionicons.font,
   });
 
   const [fontTimedOut, setFontTimedOut] = useState(false);
