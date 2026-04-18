@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: city-market-backend
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install
+    startCommand: npx tsx server/index.ts
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  - name: city-market-db
+    databaseName: citymarket
+    user: citymarket
+    region: frankfurt
+    plan: free
