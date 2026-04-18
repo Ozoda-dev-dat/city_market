@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "City market",
+    "name": "City Market",
     "scheme": "citymarket",
     "slug": "citymarket",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
