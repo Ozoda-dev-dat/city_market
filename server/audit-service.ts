@@ -1,18 +1,19 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../shared/schema";
 
 export class AuditService {
-  private db: ReturnType<typeof drizzle>;
+  private db: ReturnType<typeof drizzle> | null = null;
 
-  constructor() {
+  private getDb() {
+    if (this.db) return this.db;
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL is not set");
     }
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
+    const client = postgres(process.env.DATABASE_URL);
     this.db = drizzle(client, { schema });
+    return this.db;
   }
 
   async logInsert(tableName: string, recordId: string, userId?: string, ipAddress?: string, userAgent?: string) {
@@ -72,7 +73,8 @@ export class AuditService {
     userAgent?: string;
   }) {
     try {
-      await this.db.insert(schema.auditLogs).values({
+      const db = this.getDb();
+      await db.insert(schema.auditLogs).values({
         tableName: params.tableName,
         recordId: params.recordId,
         action: params.action,
@@ -84,12 +86,12 @@ export class AuditService {
       });
     } catch (error) {
       console.error("Failed to log audit change:", error);
-      // Don't throw error to avoid breaking main operations
     }
   }
 
   async getAuditHistory(tableName: string, recordId: string) {
-    return await this.db
+    const db = this.getDb();
+    return await db
       .select()
       .from(schema.auditLogs)
       .where(
@@ -102,7 +104,8 @@ export class AuditService {
   }
 
   async getUserActivity(userId: string, limit = 50) {
-    return await this.db
+    const db = this.getDb();
+    return await db
       .select()
       .from(schema.auditLogs)
       .where(eq(schema.auditLogs.userId, userId))
@@ -111,7 +114,8 @@ export class AuditService {
   }
 
   async getTableActivity(tableName: string, limit = 100) {
-    return await this.db
+    const db = this.getDb();
+    return await db
       .select()
       .from(schema.auditLogs)
       .where(eq(schema.auditLogs.tableName, tableName))

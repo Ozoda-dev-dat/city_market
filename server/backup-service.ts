@@ -5,21 +5,20 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 export class BackupService {
-  private db: ReturnType<typeof drizzle>;
+  private db: ReturnType<typeof drizzle> | null = null;
   private backupDir: string;
 
   constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
-    this.db = drizzle(client, { schema });
-    
-    // Create backup directory
     this.backupDir = path.join(process.cwd(), 'backups');
     this.ensureBackupDir();
+  }
+
+  private getDb() {
+    if (this.db) return this.db;
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    const client = postgres(process.env.DATABASE_URL);
+    this.db = drizzle(client, { schema });
+    return this.db;
   }
 
   private async ensureBackupDir() {
@@ -85,12 +84,12 @@ export class BackupService {
         timestamp: new Date().toISOString(),
         type: 'data-only',
         tables: {
-          users: await this.db.select().from(schema.users),
-          categories: await this.db.select().from(schema.categories),
-          products: await this.db.select().from(schema.products),
-          orders: await this.db.select().from(schema.orders),
-          promoCodes: await this.db.select().from(schema.promoCodes),
-          auditLogs: await this.db.select().from(schema.auditLogs),
+          users: await this.getDb().select().from(schema.users),
+          categories: await this.getDb().select().from(schema.categories),
+          products: await this.getDb().select().from(schema.products),
+          orders: await this.getDb().select().from(schema.orders),
+          promoCodes: await this.getDb().select().from(schema.promoCodes),
+          auditLogs: await this.getDb().select().from(schema.auditLogs),
         }
       };
 
@@ -112,8 +111,8 @@ export class BackupService {
         for (const [tableName, records] of Object.entries(backupData.tables)) {
           if (Array.isArray(records) && records.length > 0) {
             const table = (schema as any)[tableName];
-            await this.db.delete(table);
-            await this.db.insert(table).values(records);
+            await this.getDb().delete(table);
+            await this.getDb().insert(table).values(records);
             console.log(`✅ Restored ${records.length} records to ${tableName}`);
           }
         }
@@ -169,7 +168,7 @@ export class BackupService {
 
     for (const tableName of tables) {
       try {
-        const result = await this.db.execute(`
+        const result = await this.getDb().execute(`
           SELECT 
             COUNT(*) as row_count,
             pg_size_pretty(pg_total_relation_size('${tableName}')) as size

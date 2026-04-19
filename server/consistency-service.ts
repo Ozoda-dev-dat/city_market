@@ -14,16 +14,16 @@ export interface ConsistencyIssue {
 }
 
 export class ConsistencyService {
-  private db: ReturnType<typeof drizzle>;
+  private db: ReturnType<typeof drizzle> | null = null;
 
-  constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
+  constructor() {}
+
+  private getDb() {
+    if (this.db) return this.db;
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    const client = postgres(process.env.DATABASE_URL);
     this.db = drizzle(client, { schema });
+    return this.db;
   }
 
   async runAllChecks(): Promise<ConsistencyIssue[]> {
@@ -139,7 +139,7 @@ export class ConsistencyService {
     const issues: ConsistencyIssue[] = [];
 
     // Check duplicate phone numbers
-    const duplicatePhones = await this.db.execute(`
+    const duplicatePhones = await this.getDb().execute(`
       SELECT phone_number, COUNT(*) as count
       FROM users 
       WHERE deleted_at IS NULL
@@ -160,7 +160,7 @@ export class ConsistencyService {
     }
 
     // Check duplicate promo codes
-    const duplicatePromoCodes = await this.db.execute(`
+    const duplicatePromoCodes = await this.getDb().execute(`
       SELECT code, COUNT(*) as count
       FROM promo_codes 
       WHERE deleted_at IS NULL
@@ -253,7 +253,7 @@ export class ConsistencyService {
     const issues: ConsistencyIssue[] = [];
 
     // Check audit logs for deleted records
-    const orphanedAuditLogs = await this.db.execute(`
+    const orphanedAuditLogs = await this.getDb().execute(`
       SELECT al.table_name, COUNT(*) as count
       FROM audit_logs al
       LEFT JOIN users u ON al.user_id = u.id
@@ -282,7 +282,7 @@ export class ConsistencyService {
     const issues: ConsistencyIssue[] = [];
 
     // Check orders with invalid status transitions
-    const invalidStatusOrders = await this.db.execute(`
+    const invalidStatusOrders = await this.getDb().execute(`
       SELECT o.id, o.status, o.created_at
       FROM orders o
       WHERE o.deleted_at IS NULL
@@ -349,7 +349,7 @@ export class ConsistencyService {
     const issues: ConsistencyIssue[] = [];
 
     // Check for missing audit logs for recent changes
-    const recentUsers = await this.db.execute(`
+    const recentUsers = await this.getDb().execute(`
       SELECT u.id, u.updated_at
       FROM users u
       WHERE u.deleted_at IS NULL
@@ -380,7 +380,7 @@ export class ConsistencyService {
     const issues: ConsistencyIssue[] = [];
 
     // Check records with deletedAt but still active
-    const inconsistentDeletes = await this.db.execute(`
+    const inconsistentDeletes = await this.getDb().execute(`
       SELECT 'users' as table_name, COUNT(*) as count
       FROM users 
       WHERE deleted_at IS NOT NULL AND is_active = true

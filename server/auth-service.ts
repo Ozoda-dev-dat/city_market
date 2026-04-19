@@ -34,30 +34,33 @@ export interface AuthResult {
 }
 
 export class AuthService {
-  private db: ReturnType<typeof drizzle>;
-  private jwtSecret: string;
-  private jwtRefreshSecret: string;
+  private db: ReturnType<typeof drizzle> | null = null;
+  private jwtSecret: string | null = null;
+  private jwtRefreshSecret: string | null = null;
   private saltRounds: number = 12;
 
-  constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not set");
-    }
-    
-    if (!process.env.JWT_REFRESH_SECRET) {
-      throw new Error("JWT_REFRESH_SECRET is not set");
-    }
-    
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
+  constructor() {}
+
+  private getDb() {
+    if (this.db) return this.db;
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    const client = postgres(process.env.DATABASE_URL);
     this.db = drizzle(client, { schema });
-    
-    this.jwtSecret = process.env.JWT_SECRET;
-    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    return this.db;
+  }
+
+  private getJwtSecret() {
+    if (this.getJwtSecret()) return this.getJwtSecret();
+    const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "default-jwt-secret-change-in-prod";
+    this.getJwtSecret() = secret;
+    return secret;
+  }
+
+  private getJwtRefreshSecret() {
+    if (this.getJwtRefreshSecret()) return this.getJwtRefreshSecret();
+    const secret = process.env.JWT_REFRESH_SECRET || process.env.SESSION_SECRET || "default-refresh-secret-change-in-prod";
+    this.getJwtRefreshSecret() = secret;
+    return secret;
   }
 
   // Password hashing
@@ -203,7 +206,7 @@ export class AuthService {
       role: user.role
     };
 
-    return jwt.sign(payload, this.jwtSecret, {
+    return jwt.sign(payload, this.getJwtSecret(), {
       expiresIn: '1h', // Short-lived access token
       issuer: 'supermarket-go',
       audience: 'supermarket-go-users'
@@ -217,7 +220,7 @@ export class AuthService {
       role: user.role
     };
 
-    return jwt.sign(payload, this.jwtRefreshSecret, {
+    return jwt.sign(payload, this.getJwtRefreshSecret(), {
       expiresIn: '7d', // Longer-lived refresh token
       issuer: 'supermarket-go',
       audience: 'supermarket-go-users'
@@ -227,7 +230,7 @@ export class AuthService {
   // Token verification
   verifyToken(token: string): JWTPayload {
     try {
-      const decoded = jwt.verify(token, this.jwtSecret, {
+      const decoded = jwt.verify(token, this.getJwtSecret(), {
         issuer: 'supermarket-go',
         audience: 'supermarket-go-users'
       }) as JWTPayload;
@@ -240,7 +243,7 @@ export class AuthService {
 
   verifyRefreshToken(refreshToken: string): JWTPayload {
     try {
-      const decoded = jwt.verify(refreshToken, this.jwtRefreshSecret, {
+      const decoded = jwt.verify(refreshToken, this.getJwtRefreshSecret(), {
         issuer: 'supermarket-go',
         audience: 'supermarket-go-users'
       }) as JWTPayload;
@@ -379,7 +382,7 @@ export class AuthService {
       type: 'password_reset'
     };
 
-    return jwt.sign(payload, this.jwtSecret, {
+    return jwt.sign(payload, this.getJwtSecret(), {
       expiresIn: '1h',
       issuer: 'supermarket-go'
     });
@@ -462,7 +465,7 @@ export class AuthService {
         token: undefined
       } : {};
 
-      await this.db.insert(schema.systemLogs).values({
+      await this.getDb().insert(schema.systemLogs).values({
         level: 'info',
         message: `User action: ${action}`,
         context: sanitizedMetadata,

@@ -11,16 +11,16 @@ export interface TransactionOptions {
 }
 
 export class TransactionService {
-  private db: ReturnType<typeof drizzle>;
+  private db: ReturnType<typeof drizzle> | null = null;
 
-  constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
+  constructor() {}
+
+  private getDb() {
+    if (this.db) return this.db;
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    const client = postgres(process.env.DATABASE_URL);
     this.db = drizzle(client, { schema });
+    return this.db;
   }
 
   async withTransaction<T>(
@@ -438,7 +438,7 @@ export class TransactionService {
 
   async getTransactionMetrics(): Promise<any> {
     try {
-      const metrics = await this.db.execute(`
+      const metrics = await this.getDb().execute(`
         SELECT 
           COUNT(*) as total_transactions,
           COUNT(CASE WHEN status = 'active' THEN 1 END) as active_transactions,
@@ -457,7 +457,7 @@ export class TransactionService {
 
   async cleanupLongRunningTransactions(maxDurationMinutes = 30): Promise<number> {
     try {
-      const result = await this.db.execute(`
+      const result = await this.getDb().execute(`
         SELECT pg_terminate_backend(pid)
         FROM pg_stat_activity 
         WHERE 

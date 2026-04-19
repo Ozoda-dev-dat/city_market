@@ -7,24 +7,27 @@ import path from 'path';
 import { createHash, randomBytes } from 'crypto';
 
 export class DataProtectionService {
-  private db: ReturnType<typeof drizzle>;
-  private encryptionKey: string;
+  private db: ReturnType<typeof drizzle> | null = null;
+  private encryptionKey: string | null = null;
   private backupDir: string;
 
   constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
-    this.db = drizzle(client, { schema });
-    
-    // Initialize encryption key from environment or generate one
-    this.encryptionKey = process.env.ENCRYPTION_KEY || this.generateEncryptionKey();
-    
     this.backupDir = path.join(process.cwd(), 'secure-backups');
     this.ensureBackupDir();
+  }
+
+  private getDb() {
+    if (this.db) return this.db;
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
+    const client = postgres(process.env.DATABASE_URL);
+    this.db = drizzle(client, { schema });
+    return this.db;
+  }
+
+  private getEncryptionKey() {
+    if (this.getEncryptionKey()) return this.getEncryptionKey();
+    this.getEncryptionKey() = process.env.ENCRYPTION_KEY || this.generateEncryptionKey();
+    return this.getEncryptionKey();
   }
 
   private generateEncryptionKey(): string {
@@ -43,7 +46,7 @@ export class DataProtectionService {
 
   private encrypt(text: string): string {
     const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(this.encryptionKey, 'hex');
+    const key = Buffer.from(this.getEncryptionKey(), 'hex');
     const iv = randomBytes(16);
     const cipher = require('crypto').createCipher(algorithm, key);
     cipher.setAAD(Buffer.from('additional-data'));
@@ -57,7 +60,7 @@ export class DataProtectionService {
 
   private decrypt(encryptedText: string): string {
     const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(this.encryptionKey, 'hex');
+    const key = Buffer.from(this.getEncryptionKey(), 'hex');
     const parts = encryptedText.split(':');
     
     const iv = Buffer.from(parts[0], 'hex');
@@ -84,9 +87,9 @@ export class DataProtectionService {
       const sensitiveData = {
         timestamp: new Date().toISOString(),
         type: 'secure-backup',
-        users: await this.db.select().from(schema.users),
-        orders: await this.db.select().from(schema.orders),
-        auditLogs: await this.db.select().from(schema.auditLogs),
+        users: await this.getDb().select().from(schema.users),
+        orders: await this.getDb().select().from(schema.orders),
+        auditLogs: await this.getDb().select().from(schema.auditLogs),
       };
 
       // Encrypt the data
@@ -202,7 +205,7 @@ export class DataProtectionService {
   }
 
   private hashField(data: string): string {
-    return createHash('sha256').update(data + this.encryptionKey).digest('hex').substring(0, 20);
+    return createHash('sha256').update(data + this.getEncryptionKey()).digest('hex').substring(0, 20);
   }
 
   async implementDataRetention(): Promise<void> {
@@ -274,7 +277,7 @@ export class DataProtectionService {
       const tables = ['users', 'orders', 'products', 'categories', 'promo_codes'];
       
       for (const tableName of tables) {
-        const result = await this.db.execute(`
+        const result = await this.getDb().execute(`
           SELECT 
             COUNT(*) as record_count,
             MD5(string_agg(id || COALESCE(phone_number, '') || COALESCE(name, ''), ',')) as checksum
@@ -293,7 +296,7 @@ export class DataProtectionService {
       }
 
       // Check for orphaned records
-      const orphanedCount = await this.db.execute(`
+      const orphanedCount = await this.getDb().execute(`
         SELECT COUNT(*) as count
         FROM orders o
         LEFT JOIN users u ON o.customer_id = u.id
@@ -331,11 +334,11 @@ export class DataProtectionService {
           promoCodes: await this.getTableSchema('promo_codes'),
         },
         data: {
-          users: await this.db.select().from(schema.users),
-          categories: await this.db.select().from(schema.categories),
-          products: await this.db.select().from(schema.products),
-          orders: await this.db.select().from(schema.orders),
-          promoCodes: await this.db.select().from(schema.promoCodes),
+          users: await this.getDb().select().from(schema.users),
+          categories: await this.getDb().select().from(schema.categories),
+          products: await this.getDb().select().from(schema.products),
+          orders: await this.getDb().select().from(schema.orders),
+          promoCodes: await this.getDb().select().from(schema.promoCodes),
         },
         metadata: {
           totalRecords: await this.getTotalRecordCount(),
@@ -354,7 +357,7 @@ export class DataProtectionService {
   }
 
   private async getTableSchema(tableName: string): Promise<any> {
-    const result = await this.db.execute(`
+    const result = await this.getDb().execute(`
       SELECT column_name, data_type, is_nullable, column_default
       FROM information_schema.columns
       WHERE table_name = '${tableName}'
@@ -365,7 +368,7 @@ export class DataProtectionService {
   }
 
   private async getTotalRecordCount(): Promise<number> {
-    const result = await this.db.execute(`
+    const result = await this.getDb().execute(`
       SELECT 
         SUM(CASE WHEN table_name = 'users' THEN (SELECT COUNT(*) FROM users WHERE deleted_at IS NULL) ELSE 0 END) +
         SUM(CASE WHEN table_name = 'orders' THEN (SELECT COUNT(*) FROM orders WHERE deleted_at IS NULL) ELSE 0 END) +
@@ -380,7 +383,7 @@ export class DataProtectionService {
   }
 
   private async getDatabaseSize(): Promise<string> {
-    const result = await this.db.execute(`
+    const result = await this.getDb().execute(`
       SELECT pg_size_pretty(pg_database_size(current_database())) as size
     `);
     
@@ -392,7 +395,7 @@ export class DataProtectionService {
     let checksumData = '';
 
     for (const tableName of tables) {
-      const result = await this.db.execute(`
+      const result = await this.getDb().execute(`
         SELECT COUNT(*) as count, MD5(string_agg(id, ',')) as checksum
         FROM ${tableName}
         WHERE deleted_at IS NULL
