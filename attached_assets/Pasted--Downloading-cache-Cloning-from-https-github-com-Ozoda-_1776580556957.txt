@@ -1,0 +1,54 @@
+ Downloading cache...
+==> Cloning from https://github.com/Ozoda-dev-dat/city_market
+==> Checking out commit 1568d300cebe0ea6209391db9755bea0661c49da in branch main
+==> Downloaded 279MB in 3s. Extraction took 6s.
+==> Using Node.js version 22.22.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm install'...
+> expo-app@1.0.0 postinstall
+> patch-package || true
+sh: 1: patch-package: not found
+added 15 packages, and audited 989 packages in 2s
+130 packages are looking for funding
+  run `npm fund` for details
+12 vulnerabilities (1 moderate, 11 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+Some issues need review, and may require choosing
+a different dependency.
+Run `npm audit` for details.
+==> Uploading build...
+==> Uploaded in 8.8s. Compression took 6.9s
+==> Build successful 🎉
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+[WARNING] ENCRYPTION_KEY not set. Sensitive data will not be encrypted.
+[WARNING] API_KEYS not set. API endpoints will be publicly accessible.
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+[WARNING] ENCRYPTION_KEY not set. Sensitive data will not be encrypted.
+[WARNING] API_KEYS not set. API endpoints will be publicly accessible.
+✅ Environment validation passed
+📊 Environment: production
+🌐 Port: 5000
+🔐 Log Level: info
+⚠️  WARNING: ENCRYPTION_KEY not set in production
+⚠️  WARNING: API_KEYS not set in production
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+Metro proxy error: 
+==> Your service is live 🎉
+Metro proxy error: 
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://city-market.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
