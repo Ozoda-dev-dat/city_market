@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { drizzle } from "drizzle-orm/postgres-js";
 import { eq, and, isNull } from "drizzle-orm";

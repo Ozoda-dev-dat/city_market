@@ -1,0 +1,318 @@
+==> Deploying...
+Menu
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> No open ports detected, continuing to scan...
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+==> No open ports detected, continuing to scan...
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+==> Running 'npm run server:dev'
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+node:internal/modules/cjs/loader:1383
+  const err = new Error(message);
+              ^
+Error: Cannot find module 'bcrypt'
+Require stack:
+- /opt/render/project/src/lib/password.ts
+- /opt/render/project/src/server/routes.ts
+- /opt/render/project/src/server/index.ts
+    at node:internal/modules/cjs/loader:1383:15
+    at nextResolveSimple (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /opt/render/project/src/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///opt/render/project/src/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1025:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1030:22)
+    at Function._load (node:internal/modules/cjs/loader:1192:37) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/opt/render/project/src/lib/password.ts',
+    '/opt/render/project/src/server/routes.ts',
+    '/opt/render/project/src/server/index.ts'
+  ]
+}
+Node.js v22.22.0
+==> No open ports detected, continuing to scan...
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+==> Port scan timeout reached, no open ports detected. Bind your service to at least one port. If you don't need to receive traffic on any port, create a background worker instead.
+==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
