@@ -1,0 +1,88 @@
+Microsoft Windows [Version 10.0.26200.8246]
+(c) Корпорация Майкрософт (Microsoft Corporation). Все права защищены.
+
+C:\Users\user>cd C:\Users\user
+
+C:\Users\user>git clone https://github.com/Ozoda-dev-dat/city_market.git
+Cloning into 'city_market'...
+remote: Enumerating objects: 2630, done.
+remote: Counting objects: 100% (67/67), done.
+remote: Compressing objects: 100% (18/18), done.
+remote: Total 2630 (delta 56), reused 49 (delta 49), pack-reused 2563 (from 1)
+Receiving objects: 100% (2630/2630), 105.08 MiB | 6.85 MiB/s, done.
+Resolving deltas: 100% (930/930), done.
+Updating files: 100% (1151/1151), done.
+
+C:\Users\user>cd city_market
+
+C:\Users\user\city_market>npm install
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated shaka-player@2.5.23: Shaka Player < v4.2 is no longer supported.
+
+> expo-app@1.0.0 postinstall
+> patch-package || true
+
+patch-package 8.0.1
+Applying patches...
+expo-asset@12.0.12 ✔
+
+added 1539 packages, and audited 1540 packages in 1m
+
+240 packages are looking for funding
+  run `npm fund` for details
+
+16 vulnerabilities (5 moderate, 11 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+
+C:\Users\user\city_market>set EXPO_PUBLIC_DOMAIN=city-market.onrender.com
+
+C:\Users\user\city_market>
+
+C:\Users\user\city_market>eas build --platform android --profile production
+(node:5984) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+⚠️ Detected that your app uses Expo Go for development, this is not recommended when building production apps.
+Learn more: https://expo.fyi/why-not-build-expo-go-for-production
+To suppress this warning, set EAS_BUILD_NO_EXPO_GO_WARNING=true.
+
+EAS project not configured.
+√ Would you like to automatically create an EAS project for @ozoda/citymarket? ... yes
+√ Created @ozoda/citymarket: https://expo.dev/accounts/ozoda/projects/citymarket on EAS
+√ Linked local project to EAS project 10de4a8c-0e24-4c74-8d01-e66f7662d837
+Resolved "production" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "production" environment on EAS.
+
+
+
+√ Using remote Android credentials (Expo server)
+√ Generate a new Android Keystore? ... yes
+Detected that you do not have keytool installed locally.
+√ Generating keystore in the cloud...
+√ Created keystore
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+√ Compressed project files 26s (218 MB)
+Your project archive is 218 MB. You can reduce its size and the time it takes to upload by excluding files that are unnecessary for the build process in .easignore file. Learn more: https://expo.fyi/eas-build-archive
+√ Uploaded to EAS 1m 43s
+√ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/ozoda/projects/citymarket/builds/4a0cda48-cd1c-4122-866b-74431ade9b12
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+× Build failed
+
+🤖 Android build failed:
+Gradle build failed with unknown error. See logs for the "Run gradlew" (https://expo.dev/accounts/ozoda/projects/citymarket/builds/4a0cda48-cd1c-4122-866b-74431ade9b12#run-gradlew) phase for more information.
+
+C:\Users\user\city_market>

@@ -1,0 +1,15 @@
+android/
+ios/
+.git/
+node_modules/
+backups/
+secure-backups/
+server_dist/
+attached_assets/
+screenshots/
+*.log
+*.md
+__tests__/
+coverage/
+.nyc_output/
+patches/
