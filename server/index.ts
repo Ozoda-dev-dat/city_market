@@ -311,6 +311,10 @@ function configureExpoAndLanding(app: express.Application) {
 
   app.use("/assets", express.static(path.resolve(process.cwd(), "assets")));
 
+  app.get("/privacy", (_req: Request, res: Response) => {
+    res.send(`<!DOCTYPE html><html lang="uz"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>City Market — Maxfiylik Siyosati</title><style>body{font-family:sans-serif;max-width:800px;margin:40px auto;padding:0 20px;line-height:1.7;color:#333}h1{color:#1A9B5C}h2{margin-top:32px}</style></head><body><h1>City Market — Maxfiylik Siyosati</h1><p><strong>Kuchga kirish sanasi:</strong> 2025-yil 1-yanvar</p><h2>1. Yig'iladigan ma'lumotlar</h2><p>City Market ilovasi quyidagi ma'lumotlarni yig'ishi mumkin: ism, manzil, telefon raqam, buyurtma tarixi. Kamera ruxsati faqat mahsulot rasmlarini yuklash uchun ishlatiladi va rasmlar uchinchi shaxslarga uzatilmaydi.</p><h2>2. Ma'lumotlardan foydalanish</h2><p>Yig'ilgan ma'lumotlar faqat buyurtmalarni qayta ishlash, yetkazib berish va mijozlarga xizmat ko'rsatish maqsadida ishlatiladi.</p><h2>3. Ma'lumotlarni saqlash</h2><p>Shaxsiy ma'lumotlaringiz xavfsiz serverlarimizda saqlanadi va uchinchi shaxslarga sotilmaydi yoki uzatilmaydi.</p><h2>4. Foydalanuvchi huquqlari</h2><p>Siz istalgan vaqtda ma'lumotlaringizni o'chirish yoki ko'rish uchun biz bilan bog'lanishingiz mumkin.</p><h2>5. Bog'lanish</h2><p>Savollar uchun: <a href="mailto:support@citymarket.uz">support@citymarket.uz</a></p></body></html>`);
+  });
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) {
       return next();
