@@ -330,8 +330,20 @@ uri = "file://assets/product-images/pineapple.png"
 type = "image"
 title = "pineapple"
 
+[[generated]]
+id = "hzZAFxJsIP2mY519M4BzI"
+uri = "file://attached_assets/city_market_feature_graphic.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"
 uri = "file://qr-expo.png"
 type = "image"
 title = "CityMarket Expo QR Code"
+
+[[outputs]]
+id = "RJvG0bdESm6NyR6RmnRAo"
+uri = "file://attached_assets/city_market_feature_graphic.png"
+type = "image"
+title = "City Market Feature Graphic (1024x500)"
