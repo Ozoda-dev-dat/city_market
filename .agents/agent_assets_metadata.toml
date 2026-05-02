@@ -336,6 +336,12 @@ uri = "file://attached_assets/city_market_feature_graphic.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "X-30HDNe85eqvNMrnckKC"
+uri = "file://attached_assets/city_market_app_icon_512.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"
 uri = "file://qr-expo.png"
@@ -347,3 +353,9 @@ id = "RJvG0bdESm6NyR6RmnRAo"
 uri = "file://attached_assets/city_market_feature_graphic.png"
 type = "image"
 title = "City Market Feature Graphic — ochiq yashil"
+
+[[outputs]]
+id = "aB1UTFpZrhowbf7-eNazO"
+uri = "file://attached_assets/city_market_app_icon_512.png"
+type = "image"
+title = "City Market App Icon (512x512)"
