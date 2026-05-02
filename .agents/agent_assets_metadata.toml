@@ -342,6 +342,24 @@ uri = "file://attached_assets/city_market_app_icon_512.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "5TqYZNm3FXeGu4vA2Gd12"
+uri = "file://attached_assets/screenshot_home.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "sisfwLkdf2W42ImwAA7bN"
+uri = "file://attached_assets/screenshot_catalog.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "abDKrCNSvwsPUl1wqnf4c"
+uri = "file://attached_assets/screenshot_cart.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"
 uri = "file://qr-expo.png"
@@ -359,3 +377,21 @@ id = "aB1UTFpZrhowbf7-eNazO"
 uri = "file://attached_assets/city_market_app_icon_512.png"
 type = "image"
 title = "City Market App Icon (512x512)"
+
+[[outputs]]
+id = "vgDS6Fnzu5IXftRRofCuc"
+uri = "file://attached_assets/screenshot_home.png"
+type = "image"
+title = "Screenshot 1 — Bosh sahifa"
+
+[[outputs]]
+id = "jkbQmgvp6g-FXQPDG74Fi"
+uri = "file://attached_assets/screenshot_catalog.png"
+type = "image"
+title = "Screenshot 2 — Katalog"
+
+[[outputs]]
+id = "gDtBUKLM_pfo7nkmmY4ax"
+uri = "file://attached_assets/screenshot_cart.png"
+type = "image"
+title = "Screenshot 3 — Savatcha"
