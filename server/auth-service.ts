@@ -398,12 +398,8 @@ export class AuthService {
       throw new Error('Invalid phone number format');
     }
 
-    if (!data.password || data.password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
-    }
-
-    if (!this.isStrongPassword(data.password)) {
-      throw new Error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+    if (!data.password || data.password.length < 6) {
+      throw new Error('Password must be at least 6 characters long');
     }
 
     if (data.email && !this.isValidEmail(data.email)) {
@@ -426,12 +422,8 @@ export class AuthService {
   }
 
   private validatePassword(password: string): void {
-    if (password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
-    }
-
-    if (!this.isStrongPassword(password)) {
-      throw new Error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+    if (password.length < 6) {
+      throw new Error('Password must be at least 6 characters long');
     }
   }
 

@@ -71,28 +71,12 @@ export function validatePassword(password: string): ValidationResult {
     return { isValid: false, errors };
   }
 
-  if (password.length < 8) {
-    errors.push('Password must be at least 8 characters long');
+  if (password.length < 6) {
+    errors.push('Password must be at least 6 characters long');
   }
 
   if (password.length > 128) {
     errors.push('Password must be less than 128 characters long');
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    errors.push('Password must contain at least one uppercase letter');
-  }
-
-  if (!/[a-z]/.test(password)) {
-    errors.push('Password must contain at least one lowercase letter');
-  }
-
-  if (!/\d/.test(password)) {
-    errors.push('Password must contain at least one number');
-  }
-
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    errors.push('Password must contain at least one special character');
   }
 
   if (/\s/.test(password)) {
@@ -225,12 +209,8 @@ export function validateInput(input: string, type: 'phone' | 'password' | 'name'
 export const authSchemas = {
   register: z.object({
     phoneNumber: z.string().regex(PHONE_REGEX, 'Invalid phone number format'),
-    password: z.string().min(8, 'Password must be at least 8 characters')
-      .max(128, 'Password must be less than 128 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/\d/, 'Password must contain at least one number')
-      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password must contain at least one special character'),
+    password: z.string().min(6, 'Password must be at least 6 characters')
+      .max(128, 'Password must be less than 128 characters'),
     name: z.string().min(2, 'Name must be at least 2 characters')
       .max(50, 'Name must be less than 50 characters')
       .regex(/^[a-zA-Z\s\u0400-\u04FF'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
