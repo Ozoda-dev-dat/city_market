@@ -360,6 +360,24 @@ uri = "file://attached_assets/screenshot_cart.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "hJdYmHF0y0HhL_pSZ3Jgf"
+uri = "file://attached_assets/screenshot_catalog_real.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "yM6y0Yug_0vV4vPOoKalA"
+uri = "file://attached_assets/screenshot_cart_real.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "-xNz6EVy6txcy9aC4MVnI"
+uri = "file://attached_assets/screenshot_profile_real.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"
 uri = "file://qr-expo.png"
@@ -395,3 +413,21 @@ id = "gDtBUKLM_pfo7nkmmY4ax"
 uri = "file://attached_assets/screenshot_cart.png"
 type = "image"
 title = "Screenshot 3 — Savatcha"
+
+[[outputs]]
+id = "bMMKVauIt3ywDayK6bZIz"
+uri = "file://attached_assets/screenshot_catalog_real.png"
+type = "image"
+title = "Screenshot — Katalog"
+
+[[outputs]]
+id = "amatU__LY6hDd44eKIYB-"
+uri = "file://attached_assets/screenshot_cart_real.png"
+type = "image"
+title = "Screenshot — Savat"
+
+[[outputs]]
+id = "Zs4tUg1Ic5Cc6TTpmbfE3"
+uri = "file://attached_assets/screenshot_profile_real.png"
+type = "image"
+title = "Screenshot — Profil"
