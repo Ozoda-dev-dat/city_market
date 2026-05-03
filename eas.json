@@ -20,12 +20,18 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "city-market.onrender.com"
       }
     },
     "production-apk": {
       "extends": "production",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "city-market.onrender.com"
       }
     }
   },
