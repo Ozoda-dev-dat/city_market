@@ -1,6 +1,7 @@
 import { fetch } from "expo/fetch";
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 /**
  * Resolves a product image URL — absolute URLs are returned as-is,
@@ -14,19 +15,27 @@ export function resolveImageUrl(url: string): string {
 }
 
 export function getApiUrl(): string {
+  // 1. Runtime env var (works in dev/Expo Go)
   let host = process.env.EXPO_PUBLIC_DOMAIN;
-  
-  // Fallback to local development
+
+  // 2. Baked-in at build time via app.json extra (works in production APK/AAB)
+  if (!host) {
+    host = Constants.expoConfig?.extra?.apiDomain as string | undefined;
+  }
+
+  // 3. Last resort — only for local dev, never reaches production builds
   if (!host) {
     host = "localhost:5000";
   }
 
-  // Trim whitespace
   host = host.trim();
 
-  // Use http for localhost/local IPs, https for other domains
-  const protocol = host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168") ? "http" : "https";
-  let url = new URL(`${protocol}://${host}`);
+  const isLocal =
+    host.includes("localhost") ||
+    host.includes("127.0.0.1") ||
+    host.includes("192.168");
+  const protocol = isLocal ? "http" : "https";
+  const url = new URL(`${protocol}://${host}`);
 
   return url.href;
 }

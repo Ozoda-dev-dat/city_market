@@ -207,8 +207,8 @@ class NetworkManager {
   }
 
   private async pingServer(): Promise<void> {
-    const domain = process.env.EXPO_PUBLIC_DOMAIN;
-    const baseUrl = domain ? `https://${domain}` : 'http://localhost:5000';
+    const { getApiUrl } = require('./query-client');
+    const baseUrl = getApiUrl().replace(/\/$/, '');
     const response = await fetch(`${baseUrl}/api/health`, {
       method: 'HEAD',
     });

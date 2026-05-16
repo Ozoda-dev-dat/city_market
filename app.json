@@ -47,6 +47,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiDomain": "city-market.onrender.com"
     }
   }
 }
