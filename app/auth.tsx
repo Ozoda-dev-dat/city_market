@@ -245,18 +245,6 @@ export default function AuthScreen() {
             )}
           </Pressable>
 
-          <View style={styles.creditsBox}>
-            <Text style={styles.creditsLabel}>Admin:</Text>
-            <Text style={styles.creditsText}>+998901234567 / Admin@123</Text>
-          </View>
-          <View style={styles.creditsBox}>
-            <Text style={styles.creditsLabel}>Mijoz:</Text>
-            <Text style={styles.creditsText}>+998901234568 / Test@1234</Text>
-          </View>
-          <View style={styles.creditsBox}>
-            <Text style={styles.creditsLabel}>Kuryer:</Text>
-            <Text style={styles.creditsText}>+998975482020 / Dilshod@123</Text>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -450,23 +438,6 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_700Bold",
       fontSize: 16,
       color: "#fff",
-    },
-    creditsBox: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 6,
-      marginTop: 4,
-    },
-    creditsLabel: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 12,
-      color: Colors.textMuted,
-    },
-    creditsText: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 12,
-      color: Colors.textMuted,
     },
   });
 };
