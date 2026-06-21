@@ -824,10 +824,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { status, courierId } = req.body;
         const order = await storage.updateOrderStatus(req.params.id, status, courierId);
         broadcast("orders-changed");
+        if (order.customerId) {
+          sendToUser(order.customerId, "order-status-updated", {
+            orderId: order.id,
+            status: order.status,
+          });
+        }
         res.json(order);
       } catch (error) {
         console.error("Error updating order status:", error);
         res.status(500).json({ error: "Failed to update order status" });
+      }
+    }
+  );
+
+  app.post("/api/courier/location",
+    authenticateToken,
+    requireAdminOrCourier,
+    async (req, res) => {
+      try {
+        const { orderId, latitude, longitude } = req.body;
+        if (!orderId || latitude == null || longitude == null) {
+          return res.status(400).json({ error: "orderId, latitude, longitude required" });
+        }
+        const order = await storage.getOrder(orderId);
+        if (!order) return res.status(404).json({ error: "Order not found" });
+        if (order.courierId && order.courierId !== req.user!.userId && req.user!.role !== "admin") {
+          return res.status(403).json({ error: "Not your order" });
+        }
+        if (order.customerId) {
+          sendToUser(order.customerId, "courier-location", {
+            orderId,
+            latitude,
+            longitude,
+          });
+        }
+        res.json({ ok: true });
+      } catch (error) {
+        console.error("Error relaying courier location:", error);
+        res.status(500).json({ error: "Failed to relay location" });
       }
     }
   );

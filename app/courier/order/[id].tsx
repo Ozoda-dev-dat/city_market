@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
+import { apiRequest } from "@/lib/query-client";
 
 let MapView: any = null;
 let Marker: any = null;
@@ -78,11 +79,14 @@ export default function CourierOrderDetail() {
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
   const mapRef = useRef<any>(null);
+  const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastSentRef = useRef<Coord | null>(null);
 
   const [courierLocation, setCourierLocation] = useState<Coord | null>(null);
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
   const [routeLoading, setRouteLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [sendingLocation, setSendingLocation] = useState(false);
 
   const order = orders.find((o) => o.id === id);
 
@@ -94,8 +98,23 @@ export default function CourierOrderDetail() {
         }
       : null;
 
+  const sendLocationToServer = useCallback(async (coord: Coord, orderId: string) => {
+    try {
+      setSendingLocation(true);
+      await apiRequest("POST", "/api/courier/location", {
+        orderId,
+        latitude: coord.latitude,
+        longitude: coord.longitude,
+      });
+    } catch {
+    } finally {
+      setSendingLocation(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (Platform.OS === "web" || !customerCoord) return;
+    if (Platform.OS === "web" || !customerCoord || !order) return;
+    if (order.status === "delivered") return;
 
     let watcher: Location.LocationSubscription | null = null;
 
@@ -123,6 +142,7 @@ export default function CourierOrderDetail() {
         longitude: current.coords.longitude,
       };
       setCourierLocation(from);
+      lastSentRef.current = from;
 
       setRouteLoading(true);
       const route = await fetchRoute(from, customerCoord!);
@@ -137,6 +157,23 @@ export default function CourierOrderDetail() {
           });
         }
       }, 600);
+
+      await sendLocationToServer(from, order.id);
+
+      locationIntervalRef.current = setInterval(async () => {
+        try {
+          const pos = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          const coord: Coord = {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          };
+          setCourierLocation(coord);
+          lastSentRef.current = coord;
+          await sendLocationToServer(coord, order.id);
+        } catch {}
+      }, 5000);
 
       watcher = await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.Balanced, distanceInterval: 30 },
@@ -154,31 +191,39 @@ export default function CourierOrderDetail() {
 
     return () => {
       watcher?.remove();
+      if (locationIntervalRef.current) {
+        clearInterval(locationIntervalRef.current);
+        locationIntervalRef.current = null;
+      }
     };
-  }, [order?.id]);
+  }, [order?.id, order?.status]);
 
   if (!order) return null;
 
-  const handleAction = async () => {
-    const statusMap: any = { ready: "delivering", delivering: "delivered" };
-    const next = statusMap[order.status];
-    if (!next) return;
+  const handleAction = async (targetStatus: string) => {
     try {
-      await updateOrderStatus(order.id, next);
+      await updateOrderStatus(order.id, targetStatus);
       if (Platform.OS !== "web")
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (targetStatus === "delivered") {
+        if (locationIntervalRef.current) {
+          clearInterval(locationIntervalRef.current);
+          locationIntervalRef.current = null;
+        }
+        router.back();
+      }
     } catch {
       Alert.alert("Xatolik", "Statusni yangilashda xatolik yuz berdi");
     }
   };
 
-  const buttonConfig: any = {
-    ready: { label: "Olishni tasdiqlash", icon: "bicycle", color: Colors.primary },
-    delivering: { label: "Yetkazilganligini tasdiqlash", icon: "checkmark-circle", color: "#10B981" },
-    delivered: { label: "Yetkazilgan", icon: "checkmark", color: Colors.textMuted, disabled: true },
-    pending: { label: "Tayyorlanmoqda...", icon: "time", color: Colors.textMuted, disabled: true },
-  };
-  const config = buttonConfig[order.status] || buttonConfig.pending;
+  const statusSteps = [
+    { key: "ready", label: "Tayyor", icon: "bag-check-outline" },
+    { key: "delivering", label: "Yetkazilmoqda", icon: "bicycle-outline" },
+    { key: "delivered", label: "Yetkazildi", icon: "checkmark-circle-outline" },
+  ];
+
+  const currentStepIdx = statusSteps.findIndex((s) => s.key === order.status);
 
   const mapInitialRegion = customerCoord
     ? {
@@ -196,10 +241,16 @@ export default function CourierOrderDetail() {
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </Pressable>
         <Text style={styles.title}>Buyurtma #{order.id.slice(-6).toUpperCase()}</Text>
+        {sendingLocation && (
+          <View style={styles.liveIndicator}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>JONLI</Text>
+          </View>
+        )}
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 140 }}
         showsVerticalScrollIndicator={false}
       >
         {customerCoord && Platform.OS !== "web" && MapView ? (
@@ -232,7 +283,6 @@ export default function CourierOrderDetail() {
                   coordinates={routeCoords}
                   strokeColor="#EF4444"
                   strokeWidth={4}
-                  lineDashPattern={undefined}
                 />
               )}
             </MapView>
@@ -281,6 +331,41 @@ export default function CourierOrderDetail() {
 
         <View style={{ padding: 16, gap: 14 }}>
           <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Buyurtma holati</Text>
+            <View style={styles.stepper}>
+              {statusSteps.map((step, idx) => {
+                const isDone = idx < currentStepIdx;
+                const isCurrent = idx === currentStepIdx;
+                return (
+                  <View key={step.key} style={styles.stepItem}>
+                    <View style={[
+                      styles.stepCircle,
+                      isDone && styles.stepCircleDone,
+                      isCurrent && styles.stepCircleCurrent,
+                    ]}>
+                      <Ionicons
+                        name={isDone ? "checkmark" : step.icon as any}
+                        size={16}
+                        color={isDone || isCurrent ? "#fff" : Colors.textMuted}
+                      />
+                    </View>
+                    {idx < statusSteps.length - 1 && (
+                      <View style={[styles.stepLine, isDone && styles.stepLineDone]} />
+                    )}
+                    <Text style={[
+                      styles.stepLabel,
+                      isCurrent && styles.stepLabelCurrent,
+                      isDone && styles.stepLabelDone,
+                    ]}>
+                      {step.label}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+
+          <View style={styles.card}>
             <Text style={styles.sectionTitle}>Yetkazish manzili</Text>
             <View style={styles.infoRow}>
               <View style={styles.iconWrap}>
@@ -327,17 +412,38 @@ export default function CourierOrderDetail() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-        <Pressable
-          style={[
-            styles.mainBtn,
-            { backgroundColor: config.color, opacity: config.disabled ? 0.6 : 1 },
-          ]}
-          onPress={handleAction}
-          disabled={config.disabled}
-        >
-          <Ionicons name={config.icon} size={20} color="#fff" />
-          <Text style={styles.mainBtnText}>{config.label}</Text>
-        </Pressable>
+        {order.status === "ready" && (
+          <Pressable
+            style={[styles.mainBtn, { backgroundColor: Colors.primary }]}
+            onPress={() => handleAction("delivering")}
+          >
+            <Ionicons name="bicycle" size={20} color="#fff" />
+            <Text style={styles.mainBtnText}>Do&apos;konga ketdim</Text>
+          </Pressable>
+        )}
+        {order.status === "delivering" && (
+          <View style={{ gap: 10 }}>
+            <Pressable
+              style={[styles.mainBtn, { backgroundColor: "#10B981" }]}
+              onPress={() => handleAction("delivered")}
+            >
+              <Ionicons name="checkmark-circle" size={20} color="#fff" />
+              <Text style={styles.mainBtnText}>Yetkazildi</Text>
+            </Pressable>
+          </View>
+        )}
+        {order.status === "delivered" && (
+          <View style={[styles.mainBtn, { backgroundColor: Colors.textMuted, opacity: 0.6 }]}>
+            <Ionicons name="checkmark" size={20} color="#fff" />
+            <Text style={styles.mainBtnText}>Yetkazilgan</Text>
+          </View>
+        )}
+        {order.status !== "ready" && order.status !== "delivering" && order.status !== "delivered" && (
+          <View style={[styles.mainBtn, { backgroundColor: Colors.textMuted, opacity: 0.6 }]}>
+            <Ionicons name="time" size={20} color="#fff" />
+            <Text style={styles.mainBtnText}>Tayyorlanmoqda...</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -357,6 +463,28 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_700Bold",
       fontSize: 18,
       color: Colors.text,
+      flex: 1,
+    },
+    liveIndicator: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#DCFCE7",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    liveDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: "#16A34A",
+    },
+    liveText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 10,
+      color: "#16A34A",
+      letterSpacing: 0.5,
     },
     mapContainer: {
       height: 280,
@@ -428,6 +556,46 @@ const getStyles = (isDarkMode: boolean) => {
       color: Colors.text,
       marginBottom: 2,
     },
+    stepper: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      paddingTop: 4,
+    },
+    stepItem: {
+      alignItems: "center",
+      flex: 1,
+      position: "relative",
+    },
+    stepCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: Colors.divider,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 6,
+    },
+    stepCircleDone: { backgroundColor: Colors.primary },
+    stepCircleCurrent: { backgroundColor: "#F59E0B" },
+    stepLine: {
+      position: "absolute",
+      top: 18,
+      left: "50%",
+      right: "-50%",
+      height: 2,
+      backgroundColor: Colors.divider,
+      zIndex: -1,
+    },
+    stepLineDone: { backgroundColor: Colors.primary },
+    stepLabel: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 11,
+      color: Colors.textMuted,
+      textAlign: "center",
+    },
+    stepLabelCurrent: { color: "#F59E0B", fontFamily: "Poppins_600SemiBold" },
+    stepLabelDone: { color: Colors.primary, fontFamily: "Poppins_500Medium" },
     infoRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -492,6 +660,9 @@ const getStyles = (isDarkMode: boolean) => {
     },
     footer: {
       padding: 16,
+      backgroundColor: Colors.background,
+      borderTopWidth: 1,
+      borderTopColor: Colors.divider,
     },
     mainBtn: {
       height: 56,

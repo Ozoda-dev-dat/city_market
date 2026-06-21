@@ -37,6 +37,7 @@ export interface IStorage {
   softDeleteSubcategory(id: string, userId?: string): Promise<void>;
   
   getOrders(): Promise<Order[]>;
+  getOrder(id: string): Promise<Order | undefined>;
   getOrdersByCustomer(customerId: string): Promise<Order[]>;
   createOrder(order: any): Promise<Order>;
   updateOrderStatus(id: string, status: string, courierId?: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<Order>;
@@ -419,6 +420,11 @@ export class DbStorage implements IStorage {
 
   async getOrders(): Promise<Order[]> {
     return await this.db.select().from(schema.orders);
+  }
+
+  async getOrder(id: string): Promise<Order | undefined> {
+    const result = await this.db.select().from(schema.orders).where(eq(schema.orders.id, id));
+    return result[0];
   }
 
   async getOrdersByCustomer(customerId: string): Promise<Order[]> {
