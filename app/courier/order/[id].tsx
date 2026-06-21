@@ -218,12 +218,26 @@ export default function CourierOrderDetail() {
   };
 
   const statusSteps = [
-    { key: "ready", label: "Tayyor", icon: "bag-check-outline" },
-    { key: "delivering", label: "Yetkazilmoqda", icon: "bicycle-outline" },
-    { key: "delivered", label: "Yetkazildi", icon: "checkmark-circle-outline" },
+    { key: "confirmed", label: "Qabul qilindi", icon: "checkmark-circle-outline" },
+    { key: "preparing", label: "Do'konga ketmoqda", icon: "bicycle-outline" },
+    { key: "ready", label: "Mahsulot olinmoqda", icon: "bag-handle-outline" },
+    { key: "delivering", label: "Sizga kelmoqda", icon: "navigate-outline" },
+    { key: "delivered", label: "Yetkazildi", icon: "home-outline" },
   ];
 
-  const currentStepIdx = statusSteps.findIndex((s) => s.key === order.status);
+  const statusToStepIdx = (status: string): number => {
+    switch (status) {
+      case "pending":
+      case "confirmed": return 0;
+      case "preparing": return 1;
+      case "ready": return 2;
+      case "delivering": return 3;
+      case "delivered": return 4;
+      default: return 0;
+    }
+  };
+
+  const currentStepIdx = statusToStepIdx(order.status);
 
   const mapInitialRegion = customerCoord
     ? {
@@ -332,12 +346,12 @@ export default function CourierOrderDetail() {
         <View style={{ padding: 16, gap: 14 }}>
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Buyurtma holati</Text>
-            <View style={styles.stepper}>
-              {statusSteps.map((step, idx) => {
-                const isDone = idx < currentStepIdx;
-                const isCurrent = idx === currentStepIdx;
-                return (
-                  <View key={step.key} style={styles.stepItem}>
+            {statusSteps.map((step, idx) => {
+              const isDone = idx < currentStepIdx;
+              const isCurrent = idx === currentStepIdx;
+              return (
+                <View key={step.key} style={styles.stepRow}>
+                  <View style={styles.stepLeft}>
                     <View style={[
                       styles.stepCircle,
                       isDone && styles.stepCircleDone,
@@ -345,13 +359,15 @@ export default function CourierOrderDetail() {
                     ]}>
                       <Ionicons
                         name={isDone ? "checkmark" : step.icon as any}
-                        size={16}
-                        color={isDone || isCurrent ? "#fff" : Colors.textMuted}
+                        size={isCurrent ? 18 : 15}
+                        color={isDone ? "#fff" : isCurrent ? Colors.primary : Colors.textMuted}
                       />
                     </View>
                     {idx < statusSteps.length - 1 && (
-                      <View style={[styles.stepLine, isDone && styles.stepLineDone]} />
+                      <View style={[styles.stepConnector, isDone && styles.stepConnectorDone]} />
                     )}
+                  </View>
+                  <View style={[styles.stepRight, idx < statusSteps.length - 1 && { paddingBottom: 18 }]}>
                     <Text style={[
                       styles.stepLabel,
                       isCurrent && styles.stepLabelCurrent,
@@ -359,10 +375,15 @@ export default function CourierOrderDetail() {
                     ]}>
                       {step.label}
                     </Text>
+                    {isCurrent && (
+                      <View style={styles.currentBadge}>
+                        <Text style={styles.currentBadgeText}>Hozirgi holat</Text>
+                      </View>
+                    )}
                   </View>
-                );
-              })}
-            </View>
+                </View>
+              );
+            })}
           </View>
 
           <View style={styles.card}>
@@ -412,6 +433,12 @@ export default function CourierOrderDetail() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+        {(order.status === "pending" || order.status === "confirmed" || order.status === "preparing") && (
+          <View style={[styles.mainBtn, { backgroundColor: Colors.textMuted, opacity: 0.65 }]}>
+            <Ionicons name="time-outline" size={20} color="#fff" />
+            <Text style={styles.mainBtnText}>Buyurtma tayyorlanmoqda...</Text>
+          </View>
+        )}
         {order.status === "ready" && (
           <Pressable
             style={[styles.mainBtn, { backgroundColor: Colors.primary }]}
@@ -433,15 +460,9 @@ export default function CourierOrderDetail() {
           </View>
         )}
         {order.status === "delivered" && (
-          <View style={[styles.mainBtn, { backgroundColor: Colors.textMuted, opacity: 0.6 }]}>
+          <View style={[styles.mainBtn, { backgroundColor: "#10B981", opacity: 0.7 }]}>
             <Ionicons name="checkmark" size={20} color="#fff" />
             <Text style={styles.mainBtnText}>Yetkazilgan</Text>
-          </View>
-        )}
-        {order.status !== "ready" && order.status !== "delivering" && order.status !== "delivered" && (
-          <View style={[styles.mainBtn, { backgroundColor: Colors.textMuted, opacity: 0.6 }]}>
-            <Ionicons name="time" size={20} color="#fff" />
-            <Text style={styles.mainBtnText}>Tayyorlanmoqda...</Text>
           </View>
         )}
       </View>
@@ -556,16 +577,13 @@ const getStyles = (isDarkMode: boolean) => {
       color: Colors.text,
       marginBottom: 2,
     },
-    stepper: {
+    stepRow: {
       flexDirection: "row",
-      alignItems: "flex-start",
-      justifyContent: "space-between",
-      paddingTop: 4,
+      gap: 12,
     },
-    stepItem: {
+    stepLeft: {
       alignItems: "center",
-      flex: 1,
-      position: "relative",
+      width: 36,
     },
     stepCircle: {
       width: 36,
@@ -574,28 +592,44 @@ const getStyles = (isDarkMode: boolean) => {
       backgroundColor: Colors.divider,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 6,
     },
     stepCircleDone: { backgroundColor: Colors.primary },
-    stepCircleCurrent: { backgroundColor: "#F59E0B" },
-    stepLine: {
-      position: "absolute",
-      top: 18,
-      left: "50%",
-      right: "-50%",
-      height: 2,
+    stepCircleCurrent: {
+      backgroundColor: Colors.primary + "20",
+      borderWidth: 2,
+      borderColor: Colors.primary,
+    },
+    stepConnector: {
+      width: 2,
+      flex: 1,
       backgroundColor: Colors.divider,
-      zIndex: -1,
+      marginVertical: 2,
     },
-    stepLineDone: { backgroundColor: Colors.primary },
+    stepConnectorDone: { backgroundColor: Colors.primary },
+    stepRight: {
+      flex: 1,
+      paddingTop: 7,
+    },
     stepLabel: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 11,
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
       color: Colors.textMuted,
-      textAlign: "center",
     },
-    stepLabelCurrent: { color: "#F59E0B", fontFamily: "Poppins_600SemiBold" },
-    stepLabelDone: { color: Colors.primary, fontFamily: "Poppins_500Medium" },
+    stepLabelCurrent: { color: Colors.primary, fontFamily: "Poppins_600SemiBold" },
+    stepLabelDone: { color: Colors.text, fontFamily: "Poppins_500Medium" },
+    currentBadge: {
+      marginTop: 4,
+      alignSelf: "flex-start",
+      backgroundColor: Colors.primary + "20",
+      paddingHorizontal: 10,
+      paddingVertical: 3,
+      borderRadius: 10,
+    },
+    currentBadgeText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 11,
+      color: Colors.primary,
+    },
     infoRow: {
       flexDirection: "row",
       alignItems: "center",

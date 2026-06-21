@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Animated, Linking, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  RefreshControl,
+  Animated,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,9 +19,42 @@ import { useApp } from "@/context/ProductsContext";
 import { formatPrice } from "@/constants/data";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
+import { wsManager } from "@/lib/websocket";
 import { Order } from "@/shared/schema";
 
-export default function EnhancedOrderTrackingScreen() {
+let MapView: any = null;
+let Marker: any = null;
+if (Platform.OS !== "web") {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
+
+interface Coord {
+  latitude: number;
+  longitude: number;
+}
+
+function haversineKm(a: Coord, b: Coord): number {
+  const R = 6371;
+  const dLat = ((b.latitude - a.latitude) * Math.PI) / 180;
+  const dLon = ((b.longitude - a.longitude) * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.latitude * Math.PI) / 180) *
+      Math.cos((b.latitude * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+function formatEta(km: number): string {
+  const minutes = Math.round((km / 25) * 60);
+  if (minutes < 1) return "1 daqiqadan kam";
+  if (minutes < 60) return `~${minutes} daqiqa`;
+  return `~${Math.round(minutes / 60)} soat`;
+}
+
+export default function CustomerOrderTracking() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { orders: adminOrders, isLoading: isLoadingOrders } = useApp();
@@ -19,45 +62,100 @@ export default function EnhancedOrderTrackingScreen() {
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
   const queryClient = useQueryClient();
-  
-  const [refreshing, setRefreshing] = useState(false);
-  const [animatedValue] = useState(new Animated.Value(0));
-  const [progressValue] = useState(new Animated.Value(0));
+  const mapRef = useRef<any>(null);
 
-  // Try admin orders first; fall back to customer orders for regular users
+  const [refreshing, setRefreshing] = useState(false);
+  const [progressAnim] = useState(new Animated.Value(0));
+  const [courierCoord, setCourierCoord] = useState<Coord | null>(null);
+  const [etaText, setEtaText] = useState<string | null>(null);
+
   const { data: myOrders = [] } = useQuery<Order[]>({
     queryKey: ["/api/orders/my"],
-    queryFn: () => apiRequest("GET", "/api/orders/my").then(res => res.json()),
-    enabled: !adminOrders.find(o => o.id === id),
+    queryFn: () => apiRequest("GET", "/api/orders/my").then((res) => res.json()),
+    enabled: !adminOrders.find((o) => o.id === id),
   });
 
-  const order = adminOrders.find(o => o.id === id) ?? myOrders.find(o => o.id === id);
+  const order = adminOrders.find((o) => o.id === id) ?? myOrders.find((o) => o.id === id);
+
+  const customerCoord: Coord | null =
+    order?.latitude && order?.longitude
+      ? {
+          latitude: parseFloat(order.latitude),
+          longitude: parseFloat(order.longitude),
+        }
+      : null;
+
+  const handleCourierLocation = useCallback(
+    (data: unknown) => {
+      const loc = data as { orderId: string; latitude: number; longitude: number };
+      if (loc.orderId !== id) return;
+      const coord: Coord = { latitude: loc.latitude, longitude: loc.longitude };
+      setCourierCoord(coord);
+      if (customerCoord) {
+        const km = haversineKm(coord, customerCoord);
+        setEtaText(formatEta(km));
+      }
+      if (mapRef.current && customerCoord) {
+        mapRef.current.fitToCoordinates([coord, customerCoord], {
+          edgePadding: { top: 60, right: 40, bottom: 60, left: 40 },
+          animated: true,
+        });
+      }
+    },
+    [id, customerCoord]
+  );
+
+  const handleStatusUpdate = useCallback(
+    (data: unknown) => {
+      const update = data as { orderId: string; status: string };
+      if (update.orderId !== id) return;
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
+    },
+    [id, queryClient]
+  );
 
   useEffect(() => {
-    if (!order) return;
-    Animated.timing(animatedValue, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start();
-    const currentStep = getCurrentStep();
-    Animated.timing(progressValue, {
-      toValue: (currentStep / 4) * 100,
-      duration: 1500,
-      useNativeDriver: false,
-    }).start();
-  }, [order?.status]);
-  
-  const getCurrentStep = () => {
+    const off1 = wsManager.on("courier-location", handleCourierLocation);
+    const off2 = wsManager.on("order-status-updated", handleStatusUpdate);
+    return () => {
+      off1();
+      off2();
+    };
+  }, [handleCourierLocation, handleStatusUpdate]);
+
+  const currentStep = (() => {
     if (!order) return 0;
-    if (order.status === 'cancelled') return 0;
-    if (order.status === 'pending') return 1;
-    if (order.status === 'confirmed') return 1;
-    if (order.status === 'preparing') return 2;
-    if (order.status === 'ready') return 2;
-    if (order.status === 'delivering') return 3;
-    if (order.status === 'delivered') return 4;
-    return 0;
+    switch (order.status) {
+      case "pending":
+      case "confirmed":
+        return 0;
+      case "preparing":
+        return 1;
+      case "ready":
+        return 2;
+      case "delivering":
+        return 3;
+      case "delivered":
+        return 4;
+      default:
+        return 0;
+    }
+  })();
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: currentStep / 4,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
+    setRefreshing(false);
   };
 
   if (!order && isLoadingOrders) {
@@ -72,282 +170,291 @@ export default function EnhancedOrderTrackingScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: Colors.background, alignItems: "center", justifyContent: "center", gap: 16 }}>
         <Ionicons name="receipt-outline" size={64} color={Colors.textMuted} />
-        <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 16, color: Colors.textSecondary }}>Buyurtma topilmadi</Text>
-        <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 24, paddingVertical: 12, backgroundColor: Colors.primary, borderRadius: 12 }}>
+        <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 16, color: Colors.textSecondary }}>
+          Buyurtma topilmadi
+        </Text>
+        <Pressable
+          onPress={() => router.back()}
+          style={{ paddingHorizontal: 24, paddingVertical: 12, backgroundColor: Colors.primary, borderRadius: 12 }}
+        >
           <Text style={{ color: "#fff", fontFamily: "Poppins_600SemiBold" }}>Ortga qaytish</Text>
         </Pressable>
       </View>
     );
   }
 
+  const isCancelled = order.status === "cancelled";
+
   const steps = [
-    { 
-      key: "pending", 
-      label: "Qabul qilindi", 
-      icon: "checkmark-circle",
+    {
+      key: "confirmed",
+      label: "Qabul qilindi",
       description: "Buyurtmangiz qabul qilindi",
-      time: order.createdAt ? new Date(order.createdAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) : ''
+      icon: "checkmark-circle-outline" as const,
     },
-    { 
-      key: "preparing", 
-      label: "Tayyorlanmoqda", 
-      icon: "bag-handle",
-      description: "Buyurtma tayyorlanmoqda",
-      time: ''
+    {
+      key: "preparing",
+      label: "Do'konga ketmoqda",
+      description: "Kuryer do'konga yo'l oldi",
+      icon: "bicycle-outline" as const,
     },
-    { 
-      key: "delivering", 
-      label: "Yo'lda", 
-      icon: "bicycle",
+    {
+      key: "ready",
+      label: "Mahsulot olinmoqda",
+      description: "Kuryer mahsulotlarni yig'moqda",
+      icon: "bag-handle-outline" as const,
+    },
+    {
+      key: "delivering",
+      label: "Sizga kelmoqda",
       description: "Kuryer yo'lda",
-      time: ''
+      icon: "navigate-outline" as const,
     },
-    { 
-      key: "delivered", 
-      label: "Yetkazildi", 
-      icon: "home",
+    {
+      key: "delivered",
+      label: "Yetkazildi",
       description: "Buyurtma muvaffaqiyatli yetkazildi",
-      time: ''
+      icon: "home-outline" as const,
     },
   ];
 
-  const currentStepIndex = steps.findIndex(s => s.key === order.status);
-  const isCancelled = order.status === "cancelled";
-  const progress = currentStepIndex >= 0 ? (currentStepIndex + 1) / steps.length : 0;
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-    await queryClient.invalidateQueries({ queryKey: ["/api/orders/my"] });
-    setRefreshing(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return Colors.warning;
-      case 'confirmed': return Colors.warning;
-      case 'preparing': return Colors.primary;
-      case 'ready': return Colors.primary;
-      case 'delivering': return Colors.primary;
-      case 'delivered': return '#10B981';
-      case 'cancelled': return Colors.error;
-      default: return Colors.textMuted;
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Kutilmoqda';
-      case 'confirmed': return 'Tasdiqlandi';
-      case 'preparing': return 'Tayyorlanmoqda';
-      case 'ready': return 'Tayyor';
-      case 'delivering': return "Yo'lda";
-      case 'delivered': return 'Yetkazildi';
-      case 'cancelled': return 'Bekor qilingan';
-      default: return status;
-    }
-  };
-
-  const getStatusEmoji = (status: string) => {
-    switch (status) {
-      case 'pending': return '⏳';
-      case 'confirmed': return '✔️';
-      case 'preparing': return '🛒';
-      case 'ready': return '📦';
-      case 'delivering': return '🚴';
-      case 'delivered': return '✅';
-      case 'cancelled': return '❌';
-      default: return '📦';
-    }
-  };
+  const showMap =
+    Platform.OS !== "web" &&
+    MapView &&
+    order.status === "delivering" &&
+    customerCoord;
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </Pressable>
         <Text style={styles.title}>Buyurtma holati</Text>
+        {order.status === "delivering" && (
+          <View style={styles.livePill}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>JONLI</Text>
+          </View>
+        )}
       </View>
-      
-      <ScrollView 
-        contentContainerStyle={{ padding: 20 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {/* Order Summary Card */}
-        <View style={styles.orderSummaryCard}>
-          <View style={styles.orderHeader}>
-            <View>
-              <Text style={styles.orderNumber}>Buyurtma #{order.id.slice(-6)}</Text>
-              <Text style={styles.orderDate}>
-                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('uz-UZ') : ''}
-              </Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{getStatusEmoji(order.status)} {getStatusLabel(order.status)}</Text>
-            </View>
-          </View>
-          <View style={styles.orderTotal}>
-            <Text style={styles.totalLabel}>Jami summa:</Text>
-            <Text style={styles.totalAmount}>{formatPrice(order.total)}</Text>
-          </View>
-        </View>
-
-        {/* Progress Bar */}
-        {!isCancelled && (
-          <View style={styles.progressContainer}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>Buyurtma jarayoni</Text>
-              <Text style={styles.progressPercent}>{Math.round(progress * 100)}%</Text>
-            </View>
-            <View style={styles.progressBar}>
-              <Animated.View 
-                style={[
-                  styles.progressFill, 
-                  { 
-                    backgroundColor: getStatusColor(order.status),
-                    width: animatedValue.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', `${progress * 100}%`]
-                    })
-                  }
-                ]} 
-              />
-            </View>
-          </View>
-        )}
-
-        {/* Status Timeline */}
-        {isCancelled ? (
-          <View style={styles.cancelledBox}>
-            <Ionicons name="close-circle" size={64} color={Colors.error} />
-            <Text style={styles.cancelledTitle}>Buyurtma bekor qilingan</Text>
-            <Text style={styles.cancelledDescription}>
-              Bu buyurtma bekor qilingan. Iltimos, qayta buyurtma berishingiz mumkin.
-            </Text>
-            <Pressable style={styles.reorderButton} onPress={() => router.push('/(tabs)/catalog')}>
-              <Text style={styles.reorderButtonText}>Qayta buyurtma berish</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={styles.timelineContainer}>
-            <Text style={styles.timelineTitle}>Batafsil holat</Text>
-            {steps.map((step, index) => {
-              const isCompleted = index <= currentStepIndex;
-              const isCurrent = index === currentStepIndex;
-              const isUpcoming = index > currentStepIndex;
-              
-              return (
-                <View key={step.key} style={styles.stepRow}>
-                  <View style={styles.stepLeft}>
-                    <View style={[
-                      styles.stepDot, 
-                      isCompleted && styles.stepDotCompleted,
-                      isCurrent && styles.stepDotCurrent,
-                      isUpcoming && styles.stepDotUpcoming
-                    ]}>
-                      <Ionicons 
-                        name={step.icon as any} 
-                        size={isCurrent ? 20 : 16} 
-                        color={isCompleted ? '#fff' : isCurrent ? Colors.primary : Colors.textMuted} 
-                      />
-                    </View>
-                    {index < steps.length - 1 && (
-                      <View style={[
-                        styles.stepLine,
-                        index < currentStepIndex && styles.stepLineCompleted
-                      ]} />
-                    )}
+        {/* Live Map - shown when courier is on the way */}
+        {showMap && (
+          <View style={styles.mapContainer}>
+            <MapView
+              ref={mapRef}
+              style={StyleSheet.absoluteFill}
+              initialRegion={{
+                latitude: customerCoord!.latitude,
+                longitude: customerCoord!.longitude,
+                latitudeDelta: 0.04,
+                longitudeDelta: 0.04,
+              }}
+              showsCompass={false}
+              showsScale={false}
+              toolbarEnabled={false}
+            >
+              {courierCoord && (
+                <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
+                  <View style={styles.courierMarker}>
+                    <Ionicons name="bicycle" size={16} color="#fff" />
                   </View>
-                  <View style={styles.stepRight}>
-                    <View style={styles.stepContent}>
-                      <Text style={[
-                        styles.stepLabel,
-                        isCompleted && styles.stepLabelCompleted,
-                        isCurrent && styles.stepLabelCurrent,
-                        isUpcoming && styles.stepLabelUpcoming
-                      ]}>
-                        {step.label}
-                      </Text>
-                      {step.time && (
-                        <Text style={styles.stepTime}>{step.time}</Text>
-                      )}
-                    </View>
-                    <Text style={styles.stepDescription}>{step.description}</Text>
-                    {isCurrent && (
-                      <View style={styles.currentBadge}>
-                        <Text style={styles.currentBadgeText}>Hozirgi holat</Text>
-                      </View>
-                    )}
-                  </View>
+                </Marker>
+              )}
+              <Marker coordinate={customerCoord!}>
+                <View style={styles.destinationMarker}>
+                  <Ionicons name="home" size={16} color="#fff" />
                 </View>
-              );
-            })}
-          </View>
-        )}
+              </Marker>
+            </MapView>
 
-        {/* Delivery Details */}
-        <View style={styles.deliveryCard}>
-          <Text style={styles.cardTitle}>Yetkazib berish ma'lumotlari</Text>
-          
-          <View style={styles.deliverySection}>
-            <View style={styles.deliveryRow}>
-              <Ionicons name="location" size={20} color={Colors.primary} />
-              <View style={styles.deliveryInfo}>
-                <Text style={styles.deliveryLabel}>Manzil</Text>
-                <Text style={styles.deliveryText}>{order.address}</Text>
+            {etaText && (
+              <View style={styles.etaBadge}>
+                <Ionicons name="time-outline" size={14} color="#16A34A" />
+                <Text style={styles.etaText}>{etaText}</Text>
               </View>
-            </View>
-            
-            <View style={styles.deliveryRow}>
-              <Ionicons name="person" size={20} color={Colors.primary} />
-              <View style={styles.deliveryInfo}>
-                <Text style={styles.deliveryLabel}>Qabul qiluvchi</Text>
-                <Text style={styles.deliveryText}>{order.customerName}</Text>
-                <Text style={styles.deliveryPhone}>{order.phoneNumber}</Text>
-              </View>
-            </View>
-            
-            {order.status === 'delivering' && (
-              <View style={styles.deliveryRow}>
-                <Ionicons name="bicycle" size={20} color={Colors.primary} />
-                <View style={styles.deliveryInfo}>
-                  <Text style={styles.deliveryLabel}>Kuryer</Text>
-                  <Text style={styles.deliveryText}>Yo'lda</Text>
-                </View>
+            )}
+
+            {!courierCoord && (
+              <View style={styles.mapWaiting}>
+                <ActivityIndicator size="small" color="#16A34A" />
+                <Text style={styles.mapWaitingText}>Kuryer joylashuvi kutilmoqda...</Text>
               </View>
             )}
           </View>
-        </View>
+        )}
 
-        {/* Order Items */}
-        <View style={styles.itemsCard}>
-          <Text style={styles.cardTitle}>Buyurtma mahsulotlari</Text>
-          {(order.items as any[])?.map((item: any, index: number) => (
-            <View key={index} style={styles.itemRow}>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemQuantity}>{item.qty} x {formatPrice(item.price)}</Text>
+        <View style={{ padding: 16, gap: 14 }}>
+          {/* Order header card */}
+          <View style={styles.card}>
+            <View style={styles.orderRow}>
+              <View>
+                <Text style={styles.orderNum}>Buyurtma #{order.id.slice(-6).toUpperCase()}</Text>
+                <Text style={styles.orderDate}>
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleDateString("uz-UZ", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : ""}
+                </Text>
               </View>
-              <Text style={styles.itemTotal}>{formatPrice(item.price * item.qty)}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status, Colors) + "22" }]}>
+                <Text style={[styles.statusBadgeText, { color: getStatusColor(order.status, Colors) }]}>
+                  {getStatusLabel(order.status)}
+                </Text>
+              </View>
             </View>
-          ))}
-        </View>
+            <View style={styles.divider} />
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Jami summa</Text>
+              <Text style={styles.totalAmount}>{formatPrice(order.total)}</Text>
+            </View>
+          </View>
 
-        {/* Contact Support */}
-        <View style={styles.supportCard}>
-          <Text style={styles.cardTitle}>Yordam kerakmi?</Text>
-          <View style={styles.supportButtons}>
-            <Pressable style={styles.supportButton}>
-              <Ionicons name="call" size={20} color={Colors.primary} />
-              <Text style={styles.supportButtonText}>Qo'ng'iroq qilish</Text>
-            </Pressable>
-            <Pressable style={styles.supportButton}>
-              <Ionicons name="chatbubble" size={20} color={Colors.primary} />
-              <Text style={styles.supportButtonText}>Chat</Text>
-            </Pressable>
+          {/* Progress bar */}
+          {!isCancelled && (
+            <View style={styles.card}>
+              <View style={styles.progressHeader}>
+                <Text style={styles.cardTitle}>Buyurtma jarayoni</Text>
+                <Text style={styles.progressPercent}>{Math.round((currentStep / 4) * 100)}%</Text>
+              </View>
+              <View style={styles.progressTrack}>
+                <Animated.View
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: progressAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0%", "100%"],
+                      }),
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Status stepper */}
+          {isCancelled ? (
+            <View style={[styles.card, { alignItems: "center", paddingVertical: 32, gap: 12 }]}>
+              <Ionicons name="close-circle" size={56} color={Colors.error} />
+              <Text style={[styles.cardTitle, { color: Colors.error }]}>Buyurtma bekor qilingan</Text>
+              <Text style={{ fontFamily: "Poppins_400Regular", color: Colors.textSecondary, textAlign: "center" }}>
+                Bu buyurtma bekor qilingan. Iltimos, qayta buyurtma bering.
+              </Text>
+              <Pressable
+                style={{ backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
+                onPress={() => router.push("/(tabs)/catalog" as any)}
+              >
+                <Text style={{ color: "#fff", fontFamily: "Poppins_600SemiBold" }}>Qayta buyurtma berish</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Batafsil holat</Text>
+              {steps.map((step, idx) => {
+                const isDone = idx < currentStep;
+                const isCurrent = idx === currentStep;
+                return (
+                  <View key={step.key} style={styles.stepRow}>
+                    <View style={styles.stepLeft}>
+                      <View
+                        style={[
+                          styles.stepDot,
+                          isDone && styles.stepDotDone,
+                          isCurrent && styles.stepDotCurrent,
+                        ]}
+                      >
+                        <Ionicons
+                          name={isDone ? "checkmark" : step.icon}
+                          size={isCurrent ? 20 : 16}
+                          color={isDone ? "#fff" : isCurrent ? Colors.primary : Colors.textMuted}
+                        />
+                      </View>
+                      {idx < steps.length - 1 && (
+                        <View style={[styles.stepConnector, isDone && styles.stepConnectorDone]} />
+                      )}
+                    </View>
+                    <View style={[styles.stepRight, idx < steps.length - 1 && { paddingBottom: 20 }]}>
+                      <Text
+                        style={[
+                          styles.stepLabel,
+                          isDone && styles.stepLabelDone,
+                          isCurrent && styles.stepLabelCurrent,
+                        ]}
+                      >
+                        {step.label}
+                      </Text>
+                      <Text style={styles.stepDesc}>{step.description}</Text>
+                      {isCurrent && (
+                        <View style={styles.currentBadge}>
+                          <Text style={styles.currentBadgeText}>Hozirgi holat</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+
+          {/* ETA card when delivering */}
+          {order.status === "delivering" && etaText && (
+            <View style={[styles.card, styles.etaCard]}>
+              <Ionicons name="time-outline" size={24} color="#16A34A" />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.etaCardLabel}>Taxminiy yetkazish vaqti</Text>
+                <Text style={styles.etaCardValue}>{etaText}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Delivery info */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Yetkazish ma'lumotlari</Text>
+            <View style={styles.infoRow}>
+              <View style={styles.iconWrap}>
+                <Ionicons name="location" size={16} color="#16A34A" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Manzil</Text>
+                <Text style={styles.infoValue}>{order.address}</Text>
+              </View>
+            </View>
+            <View style={styles.infoRow}>
+              <View style={styles.iconWrap}>
+                <Ionicons name="person" size={16} color="#16A34A" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.infoLabel}>Qabul qiluvchi</Text>
+                <Text style={styles.infoValue}>{order.customerName}</Text>
+                <Text style={styles.infoPhone}>{order.phoneNumber}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Order items */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Buyurtma mahsulotlari</Text>
+            {(order.items as any[])?.map((item: any, i: number) => (
+              <View key={i} style={[styles.itemRow, i < (order.items as any[]).length - 1 && styles.itemRowBorder]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.itemName}>{item.name}</Text>
+                  <Text style={styles.itemQty}>
+                    {item.qty} x {formatPrice(item.price)}
+                  </Text>
+                </View>
+                <Text style={styles.itemTotal}>{formatPrice(item.price * item.qty)}</Text>
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -355,233 +462,385 @@ export default function EnhancedOrderTrackingScreen() {
   );
 }
 
+function getStatusColor(status: string, Colors: any): string {
+  switch (status) {
+    case "pending":
+    case "confirmed":
+      return Colors.warning ?? "#F59E0B";
+    case "preparing":
+    case "ready":
+      return Colors.primary;
+    case "delivering":
+      return Colors.primary;
+    case "delivered":
+      return "#10B981";
+    case "cancelled":
+      return Colors.error;
+    default:
+      return Colors.textMuted;
+  }
+}
+
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Kutilmoqda";
+    case "confirmed":
+      return "Tasdiqlandi";
+    case "preparing":
+      return "Tayyorlanmoqda";
+    case "ready":
+      return "Tayyor";
+    case "delivering":
+      return "Yo'lda";
+    case "delivered":
+      return "Yetkazildi";
+    case "cancelled":
+      return "Bekor qilingan";
+    default:
+      return status;
+  }
+}
+
 const getStyles = (isDarkMode: boolean) => {
   const Colors = getColors(isDarkMode);
   return StyleSheet.create({
-    header: { 
-      flexDirection: "row", 
-      alignItems: "center", 
-      justifyContent: "space-between",
-      padding: 16, 
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingBottom: 12,
       backgroundColor: Colors.card,
       borderBottomWidth: 1,
-      borderBottomColor: Colors.divider
+      borderBottomColor: Colors.divider,
+      gap: 12,
     },
-    backButton: { padding: 8 },
-    title: { fontFamily: "Poppins_700Bold", fontSize: 18, color: Colors.text },
-    refreshButton: { padding: 8 },
-    
-    // Order Summary
-    orderSummaryCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+    backBtn: { padding: 4 },
+    title: {
+      flex: 1,
+      fontFamily: "Poppins_700Bold",
+      fontSize: 18,
+      color: Colors.text,
+    },
+    livePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#DCFCE7",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    liveDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: "#16A34A",
+    },
+    liveText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 10,
+      color: "#16A34A",
+      letterSpacing: 0.5,
+    },
+
+    mapContainer: {
+      height: 260,
+      backgroundColor: isDarkMode ? "#1C1C1E" : "#E8F5E9",
+      overflow: "hidden",
+    },
+    courierMarker: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "#16A34A",
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2.5,
+      borderColor: "#fff",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.25,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 5,
     },
-    orderHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 16,
+    destinationMarker: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "#EF4444",
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2.5,
+      borderColor: "#fff",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
     },
-    orderNumber: { fontFamily: 'Poppins_700Bold', fontSize: 18, color: Colors.text },
-    orderDate: { fontFamily: 'Poppins_400Regular', color: Colors.textMuted, marginTop: 4 },
-    statusBadge: {
-      backgroundColor: Colors.primary + '20',
-      paddingHorizontal: 12,
+    etaBadge: {
+      position: "absolute",
+      top: 12,
+      left: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.95)",
+      borderRadius: 10,
+      paddingHorizontal: 10,
       paddingVertical: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.12,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    etaText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 12,
+      color: "#16A34A",
+    },
+    mapWaiting: {
+      position: "absolute",
+      bottom: 12,
+      left: 12,
+      right: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: isDarkMode ? "rgba(28,28,30,0.88)" : "rgba(255,255,255,0.9)",
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    mapWaitingText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.textSecondary,
+    },
+
+    card: {
+      backgroundColor: Colors.card,
+      borderRadius: 20,
+      padding: 16,
+      gap: 10,
+    },
+    cardTitle: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 16,
+      color: Colors.text,
+    },
+
+    orderRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    orderNum: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 17,
+      color: Colors.text,
+    },
+    orderDate: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 13,
+      color: Colors.textMuted,
+      marginTop: 2,
+    },
+    statusBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 5,
       borderRadius: 20,
     },
-    statusText: { fontFamily: 'Poppins_600SemiBold', color: Colors.primary, fontSize: 12 },
-    orderTotal: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingTop: 16,
-      borderTopWidth: 1,
-      borderTopColor: Colors.divider,
+    statusBadgeText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 12,
     },
-    totalLabel: { fontFamily: 'Poppins_500Medium', color: Colors.textMuted },
-    totalAmount: { fontFamily: 'Poppins_700Bold', fontSize: 20, color: Colors.primary },
-    
-    // Progress
-    progressContainer: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+    divider: {
+      height: 1,
+      backgroundColor: Colors.divider,
     },
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    totalLabel: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.textMuted,
+    },
+    totalAmount: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 18,
+      color: Colors.primary,
+    },
+
     progressHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 12,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
-    progressTitle: { fontFamily: 'Poppins_600SemiBold', fontSize: 16, color: Colors.text },
-    progressPercent: { fontFamily: 'Poppins_700Bold', fontSize: 16, color: Colors.primary },
-    progressBar: {
+    progressPercent: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 16,
+      color: Colors.primary,
+    },
+    progressTrack: {
       height: 8,
       backgroundColor: Colors.divider,
       borderRadius: 4,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     progressFill: {
-      height: '100%',
+      height: "100%",
+      backgroundColor: Colors.primary,
       borderRadius: 4,
     },
-    
-    // Timeline
-    timelineContainer: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+
+    stepRow: {
+      flexDirection: "row",
+      gap: 14,
     },
-    timelineTitle: { fontFamily: 'Poppins_700Bold', fontSize: 18, color: Colors.text, marginBottom: 20 },
-    stepRow: { flexDirection: 'row', gap: 16, marginBottom: 24 },
-    stepLeft: { alignItems: 'center' },
+    stepLeft: {
+      alignItems: "center",
+      width: 40,
+    },
     stepDot: {
       width: 40,
       height: 40,
       borderRadius: 20,
       backgroundColor: Colors.divider,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
-    stepDotCompleted: { backgroundColor: Colors.primary },
-    stepDotCurrent: { 
-      backgroundColor: Colors.primary + '20',
+    stepDotDone: {
+      backgroundColor: Colors.primary,
+    },
+    stepDotCurrent: {
+      backgroundColor: Colors.primary + "20",
       borderWidth: 2,
       borderColor: Colors.primary,
     },
-    stepDotUpcoming: { backgroundColor: Colors.divider },
-    stepLine: { width: 2, flex: 1, backgroundColor: Colors.divider },
-    stepLineCompleted: { backgroundColor: Colors.primary },
-    stepRight: { flex: 1, paddingTop: 4 },
-    stepContent: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 4,
+    stepConnector: {
+      width: 2,
+      flex: 1,
+      backgroundColor: Colors.divider,
+      marginVertical: 2,
     },
-    stepLabel: { fontFamily: 'Poppins_600SemiBold', fontSize: 16, color: Colors.textMuted },
-    stepLabelCompleted: { color: Colors.text },
-    stepLabelCurrent: { color: Colors.primary },
-    stepLabelUpcoming: { color: Colors.textMuted },
-    stepTime: { fontFamily: 'Poppins_400Regular', color: Colors.textMuted, fontSize: 14 },
-    stepDescription: { fontFamily: 'Poppins_400Regular', color: Colors.textSecondary, fontSize: 14, marginBottom: 8 },
-    currentBadge: {
-      backgroundColor: Colors.primary + '20',
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 12,
-      alignSelf: 'flex-start',
-    },
-    currentBadgeText: { 
-      fontFamily: 'Poppins_600SemiBold', 
-      color: Colors.primary, 
-      fontSize: 12 
-    },
-    
-    // Cancelled
-    cancelledBox: { 
-      alignItems: 'center', 
-      padding: 40, 
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      marginBottom: 20,
-    },
-    cancelledTitle: { 
-      fontFamily: 'Poppins_700Bold', 
-      color: Colors.error, 
-      fontSize: 20,
-      marginTop: 16,
-      marginBottom: 8,
-    },
-    cancelledDescription: { 
-      fontFamily: 'Poppins_400Regular', 
-      color: Colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: 24,
-    },
-    reorderButton: {
+    stepConnectorDone: {
       backgroundColor: Colors.primary,
-      paddingHorizontal: 24,
-      paddingVertical: 12,
-      borderRadius: 12,
     },
-    reorderButtonText: {
-      fontFamily: 'Poppins_600SemiBold',
-      color: '#fff',
+    stepRight: {
+      flex: 1,
+      paddingTop: 8,
     },
-    
-    // Cards
-    deliveryCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+    stepLabel: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 15,
+      color: Colors.textMuted,
     },
-    itemsCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+    stepLabelDone: {
+      color: Colors.text,
     },
-    supportCard: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
+    stepLabelCurrent: {
+      color: Colors.primary,
     },
-    cardTitle: { fontFamily: 'Poppins_700Bold', fontSize: 18, color: Colors.text, marginBottom: 16 },
-    
-    // Delivery
-    deliverySection: { gap: 16 },
-    deliveryRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-    deliveryInfo: { flex: 1 },
-    deliveryLabel: { fontFamily: 'Poppins_600SemiBold', color: Colors.text, marginBottom: 4 },
-    deliveryText: { fontFamily: 'Poppins_400Regular', color: Colors.textSecondary },
-    deliveryPhone: { fontFamily: 'Poppins_400Regular', color: Colors.textMuted, fontSize: 14 },
-    
-    // Items
+    stepDesc: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 13,
+      color: Colors.textSecondary,
+      marginTop: 2,
+    },
+    currentBadge: {
+      marginTop: 6,
+      alignSelf: "flex-start",
+      backgroundColor: Colors.primary + "20",
+      paddingHorizontal: 10,
+      paddingVertical: 3,
+      borderRadius: 10,
+    },
+    currentBadgeText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 11,
+      color: Colors.primary,
+    },
+
+    etaCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "#F0FDF4",
+      borderWidth: 1,
+      borderColor: isDarkMode ? "rgba(22,163,74,0.25)" : "#BBF7D0",
+    },
+    etaCardLabel: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.textSecondary,
+    },
+    etaCardValue: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 16,
+      color: "#16A34A",
+    },
+
+    infoRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+    },
+    iconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 9,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#DCFCE7",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 2,
+    },
+    infoLabel: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 13,
+      color: Colors.text,
+      marginBottom: 2,
+    },
+    infoValue: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 14,
+      color: Colors.textSecondary,
+    },
+    infoPhone: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 13,
+      color: Colors.textMuted,
+      marginTop: 1,
+    },
+
     itemRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 10,
+    },
+    itemRowBorder: {
       borderBottomWidth: 1,
       borderBottomColor: Colors.divider,
     },
-    itemInfo: { flex: 1 },
-    itemName: { fontFamily: 'Poppins_600SemiBold', color: Colors.text, fontSize: 16 },
-    itemQuantity: { fontFamily: 'Poppins_400Regular', color: Colors.textMuted, marginTop: 2 },
-    itemTotal: { fontFamily: 'Poppins_700Bold', color: Colors.primary, fontSize: 16 },
-    
-    // Support
-    supportButtons: {
-      flexDirection: 'row',
-      gap: 12,
+    itemName: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.text,
     },
-    supportButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      padding: 12,
-      backgroundColor: Colors.primary + '10',
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: Colors.primary + '30',
+    itemQty: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 13,
+      color: Colors.textMuted,
+      marginTop: 2,
     },
-    supportButtonText: {
-      fontFamily: 'Poppins_600SemiBold',
+    itemTotal: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 14,
       color: Colors.primary,
     },
   });
