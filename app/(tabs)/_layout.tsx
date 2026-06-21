@@ -115,5 +115,6 @@ export default function TabLayout() {
   if (!user) return <Redirect href="/auth" />;
   if (user.role === "admin") return <Redirect href="/admin" />;
   if (user.role === "courier") return <Redirect href="/courier" />;
+  if (user.role === "store") return <Redirect href="/(store)" />;
   return <ClassicTabLayout />;
 }

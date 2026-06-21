@@ -43,6 +43,7 @@ export default function AuthScreen() {
     if (user && !authLoading) {
       if (user.role === "admin") router.replace("/admin");
       else if (user.role === "courier") router.replace("/courier");
+      else if (user.role === "store") router.replace("/(store)");
       else router.replace("/(tabs)");
     }
   }, [user, authLoading]);
