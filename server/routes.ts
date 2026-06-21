@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./db-storage";
-import { setupWebSocket, broadcast } from "./websocket";
+import { setupWebSocket, broadcast, sendToUser } from "./websocket";
 import { insertProductSchema, insertOrderSchema } from "@shared/schema";
 import * as XLSX from "xlsx";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../lib/password";
@@ -12,6 +12,8 @@ import {
   requireAdmin, 
   requireAdminOrCourier, 
   requireCustomer,
+  requireStore,
+  requireAdminOrStore,
   optionalAuth 
 } from "../lib/auth-middleware";
 import { 
@@ -71,7 +73,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     validateRequestBody(authSchemas.register),
     async (req, res) => {
       try {
-        const { phoneNumber, password, name } = req.body;
+        const { phoneNumber, password, name, role, storeName, storeAddress, storePhone, storeDescription } = req.body;
+
+        // Only allow customer and store self-registration
+        const allowedRoles = ["customer", "store"];
+        const userRole = allowedRoles.includes(role) ? role : "customer";
 
         // Check if user already exists
         const existing = await storage.getUserByPhone(phoneNumber);
@@ -87,8 +93,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phoneNumber, 
           password: hashedPassword, 
           name, 
-          role: "customer" 
+          role: userRole,
         });
+
+        // If store role, auto-create a store record
+        let store = null;
+        if (userRole === "store") {
+          store = await storage.createStore({
+            ownerId: user.id,
+            name: storeName || name || "Mening do'konim",
+            description: storeDescription || null,
+            address: storeAddress || null,
+            phone: storePhone || phoneNumber,
+            isActive: true,
+          });
+        }
 
         // Generate JWT token
         const token = generateToken({
@@ -103,6 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(201).json({
           user: userWithoutPassword,
           token,
+          store,
         });
       } catch (error) {
         console.error("Registration error:", error);
@@ -774,6 +794,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const order = await storage.createOrder(orderData);
         broadcast("orders-changed");
+
+        // Notify store owners about items from their store
+        try {
+          await storage.notifyStoresForOrder(order);
+          const stores = await storage.getStores();
+          for (const s of stores) {
+            sendToUser(s.ownerId, "new-order", { orderId: order.id });
+          }
+        } catch (notifErr) {
+          console.error("Store notification error:", notifErr);
+        }
+
         res.json(order);
       } catch (error) {
         console.error("Error creating order:", error);
@@ -847,6 +879,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error marking notification read:", error);
         res.status(500).json({ error: "Failed to mark notification as read" });
+      }
+    }
+  );
+
+  // ── Store owner routes (/api/store/*) ────────────────────────────────────
+  // Get own store profile
+  app.get("/api/store/profile",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+        res.json(store);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch store profile" });
+      }
+    }
+  );
+
+  // Update own store profile
+  app.patch("/api/store/profile",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+        const { name, description, address, phone, logo } = req.body;
+        const updated = await storage.updateStore(store.id, { name, description, address, phone, logo });
+        res.json(updated);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update store profile" });
+      }
+    }
+  );
+
+  // Get store products (own products only)
+  app.get("/api/store/products",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+        const products = await storage.getProductsByStore(store.id);
+        res.json(products);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch store products" });
+      }
+    }
+  );
+
+  // Create product (store owner)
+  app.post("/api/store/products",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+        if (!store.isActive) return res.status(403).json({ error: "Store is not active" });
+
+        const productData = {
+          ...req.body,
+          id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          storeId: store.id,
+          inStock: true,
+          stockQuantity: req.body.stockQuantity || 0,
+        };
+
+        const result = insertProductSchema.safeParse(productData);
+        if (!result.success) {
+          return res.status(400).json({ error: "Invalid product data", details: result.error });
+        }
+        const product = await storage.createProduct(result.data);
+        broadcast("products-changed");
+        res.json(product);
+      } catch (error) {
+        console.error("Error creating store product:", error);
+        res.status(500).json({ error: "Failed to create product" });
+      }
+    }
+  );
+
+  // Update product (store owner — own products only)
+  app.patch("/api/store/products/:id",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+
+        const product = await storage.getProduct(req.params.id);
+        if (!product || product.storeId !== store.id) {
+          return res.status(403).json({ error: "Not your product" });
+        }
+
+        const updated = await storage.updateProduct(req.params.id, req.body);
+        broadcast("products-changed");
+        res.json(updated);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update product" });
+      }
+    }
+  );
+
+  // Delete product (store owner — own products only)
+  app.delete("/api/store/products/:id",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+
+        const product = await storage.getProduct(req.params.id);
+        if (!product || product.storeId !== store.id) {
+          return res.status(403).json({ error: "Not your product" });
+        }
+
+        await storage.softDeleteProduct(req.params.id);
+        broadcast("products-changed");
+        res.sendStatus(204);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to delete product" });
+      }
+    }
+  );
+
+  // Get store orders (own store orders only)
+  app.get("/api/store/orders",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+        const orders = await storage.getOrdersByStore(store.id);
+        res.json(orders);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch store orders" });
+      }
+    }
+  );
+
+  // Get store dashboard stats
+  app.get("/api/store/stats",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+
+        const [products, orders] = await Promise.all([
+          storage.getProductsByStore(store.id),
+          storage.getOrdersByStore(store.id),
+        ]);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayOrders = orders.filter((o) => new Date(o.createdAt) >= today);
+        const todayRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
+
+        res.json({
+          totalProducts: products.length,
+          totalOrders: orders.length,
+          todayOrders: todayOrders.length,
+          todayRevenue,
+          pendingOrders: orders.filter((o) => o.status === "pending" || o.status === "confirmed").length,
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch store stats" });
+      }
+    }
+  );
+
+  // ── Admin store management (/api/admin/stores) ───────────────────────────
+  app.get("/api/admin/stores",
+    authenticateToken,
+    requireAdmin,
+    async (_req, res) => {
+      try {
+        const stores = await storage.getStores();
+        res.json(stores);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to fetch stores" });
+      }
+    }
+  );
+
+  app.patch("/api/admin/stores/:id",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const updated = await storage.updateStore(req.params.id, req.body);
+        res.json(updated);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to update store" });
+      }
+    }
+  );
+
+  app.delete("/api/admin/stores/:id",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        await storage.softDeleteStore(req.params.id);
+        res.sendStatus(204);
+      } catch (error) {
+        res.status(500).json({ error: "Failed to delete store" });
+      }
+    }
+  );
+
+  // Admin: create store owner account
+  app.post("/api/admin/stores",
+    authenticateToken,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const { phoneNumber, password, name, storeName, storeDescription, storeAddress, storePhone } = req.body;
+        if (!phoneNumber || !password) {
+          return res.status(400).json({ error: "phoneNumber and password are required" });
+        }
+        const existing = await storage.getUserByPhone(phoneNumber);
+        if (existing) {
+          return res.status(400).json({ error: "User with this phone number already exists" });
+        }
+        const hashedPassword = await hashPassword(password);
+        const user = await storage.createUser({ phoneNumber, password: hashedPassword, name, role: "store" });
+        const store = await storage.createStore({
+          ownerId: user.id,
+          name: storeName || name || "Yangi do'kon",
+          description: storeDescription || null,
+          address: storeAddress || null,
+          phone: storePhone || phoneNumber,
+          isActive: true,
+        });
+        const { password: _, ...userWithoutPassword } = user;
+        res.status(201).json({ user: userWithoutPassword, store });
+      } catch (error) {
+        console.error("Error creating store:", error);
+        res.status(500).json({ error: "Failed to create store" });
       }
     }
   );

@@ -94,6 +94,16 @@ export const requireAdminOrCourier = authorizeRole(['admin', 'courier']);
 export const requireCustomer = authorizeRole(['customer']);
 
 /**
+ * Store owner-only middleware
+ */
+export const requireStore = authorizeRole(['store']);
+
+/**
+ * Admin or Store middleware
+ */
+export const requireAdminOrStore = authorizeRole(['admin', 'store']);
+
+/**
  * Optional authentication middleware
  * Attaches user to request if token is valid, but doesn't block if no token
  */

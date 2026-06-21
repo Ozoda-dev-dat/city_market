@@ -7,7 +7,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   phoneNumber: text("phone_number").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").default("customer").notNull(), // admin, courier, customer
+  role: text("role").default("customer").notNull(), // admin, courier, customer, store
   name: text("name"),
   address: text("address"),
   latitude: text("latitude"),
@@ -21,6 +21,24 @@ export const users = pgTable("users", {
   roleIdx: index("idx_users_role").on(table.role),
   activeIdx: index("idx_users_active").on(table.isActive),
   locationIdx: index("idx_users_location").on(table.latitude, table.longitude),
+}));
+
+export const stores = pgTable("stores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerId: varchar("owner_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  address: text("address"),
+  phone: text("phone"),
+  logo: text("logo"),
+  isActive: boolean("is_active").default(true).notNull(),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  ownerIdx: index("idx_stores_owner").on(table.ownerId),
+  activeIdx: index("idx_stores_active").on(table.isActive),
+  nameIdx: index("idx_stores_name").on(table.name),
 }));
 
 export const categories = pgTable("categories", {
@@ -60,6 +78,7 @@ export const products = pgTable("products", {
   name: text("name").notNull(),
   category: text("category").notNull().references(() => categories.id, { onDelete: "restrict" }),
   subcategoryId: varchar("subcategory_id").references(() => subcategories.id, { onDelete: "set null" }),
+  storeId: varchar("store_id").references(() => stores.id, { onDelete: "set null" }),
   price: integer("price").notNull(),
   originalPrice: integer("original_price"),
   unit: text("unit").notNull(),
@@ -78,6 +97,7 @@ export const products = pgTable("products", {
 }, (table) => ({
   nameIdx: index("idx_products_name").on(table.name),
   categoryIdx: index("idx_products_category").on(table.category),
+  storeIdx: index("idx_products_store").on(table.storeId),
   priceIdx: index("idx_products_price").on(table.price),
   stockIdx: index("idx_products_stock").on(table.stockQuantity),
   activeIdx: index("idx_products_active").on(table.isActive),
@@ -416,16 +436,24 @@ export const insertRefundSchema = createInsertSchema(refunds, {
 
 export const insertNotificationSchema = createInsertSchema(notifications, {
   userId: z.string().uuid(),
-  type: z.enum(["order_update", "promo", "product_available", "system", "reminder"]),
+  type: z.enum(["order_update", "promo", "product_available", "system", "reminder", "new_order"]),
   title: z.string().min(1).max(200),
   message: z.string().min(1).max(500),
   priority: z.enum(["low", "normal", "high", "urgent"]),
 });
 
+export const insertStoreSchema = createInsertSchema(stores, {
+  name: z.string().min(1).max(200),
+  description: z.string().max(1000).optional(),
+  address: z.string().max(500).optional(),
+  phone: z.string().optional(),
+  logo: z.string().optional(),
+});
+
 // Enhanced validation schemas with database-level constraints
 export const insertUserSchema = createInsertSchema(users, {
   phoneNumber: z.string().regex(/^\+998\d{9}$/, "Invalid Uzbek phone number format"),
-  role: z.enum(["admin", "courier", "customer"]),
+  role: z.enum(["admin", "courier", "customer", "store"]),
   name: z.string().min(1).max(100).optional(),
   address: z.string().max(500).optional(),
 });
@@ -464,6 +492,7 @@ export const insertCategorySchema = createInsertSchema(categories, {
 });
 
 export type User = typeof users.$inferSelect;
+export type Store = typeof stores.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Subcategory = typeof subcategories.$inferSelect;

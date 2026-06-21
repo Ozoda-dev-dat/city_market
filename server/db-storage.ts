@@ -1,8 +1,8 @@
 import { 
-  type User, type Product, type Category, type Order, type PromoCode, type Subcategory
+  type User, type Product, type Category, type Order, type PromoCode, type Subcategory, type Store
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { eq, and, isNull, desc, sql } from "drizzle-orm";
+import { eq, and, isNull, desc, sql, inArray } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "../shared/schema";
 import { auditService } from "./audit-service";
@@ -55,6 +55,16 @@ export interface IStorage {
   markNotificationRead(id: string, userId: string): Promise<void>;
   markAllNotificationsRead(userId: string): Promise<void>;
   createNotification(notification: any): Promise<any>;
+
+  getStores(): Promise<Store[]>;
+  getStore(id: string): Promise<Store | undefined>;
+  getStoreByOwner(ownerId: string): Promise<Store | undefined>;
+  createStore(store: any): Promise<Store>;
+  updateStore(id: string, store: any): Promise<Store>;
+  softDeleteStore(id: string): Promise<void>;
+  getProductsByStore(storeId: string): Promise<Product[]>;
+  getOrdersByStore(storeId: string): Promise<Order[]>;
+  notifyStoresForOrder(order: Order): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
@@ -65,8 +75,14 @@ export class DbStorage implements IStorage {
       throw new Error("DATABASE_URL is not set");
     }
     
-    const connectionString = process.env.DATABASE_URL;
-    const client = postgres(connectionString);
+    // Strip psql wrapper if present: psql 'postgresql://...' -> postgresql://...
+    let connectionString = process.env.DATABASE_URL.trim();
+    const psqlMatch = connectionString.match(/^psql\s+'(.+)'$/);
+    if (psqlMatch) {
+      connectionString = psqlMatch[1];
+    }
+    
+    const client = postgres(connectionString, { ssl: 'require' });
     this.db = drizzle(client, { schema });
     
     this.initMockData();
@@ -546,6 +562,133 @@ export class DbStorage implements IStorage {
       .values(notification)
       .returning();
     return result[0];
+  }
+
+  async getStores(): Promise<Store[]> {
+    return await this.db
+      .select()
+      .from(schema.stores)
+      .where(isNull(schema.stores.deletedAt))
+      .orderBy(desc(schema.stores.createdAt));
+  }
+
+  async getStore(id: string): Promise<Store | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.stores)
+      .where(eq(schema.stores.id, id));
+    return result[0];
+  }
+
+  async getStoreByOwner(ownerId: string): Promise<Store | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.stores)
+      .where(and(eq(schema.stores.ownerId, ownerId), isNull(schema.stores.deletedAt)));
+    return result[0];
+  }
+
+  async createStore(store: any): Promise<Store> {
+    const result = await this.db.insert(schema.stores).values(store).returning();
+    return result[0];
+  }
+
+  async updateStore(id: string, update: any): Promise<Store> {
+    const result = await this.db
+      .update(schema.stores)
+      .set({ ...update, updatedAt: new Date() })
+      .where(eq(schema.stores.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async softDeleteStore(id: string): Promise<void> {
+    await this.db
+      .update(schema.stores)
+      .set({ deletedAt: new Date(), isActive: false })
+      .where(eq(schema.stores.id, id));
+  }
+
+  async getProductsByStore(storeId: string): Promise<Product[]> {
+    return await this.db
+      .select()
+      .from(schema.products)
+      .where(and(eq(schema.products.storeId, storeId), isNull(schema.products.deletedAt)))
+      .orderBy(desc(schema.products.createdAt));
+  }
+
+  async getOrdersByStore(storeId: string): Promise<Order[]> {
+    const storeProducts = await this.db
+      .select({ id: schema.products.id })
+      .from(schema.products)
+      .where(eq(schema.products.storeId, storeId));
+
+    if (storeProducts.length === 0) return [];
+
+    const productIds = storeProducts.map((p) => p.id);
+
+    const allOrders = await this.db
+      .select()
+      .from(schema.orders)
+      .orderBy(desc(schema.orders.createdAt));
+
+    return allOrders.filter((order) => {
+      const items: any[] = Array.isArray(order.items) ? order.items : [];
+      return items.some((item: any) => productIds.includes(item.id || item.productId));
+    });
+  }
+
+  async notifyStoresForOrder(order: Order): Promise<void> {
+    const items: any[] = Array.isArray(order.items) ? order.items : [];
+    if (items.length === 0) return;
+
+    const productIds = items.map((i: any) => i.id || i.productId).filter(Boolean);
+    if (productIds.length === 0) return;
+
+    const products = await this.db
+      .select({ id: schema.products.id, name: schema.products.name, storeId: schema.products.storeId })
+      .from(schema.products)
+      .where(inArray(schema.products.id, productIds));
+
+    const storeItemsMap = new Map<string, { productName: string; quantity: number }[]>();
+
+    for (const item of items) {
+      const productId = item.id || item.productId;
+      const product = products.find((p) => p.id === productId);
+      if (!product?.storeId) continue;
+
+      if (!storeItemsMap.has(product.storeId)) {
+        storeItemsMap.set(product.storeId, []);
+      }
+      storeItemsMap.get(product.storeId)!.push({
+        productName: product.name,
+        quantity: item.quantity || 1,
+      });
+    }
+
+    for (const [storeId, storeItems] of storeItemsMap) {
+      const store = await this.getStore(storeId);
+      if (!store || !store.isActive) continue;
+
+      const itemsText = storeItems
+        .map((i) => `${i.productName} x${i.quantity}`)
+        .join(", ");
+
+      await this.createNotification({
+        userId: store.ownerId,
+        type: "new_order",
+        title: "Yangi buyurtma!",
+        message: `Buyurtma #${order.id.slice(-6).toUpperCase()}: ${itemsText}`,
+        data: {
+          orderId: order.id,
+          items: storeItems,
+          customerName: order.customerName,
+          address: order.address,
+        },
+        isRead: false,
+        priority: "high",
+      });
+    }
   }
 
   async seedNotificationsForUser(userId: string): Promise<void> {
