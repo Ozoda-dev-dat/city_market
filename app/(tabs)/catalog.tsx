@@ -8,6 +8,7 @@ import {
   Pressable,
   FlatList,
   Platform,
+  Image,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,6 +27,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/context/ProductsContext";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/query-client";
 
 function CategoryChip({
   label,
@@ -149,8 +152,9 @@ const chipStyles = StyleSheet.create({
 
 export default function CatalogScreen() {
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ category?: string }>();
+  const params = useLocalSearchParams<{ category?: string; storeId?: string }>();
   const [activeCategory, setActiveCategory] = useState<string | null>(params.category ?? null);
+  const [activeStore, setActiveStore] = useState<string | null>(params.storeId ?? null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc">("default");
   const { isDarkMode } = useTheme();
@@ -159,6 +163,16 @@ export default function CatalogScreen() {
   const { categories } = useApp();
   const { items } = useCart();
   const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  const { data: storesData } = useQuery({
+    queryKey: ["/api/stores"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/stores");
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+  const stores: any[] = Array.isArray(storesData) ? storesData.filter((s: any) => s.isActive) : [];
   const cartScale = useSharedValue(1);
   const cartAnim = useAnimatedStyle(() => ({ transform: [{ scale: cartScale.value }] }));
 
@@ -184,6 +198,9 @@ export default function CatalogScreen() {
 
   const filtered = useMemo(() => {
     let products = allProducts;
+    if (activeStore) {
+      products = products.filter((p: any) => p.storeId === activeStore);
+    }
     if (activeCategory) {
       products = products.filter((p) => p.category === activeCategory);
     }
@@ -197,7 +214,7 @@ export default function CatalogScreen() {
       products = [...products].sort((a, b) => b.price - a.price);
     }
     return products;
-  }, [activeCategory, search, sortBy, allProducts]);
+  }, [activeStore, activeCategory, search, sortBy, allProducts]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bgColors: [string, string, string] = isDarkMode
@@ -306,6 +323,43 @@ export default function CatalogScreen() {
             </Pressable>
           </Animated.View>
         </View>
+
+        {stores.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.storeScroll}
+            contentContainerStyle={styles.storeContent}
+          >
+            <Pressable
+              style={[styles.storeChip, !activeStore && styles.storeChipActive]}
+              onPress={() => setActiveStore(null)}
+            >
+              <View style={[styles.storeLogoBox, !activeStore && { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+                <Ionicons name="grid" size={14} color={!activeStore ? "#fff" : Colors.textMuted} />
+              </View>
+              <Text style={[styles.storeChipText, !activeStore && styles.storeChipTextActive]}>Barchasi</Text>
+            </Pressable>
+            {stores.map((store: any) => (
+              <Pressable
+                key={store.id}
+                style={[styles.storeChip, activeStore === store.id && styles.storeChipActive]}
+                onPress={() => setActiveStore(activeStore === store.id ? null : store.id)}
+              >
+                <View style={[styles.storeLogoBox, activeStore === store.id && { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+                  {store.logo ? (
+                    <Image source={{ uri: store.logo }} style={{ width: 20, height: 20, borderRadius: 6 }} />
+                  ) : (
+                    <Ionicons name="storefront" size={14} color={activeStore === store.id ? "#fff" : Colors.primary} />
+                  )}
+                </View>
+                <Text style={[styles.storeChipText, activeStore === store.id && styles.storeChipTextActive]} numberOfLines={1}>
+                  {store.name}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
 
         <ScrollView
           horizontal
@@ -532,5 +586,46 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
     textAlign: "center",
+  },
+  storeScroll: {
+    marginHorizontal: -16,
+    marginBottom: 4,
+  },
+  storeContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+    paddingBottom: 6,
+  },
+  storeChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.75)",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.07)",
+  },
+  storeChipActive: {
+    backgroundColor: "#16A34A",
+    borderColor: "#16A34A",
+  },
+  storeLogoBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    backgroundColor: "rgba(22,163,74,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  storeChipText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "#374151",
+    maxWidth: 100,
+  },
+  storeChipTextActive: {
+    color: "#fff",
   },
 });

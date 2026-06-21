@@ -160,6 +160,13 @@ export default function AdminDashboard() {
           bgColor="#FDF2F8"
           onPress={() => router.push("/admin/promo-codes")}
         />
+        <QuickActionCard
+          icon="storefront-outline"
+          label="Do'konlar"
+          color="#0891B2"
+          bgColor="#E0F2FE"
+          onPress={() => router.push("/admin/stores")}
+        />
       </View>
 
       <View style={styles.sectionHeader}>

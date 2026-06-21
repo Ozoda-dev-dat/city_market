@@ -69,6 +69,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply rate limiting to auth endpoints
   app.use('/api/auth', rateLimiters.auth);
 
+  // ── Public store listing (no auth required) ───────────────────────────────
+  app.get("/api/stores", async (_req, res) => {
+    try {
+      const stores = await storage.getStores();
+      res.json(stores.filter((s: any) => s.isActive && !s.deletedAt));
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stores" });
+    }
+  });
+
   app.post("/api/auth/register", 
     validateRequestBody(authSchemas.register),
     async (req, res) => {

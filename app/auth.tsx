@@ -38,6 +38,8 @@ export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [isStore, setIsStore] = useState(false);
+  const [storeName, setStoreName] = useState("");
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -78,7 +80,7 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       if (isLogin) await login(phoneNumber, password);
-      else await register(phoneNumber, password, name);
+      else await register(phoneNumber, password, name, isStore ? "store" : "customer", isStore ? storeName : undefined);
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
       let errorMessage = t("error_invalid");
@@ -142,7 +144,7 @@ export default function AuthScreen() {
           <View style={styles.tabRow}>
             <Pressable
               style={[styles.tab, isLogin && styles.tabActive]}
-              onPress={() => { setIsLogin(true); setPhoneSuffix(""); setPassword(""); setName(""); }}
+              onPress={() => { setIsLogin(true); setPhoneSuffix(""); setPassword(""); setName(""); setIsStore(false); setStoreName(""); }}
             >
               <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
             </Pressable>
@@ -155,20 +157,56 @@ export default function AuthScreen() {
           </View>
 
           {!isLogin && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Ism</Text>
-              <View style={styles.inputBox}>
-                <Ionicons name="person-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ismingizni kiriting"
-                  placeholderTextColor={Colors.textMuted}
-                  value={name}
-                  onChangeText={setName}
-                  autoCapitalize="words"
-                />
+            <>
+              <View style={styles.roleRow}>
+                <Pressable
+                  style={[styles.roleBtn, !isStore && styles.roleBtnActive]}
+                  onPress={() => setIsStore(false)}
+                >
+                  <Ionicons name="person-outline" size={16} color={!isStore ? "#fff" : Colors.textMuted} />
+                  <Text style={[styles.roleBtnText, !isStore && styles.roleBtnTextActive]}>Mijoz</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.roleBtn, isStore && styles.roleBtnActive]}
+                  onPress={() => setIsStore(true)}
+                >
+                  <Ionicons name="storefront-outline" size={16} color={isStore ? "#fff" : Colors.textMuted} />
+                  <Text style={[styles.roleBtnText, isStore && styles.roleBtnTextActive]}>Do'kon egasi</Text>
+                </Pressable>
               </View>
-            </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>{isStore ? "Sizning ismingiz" : "Ism"}</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="person-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ismingizni kiriting"
+                    placeholderTextColor={Colors.textMuted}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
+
+              {isStore && (
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Do'kon nomi</Text>
+                  <View style={styles.inputBox}>
+                    <Ionicons name="storefront-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Do'kon nomini kiriting"
+                      placeholderTextColor={Colors.textMuted}
+                      value={storeName}
+                      onChangeText={setStoreName}
+                      autoCapitalize="words"
+                    />
+                  </View>
+                </View>
+              )}
+            </>
           )}
 
           <View style={styles.inputGroup}>
@@ -438,6 +476,35 @@ const getStyles = (isDarkMode: boolean) => {
     authBtnText: {
       fontFamily: "Poppins_700Bold",
       fontSize: 16,
+      color: "#fff",
+    },
+    roleRow: {
+      flexDirection: "row",
+      gap: 10,
+      marginBottom: 20,
+    },
+    roleBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      paddingVertical: 12,
+      borderRadius: 14,
+      backgroundColor: isDarkMode ? "#1C1C1E" : "#F5F6F5",
+      borderWidth: 1.5,
+      borderColor: "transparent",
+    },
+    roleBtnActive: {
+      backgroundColor: Colors.primary,
+      borderColor: Colors.primary,
+    },
+    roleBtnText: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 13,
+      color: Colors.textMuted,
+    },
+    roleBtnTextActive: {
       color: "#fff",
     },
   });

@@ -1,13 +1,14 @@
 import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
 import { useStoreRealtime } from "@/hooks/useStoreRealtime";
+import { wsManager } from "@/lib/websocket";
 
 function useUnreadOrderNotifications() {
   const { data } = useQuery({
@@ -21,6 +22,70 @@ function useUnreadOrderNotifications() {
   const notifications: any[] = Array.isArray(data) ? data : (data?.notifications ?? []);
   return notifications.filter((n: any) => !n.isRead && n.type === "new_order").length;
 }
+
+function NewOrderBanner() {
+  const { isDarkMode } = useTheme();
+  const Colors = getColors(isDarkMode);
+  const [visible, setVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(-80)).current;
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const off = wsManager.on("new-order", () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setVisible(true);
+      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 14 }).start();
+      timerRef.current = setTimeout(() => {
+        Animated.timing(slideAnim, { toValue: -80, useNativeDriver: true, duration: 300 }).start(() => setVisible(false));
+      }, 4000);
+    });
+    return () => { off(); if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [slideAnim]);
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View style={[bannerStyles.banner, { backgroundColor: Colors.primary, transform: [{ translateY: slideAnim }] }]}>
+      <View style={bannerStyles.iconBox}>
+        <Ionicons name="receipt" size={20} color="#fff" />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={bannerStyles.title}>Yangi buyurtma!</Text>
+        <Text style={bannerStyles.sub}>Buyurtmalar bo'limini tekshiring</Text>
+      </View>
+    </Animated.View>
+  );
+}
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  iconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: { fontFamily: "Poppins_700Bold", fontSize: 14, color: "#fff" },
+  sub: { fontFamily: "Poppins_400Regular", fontSize: 12, color: "rgba(255,255,255,0.85)" },
+});
 
 export default function StoreLayout() {
   const { isDarkMode } = useTheme();
@@ -48,6 +113,8 @@ export default function StoreLayout() {
   }
 
   return (
+    <>
+    <NewOrderBanner />
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -105,6 +172,7 @@ export default function StoreLayout() {
         }}
       />
     </Tabs>
+    </>
   );
 }
 
