@@ -89,14 +89,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const hashedPassword = await hashPassword(password);
 
         // Create user with hashed password
-        const user = await storage.createUser({ 
+        let user = await storage.createUser({ 
           phoneNumber, 
           password: hashedPassword, 
           name, 
           role: userRole,
         });
 
-        // If store role, auto-create a store record
+        // If store role, auto-create a store record and link back to user
         let store = null;
         if (userRole === "store") {
           store = await storage.createStore({
@@ -107,6 +107,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             phone: storePhone || phoneNumber,
             isActive: true,
           });
+          // Set users.storeId so the link is bidirectional
+          await storage.updateUser(user.id, { storeId: store.id });
+          user = { ...user, storeId: store.id };
         }
 
         // Generate JWT token
@@ -1112,16 +1115,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: "User with this phone number already exists" });
         }
         const hashedPassword = await hashPassword(password);
-        const user = await storage.createUser({ phoneNumber, password: hashedPassword, name, role: "store" });
+        const newUser = await storage.createUser({ phoneNumber, password: hashedPassword, name, role: "store" });
         const store = await storage.createStore({
-          ownerId: user.id,
+          ownerId: newUser.id,
           name: storeName || name || "Yangi do'kon",
           description: storeDescription || null,
           address: storeAddress || null,
           phone: storePhone || phoneNumber,
           isActive: true,
         });
-        const { password: _, ...userWithoutPassword } = user;
+        await storage.updateUser(newUser.id, { storeId: store.id });
+        const { password: _, ...userWithoutPassword } = { ...newUser, storeId: store.id };
         res.status(201).json({ user: userWithoutPassword, store });
       } catch (error) {
         console.error("Error creating store:", error);

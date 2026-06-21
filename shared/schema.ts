@@ -12,6 +12,7 @@ export const users = pgTable("users", {
   address: text("address"),
   latitude: text("latitude"),
   longitude: text("longitude"),
+  storeId: varchar("store_id"), // FK set after stores table is defined — see FK constraint below
   isActive: boolean("is_active").default(true).notNull(),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -20,6 +21,7 @@ export const users = pgTable("users", {
   phoneIdx: index("idx_users_phone").on(table.phoneNumber),
   roleIdx: index("idx_users_role").on(table.role),
   activeIdx: index("idx_users_active").on(table.isActive),
+  storeIdx: index("idx_users_store").on(table.storeId),
   locationIdx: index("idx_users_location").on(table.latitude, table.longitude),
 }));
 

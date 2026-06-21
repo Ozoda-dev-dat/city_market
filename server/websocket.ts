@@ -17,7 +17,18 @@ export function setupWebSocket(httpServer: Server): void {
         const msg = JSON.parse(raw.toString());
         if (msg.type === "auth" && msg.token) {
           const payload = verifyToken(msg.token);
-          userId = payload.userId;
+          const newUserId = payload.userId;
+
+          // Remove from old user set before associating with new one
+          if (userId && userId !== newUserId) {
+            const oldSockets = userSockets.get(userId);
+            if (oldSockets) {
+              oldSockets.delete(ws);
+              if (oldSockets.size === 0) userSockets.delete(userId);
+            }
+          }
+
+          userId = newUserId;
           if (!userSockets.has(userId)) {
             userSockets.set(userId, new Set());
           }

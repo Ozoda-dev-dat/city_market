@@ -214,6 +214,20 @@ export const authSchemas = {
     name: z.string().min(2, 'Name must be at least 2 characters')
       .max(50, 'Name must be less than 50 characters')
       .regex(/^[a-zA-Z\s\u0400-\u04FF'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
+    role: z.enum(['customer', 'store', 'courier']).optional(),
+    storeName: z.string().min(2).max(200).optional(),
+    storeAddress: z.string().min(2).max(500).optional(),
+    storePhone: z.string().optional(),
+    storeDescription: z.string().max(1000).optional(),
+  }).superRefine((data, ctx) => {
+    if (data.role === 'store') {
+      if (!data.storeName) {
+        ctx.addIssue({ code: 'custom', path: ['storeName'], message: 'Store name is required for store accounts' });
+      }
+      if (!data.storeAddress) {
+        ctx.addIssue({ code: 'custom', path: ['storeAddress'], message: 'Store address is required for store accounts' });
+      }
+    }
   }),
 
   login: z.object({
