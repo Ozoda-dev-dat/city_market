@@ -64,6 +64,7 @@ export interface IStorage {
   updateStore(id: string, store: any): Promise<Store>;
   softDeleteStore(id: string): Promise<void>;
   getProductsByStore(storeId: string): Promise<Product[]>;
+  getProductCountByStore(storeId: string): Promise<number>;
   getOrdersByStore(storeId: string): Promise<Order[]>;
   notifyStoresForOrder(order: Order): Promise<string[]>;
 }
@@ -621,6 +622,14 @@ export class DbStorage implements IStorage {
       .from(schema.products)
       .where(and(eq(schema.products.storeId, storeId), isNull(schema.products.deletedAt)))
       .orderBy(desc(schema.products.createdAt));
+  }
+
+  async getProductCountByStore(storeId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.products)
+      .where(and(eq(schema.products.storeId, storeId), isNull(schema.products.deletedAt)));
+    return result[0]?.count ?? 0;
   }
 
   async getOrdersByStore(storeId: string): Promise<Order[]> {

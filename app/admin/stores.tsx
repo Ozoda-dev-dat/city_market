@@ -207,6 +207,9 @@ export default function AdminStoresScreen() {
                   <Text style={styles.storeMeta} numberOfLines={1}>
                     {store.phone || "Telefon yo'q"} · {formatDate(store.createdAt)}
                   </Text>
+                  <Text style={styles.storeMeta} numberOfLines={1}>
+                    {store.productCount ?? 0} ta mahsulot
+                  </Text>
                   {store.address ? (
                     <Text style={styles.storeAddress} numberOfLines={1}>{store.address}</Text>
                   ) : null}

@@ -812,7 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const affectedOwnerIds = await storage.notifyStoresForOrder(order);
           for (const ownerId of affectedOwnerIds) {
-            sendToUser(ownerId, "new-order", { orderId: order.id });
+            sendToUser(ownerId, "new-order", { orderId: order.id, total: order.total });
           }
         } catch (notifErr) {
           console.error("Store notification error:", notifErr);
@@ -1152,17 +1152,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (_req, res) => {
       try {
         const stores = await storage.getStores();
-        const storesWithOwners = await Promise.all(
+        const storesWithDetails = await Promise.all(
           stores.map(async (store) => {
-            try {
-              const owner = await storage.getUser(store.ownerId);
-              return { ...store, ownerName: owner?.name || "Noma'lum", ownerPhone: owner?.phoneNumber };
-            } catch {
-              return { ...store, ownerName: "Noma'lum", ownerPhone: null };
-            }
+            const [owner, productCount] = await Promise.all([
+              storage.getUser(store.ownerId).catch(() => null),
+              storage.getProductCountByStore(store.id).catch(() => 0),
+            ]);
+            return {
+              ...store,
+              ownerName: owner?.name || "Noma'lum",
+              ownerPhone: owner?.phoneNumber ?? null,
+              productCount,
+            };
           })
         );
-        res.json(storesWithOwners);
+        res.json(storesWithDetails);
       } catch (error) {
         res.status(500).json({ error: "Failed to fetch stores" });
       }

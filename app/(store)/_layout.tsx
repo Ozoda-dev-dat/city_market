@@ -1,7 +1,7 @@
-import { Tabs, Redirect } from "expo-router";
+import { Tabs, Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, Animated } from "react-native";
+import { View, Text, StyleSheet, Animated, Pressable } from "react-native";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
@@ -23,11 +23,16 @@ function useUnreadOrderNotifications() {
   return notifications.filter((n: any) => !n.isRead && n.type === "new_order").length;
 }
 
+function formatTotal(amount: number): string {
+  return (amount / 1000).toLocaleString("uz-UZ", { maximumFractionDigits: 0 }) + " ming so'm";
+}
+
 function NewOrderBanner() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const [visible, setVisible] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
   const slideAnim = useRef(new Animated.Value(-90)).current;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -36,10 +41,17 @@ function NewOrderBanner() {
     Animated.timing(slideAnim, { toValue: -90, useNativeDriver: true, duration: 280 }).start(() => setVisible(false));
   };
 
+  const handleTap = () => {
+    dismiss();
+    router.push("/(store)/orders");
+  };
+
   useEffect(() => {
     const off = wsManager.on("new-order", (data: any) => {
       const id = data?.orderId ? String(data.orderId).slice(-6).toUpperCase() : null;
+      const tot = typeof data?.total === "number" ? data.total : null;
       setOrderId(id);
+      setTotal(tot);
       if (timerRef.current) clearTimeout(timerRef.current);
       setVisible(true);
       Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 14 }).start();
@@ -52,7 +64,7 @@ function NewOrderBanner() {
 
   return (
     <Animated.View style={[bannerStyles.banner, { backgroundColor: Colors.primary, transform: [{ translateY: slideAnim }] }]}>
-      <Pressable style={bannerStyles.row} onPress={() => { dismiss(); }}>
+      <Pressable style={bannerStyles.row} onPress={handleTap}>
         <View style={bannerStyles.iconBox}>
           <Ionicons name="receipt" size={20} color="#fff" />
         </View>
@@ -60,7 +72,9 @@ function NewOrderBanner() {
           <Text style={bannerStyles.title}>
             Yangi buyurtma{orderId ? ` #${orderId}` : ""}!
           </Text>
-          <Text style={bannerStyles.sub}>Buyurtmalar bo'limini tekshiring</Text>
+          <Text style={bannerStyles.sub}>
+            {total !== null ? formatTotal(total) + " · " : ""}Ko'rish uchun bosing
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
       </Pressable>

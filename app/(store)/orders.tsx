@@ -27,6 +27,12 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   cancelled:  { label: "Bekor qilingan",  color: "#EF4444", bg: "#FEF2F2" },
 };
 
+const CTA_LABELS: Record<string, string> = {
+  preparing: "Tayyorlashni boshlash",
+  ready:     "Tayyor",
+  cancelled: "Bekor qilish",
+};
+
 const FILTER_TABS = [
   { key: "all",       label: "Barchasi" },
   { key: "pending",   label: "Yangi" },
@@ -227,7 +233,7 @@ export default function StoreOrdersScreen() {
                                 <ActivityIndicator size="small" color={nst.color} />
                               ) : (
                                 <Text style={[styles.actionBtnText, { color: nst.color }]}>
-                                  {nst.label}
+                                  {CTA_LABELS[ns] ?? nst.label}
                                 </Text>
                               )}
                             </Pressable>
