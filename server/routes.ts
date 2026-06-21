@@ -980,7 +980,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(403).json({ error: "Not your product" });
         }
 
-        const updated = await storage.updateProduct(req.params.id, req.body);
+        // Strip immutable/sensitive fields — a store owner cannot reassign storeId or change identity fields
+        const { id: _id, storeId: _storeId, deletedAt: _deletedAt, createdAt: _createdAt, ...safeBody } = req.body;
+
+        const updated = await storage.updateProduct(req.params.id, safeBody);
         broadcast("products-changed");
         res.json(updated);
       } catch (error) {
