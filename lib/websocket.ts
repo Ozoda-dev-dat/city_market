@@ -7,10 +7,22 @@ class WsManager {
   private handlers: Map<string, Set<EventHandler>> = new Map();
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private shouldConnect = false;
+  private authToken: string | null = null;
 
   private getWsUrl(): string {
     const apiUrl = getApiUrl().replace(/\/$/, "");
     return apiUrl.replace(/^http/, "ws") + "/ws";
+  }
+
+  /** Call after login with the JWT so the server can bind this socket to the user. */
+  authenticate(token: string): void {
+    this.authToken = token;
+    this._sendAuth();
+  }
+
+  /** Remove auth binding (e.g. on logout). */
+  clearAuth(): void {
+    this.authToken = null;
   }
 
   connect(): void {
@@ -34,6 +46,12 @@ class WsManager {
     this.ws = null;
   }
 
+  private _sendAuth(): void {
+    if (this.authToken && this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "auth", token: this.authToken }));
+    }
+  }
+
   private _open(): void {
     try {
       this.ws = new WebSocket(this.getWsUrl());
@@ -44,6 +62,8 @@ class WsManager {
           this.reconnectTimer = null;
         }
         console.log("[WS] Connected");
+        // Immediately authenticate if we have a token
+        this._sendAuth();
       };
 
       this.ws.onmessage = (event) => {

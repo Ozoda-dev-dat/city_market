@@ -12,7 +12,7 @@ export const users = pgTable("users", {
   address: text("address"),
   latitude: text("latitude"),
   longitude: text("longitude"),
-  storeId: varchar("store_id"), // FK set after stores table is defined — see FK constraint below
+  storeId: varchar("store_id").references(() => stores.id, { onDelete: "set null" }),
   isActive: boolean("is_active").default(true).notNull(),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

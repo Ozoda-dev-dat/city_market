@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "@/shared/schema";
 import { apiRequest } from "@/lib/query-client";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { wsManager } from "@/lib/websocket";
 
 interface AuthContextValue {
   user: User | null;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const authData = JSON.parse(stored);
         setUser(authData.user);
         setToken(authData.token);
+        if (authData.token) wsManager.authenticate(authData.token);
       }
     } catch (e) {
       handleError(e instanceof Error ? e : new Error('Failed to load user data'), 'load_user');
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const authData = await res.json();
     setUser(authData.user);
     setToken(authData.token);
+    if (authData.token) wsManager.authenticate(authData.token);
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   };
 
@@ -63,12 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const authData = await res.json();
     setUser(authData.user);
     setToken(authData.token);
+    if (authData.token) wsManager.authenticate(authData.token);
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   };
 
   const logout = async () => {
     setUser(null);
     setToken(null);
+    wsManager.clearAuth();
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
   };
 

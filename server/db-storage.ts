@@ -625,17 +625,26 @@ export class DbStorage implements IStorage {
 
     if (storeProducts.length === 0) return [];
 
-    const productIds = storeProducts.map((p) => p.id);
+    const productIds = new Set(storeProducts.map((p) => p.id));
 
     const allOrders = await this.db
       .select()
       .from(schema.orders)
       .orderBy(desc(schema.orders.createdAt));
 
-    return allOrders.filter((order) => {
+    // Filter orders to only those containing this store's products,
+    // and strip items from other stores so owners see only their own data
+    const result: Order[] = [];
+    for (const order of allOrders) {
       const items: any[] = Array.isArray(order.items) ? order.items : [];
-      return items.some((item: any) => productIds.includes(item.id || item.productId));
-    });
+      const storeItems = items.filter((item: any) =>
+        productIds.has(item.id || item.productId)
+      );
+      if (storeItems.length > 0) {
+        result.push({ ...order, items: storeItems } as Order);
+      }
+    }
+    return result;
   }
 
   async notifyStoresForOrder(order: Order): Promise<string[]> {
