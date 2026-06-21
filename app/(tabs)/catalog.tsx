@@ -179,6 +179,12 @@ export default function CatalogScreen() {
   const sortScale = useSharedValue(1);
   const sortAnim = useAnimatedStyle(() => ({ transform: [{ scale: sortScale.value }] }));
 
+  const storeMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const s of stores) m[s.id] = s.name;
+    return m;
+  }, [stores]);
+
   const convertToProduct = (schemaProduct: any): Product => ({
     id: schemaProduct.id,
     name: schemaProduct.name,
@@ -421,6 +427,7 @@ export default function CatalogScreen() {
           renderItem={({ item }) => (
             <ProductCard
               product={convertToProduct(item)}
+              storeName={(item as any).storeId ? storeMap[(item as any).storeId] : undefined}
               onPress={() =>
                 router.push({ pathname: "/product/[id]", params: { id: item.id } })
               }

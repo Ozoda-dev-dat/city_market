@@ -9,7 +9,7 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   login: (phoneNumber: string, password: string) => Promise<void>;
-  register: (phoneNumber: string, password: string, name: string, role?: string, storeName?: string) => Promise<void>;
+  register: (phoneNumber: string, password: string, name: string, role?: string, storeName?: string, storeAddress?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   isLoading: boolean;
@@ -57,10 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
   };
 
-  const register = async (phoneNumber: string, password: string, name: string, role?: string, storeName?: string) => {
+  const register = async (phoneNumber: string, password: string, name: string, role?: string, storeName?: string, storeAddress?: string) => {
     const body: any = { phoneNumber, password, name };
     if (role) body.role = role;
     if (storeName) body.storeName = storeName;
+    if (storeAddress) body.storeAddress = storeAddress;
     const res = await apiRequest("POST", "/api/auth/register", body);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

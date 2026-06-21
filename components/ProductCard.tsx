@@ -32,6 +32,7 @@ interface ProductCardProps {
   product: Product;
   onPress: () => void;
   horizontal?: boolean;
+  storeName?: string;
 }
 
 const BADGE_LABELS: Record<string, string> = {
@@ -46,7 +47,7 @@ const BADGE_COLORS: Record<string, string> = {
   hot: "#F97316",
 };
 
-export function ProductCard({ product, onPress, horizontal }: ProductCardProps) {
+export function ProductCard({ product, onPress, horizontal, storeName }: ProductCardProps) {
   const { addToCart, items, updateQuantity, removeFromCart } = useCart();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -196,6 +197,12 @@ export function ProductCard({ product, onPress, horizontal }: ProductCardProps) 
         <View style={styles.info}>
           <Text style={[styles.name, { color: Colors.text }]} numberOfLines={2}>{product.name}</Text>
           <Text style={[styles.unit, { color: Colors.textMuted }]}>{product.unit}</Text>
+          {storeName ? (
+            <View style={styles.storeBadge}>
+              <Ionicons name="storefront" size={9} color="#16A34A" />
+              <Text style={styles.storeBadgeText} numberOfLines={1}>{storeName}</Text>
+            </View>
+          ) : null}
           <View style={styles.bottomRow}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.price, { color: Colors.text }]}>{formatPrice(product.price)}</Text>
@@ -329,6 +336,18 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: 11,
     textDecorationLine: "line-through",
+  },
+  storeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginBottom: 4,
+  },
+  storeBadgeText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 10,
+    color: "#16A34A",
+    flexShrink: 1,
   },
   addBtn: {
     width: 32,

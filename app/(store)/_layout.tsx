@@ -27,17 +27,23 @@ function NewOrderBanner() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const [visible, setVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(-80)).current;
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const slideAnim = useRef(new Animated.Value(-90)).current;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const dismiss = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    Animated.timing(slideAnim, { toValue: -90, useNativeDriver: true, duration: 280 }).start(() => setVisible(false));
+  };
+
   useEffect(() => {
-    const off = wsManager.on("new-order", () => {
+    const off = wsManager.on("new-order", (data: any) => {
+      const id = data?.orderId ? String(data.orderId).slice(-6).toUpperCase() : null;
+      setOrderId(id);
       if (timerRef.current) clearTimeout(timerRef.current);
       setVisible(true);
       Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, damping: 14 }).start();
-      timerRef.current = setTimeout(() => {
-        Animated.timing(slideAnim, { toValue: -80, useNativeDriver: true, duration: 300 }).start(() => setVisible(false));
-      }, 4000);
+      timerRef.current = setTimeout(dismiss, 5000);
     });
     return () => { off(); if (timerRef.current) clearTimeout(timerRef.current); };
   }, [slideAnim]);
@@ -46,13 +52,18 @@ function NewOrderBanner() {
 
   return (
     <Animated.View style={[bannerStyles.banner, { backgroundColor: Colors.primary, transform: [{ translateY: slideAnim }] }]}>
-      <View style={bannerStyles.iconBox}>
-        <Ionicons name="receipt" size={20} color="#fff" />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={bannerStyles.title}>Yangi buyurtma!</Text>
-        <Text style={bannerStyles.sub}>Buyurtmalar bo'limini tekshiring</Text>
-      </View>
+      <Pressable style={bannerStyles.row} onPress={() => { dismiss(); }}>
+        <View style={bannerStyles.iconBox}>
+          <Ionicons name="receipt" size={20} color="#fff" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={bannerStyles.title}>
+            Yangi buyurtma{orderId ? ` #${orderId}` : ""}!
+          </Text>
+          <Text style={bannerStyles.sub}>Buyurtmalar bo'limini tekshiring</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+      </Pressable>
     </Animated.View>
   );
 }
@@ -64,16 +75,18 @@ const bannerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 999,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 12,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   iconBox: {
     width: 36,

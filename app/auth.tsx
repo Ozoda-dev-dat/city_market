@@ -40,6 +40,7 @@ export default function AuthScreen() {
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [isStore, setIsStore] = useState(false);
   const [storeName, setStoreName] = useState("");
+  const [storeAddress, setStoreAddress] = useState("");
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -80,7 +81,7 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       if (isLogin) await login(phoneNumber, password);
-      else await register(phoneNumber, password, name, isStore ? "store" : "customer", isStore ? storeName : undefined);
+      else await register(phoneNumber, password, name, isStore ? "store" : "customer", isStore ? storeName : undefined, isStore ? storeAddress : undefined);
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
       let errorMessage = t("error_invalid");
@@ -191,20 +192,36 @@ export default function AuthScreen() {
               </View>
 
               {isStore && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Do'kon nomi</Text>
-                  <View style={styles.inputBox}>
-                    <Ionicons name="storefront-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Do'kon nomini kiriting"
-                      placeholderTextColor={Colors.textMuted}
-                      value={storeName}
-                      onChangeText={setStoreName}
-                      autoCapitalize="words"
-                    />
+                <>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Do'kon nomi</Text>
+                    <View style={styles.inputBox}>
+                      <Ionicons name="storefront-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Do'kon nomini kiriting"
+                        placeholderTextColor={Colors.textMuted}
+                        value={storeName}
+                        onChangeText={setStoreName}
+                        autoCapitalize="words"
+                      />
+                    </View>
                   </View>
-                </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Do'kon manzili</Text>
+                    <View style={styles.inputBox}>
+                      <Ionicons name="location-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Shahar, ko'cha, uy"
+                        placeholderTextColor={Colors.textMuted}
+                        value={storeAddress}
+                        onChangeText={setStoreAddress}
+                        autoCapitalize="sentences"
+                      />
+                    </View>
+                  </View>
+                </>
               )}
             </>
           )}

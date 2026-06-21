@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { formatPrice } from "@/constants/data";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -185,14 +186,24 @@ export default function StoreOrdersScreen() {
                 {isExpanded && (
                   <View style={styles.orderDetail}>
                     <Text style={styles.detailSectionTitle}>Mahsulotlar:</Text>
-                    {items.map((item: any, idx: number) => (
-                      <View key={idx} style={styles.itemRow}>
-                        <Ionicons name="ellipse" size={6} color={Colors.textMuted} />
-                        <Text style={styles.itemText} numberOfLines={2}>
-                          {item.name ?? item.productId} — {item.quantity ?? 1} {item.unit ?? "ta"}
-                        </Text>
-                      </View>
-                    ))}
+                    {items.map((item: any, idx: number) => {
+                      const qty = item.quantity ?? 1;
+                      const price = item.price ?? 0;
+                      const lineTotal = qty * price;
+                      return (
+                        <View key={idx} style={styles.itemRow}>
+                          <Ionicons name="ellipse" size={6} color={Colors.textMuted} style={{ marginTop: 6 }} />
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.itemText} numberOfLines={2}>
+                              {item.name ?? item.productId}
+                            </Text>
+                            <Text style={styles.itemMeta}>
+                              {qty} {item.unit ?? "ta"}{price > 0 ? ` × ${formatPrice(price)} = ${formatPrice(lineTotal)}` : ""}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
 
                     {order.address ? (
                       <View style={styles.addressRow}>
@@ -338,10 +349,15 @@ const getStyles = (isDarkMode: boolean) => {
       gap: 8,
     },
     itemText: {
-      fontFamily: "Poppins_400Regular",
+      fontFamily: "Poppins_500Medium",
       fontSize: 13,
+      color: Colors.text,
+    },
+    itemMeta: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
       color: Colors.textSecondary,
-      flex: 1,
+      marginTop: 2,
     },
     addressRow: {
       flexDirection: "row",

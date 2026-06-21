@@ -1152,7 +1152,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (_req, res) => {
       try {
         const stores = await storage.getStores();
-        res.json(stores);
+        const storesWithOwners = await Promise.all(
+          stores.map(async (store) => {
+            try {
+              const owner = await storage.getUser(store.ownerId);
+              return { ...store, ownerName: owner?.name || "Noma'lum", ownerPhone: owner?.phoneNumber };
+            } catch {
+              return { ...store, ownerName: "Noma'lum", ownerPhone: null };
+            }
+          })
+        );
+        res.json(storesWithOwners);
       } catch (error) {
         res.status(500).json({ error: "Failed to fetch stores" });
       }

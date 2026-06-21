@@ -199,6 +199,11 @@ export default function AdminStoresScreen() {
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.storeName} numberOfLines={1}>{store.name}</Text>
+                  {store.ownerName ? (
+                    <Text style={styles.storeOwner} numberOfLines={1}>
+                      Egasi: {store.ownerName}{store.ownerPhone ? ` · ${store.ownerPhone}` : ""}
+                    </Text>
+                  ) : null}
                   <Text style={styles.storeMeta} numberOfLines={1}>
                     {store.phone || "Telefon yo'q"} · {formatDate(store.createdAt)}
                   </Text>
@@ -347,6 +352,12 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_600SemiBold",
       fontSize: 14,
       color: Colors.text,
+    },
+    storeOwner: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 12,
+      color: Colors.primary,
+      marginTop: 1,
     },
     storeMeta: {
       fontFamily: "Poppins_400Regular",
