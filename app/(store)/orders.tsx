@@ -66,7 +66,7 @@ export default function StoreOrdersScreen() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
-      apiRequest("PATCH", `/api/orders/${id}/status`, { status }),
+      apiRequest("PATCH", `/api/store/orders/${id}/status`, { status }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["/api/store/orders"] });
       qc.invalidateQueries({ queryKey: ["/api/store/stats"] });

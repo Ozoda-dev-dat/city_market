@@ -1033,6 +1033,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Update order status (store owner — own orders only, limited transitions)
+  app.patch("/api/store/orders/:id/status",
+    authenticateToken,
+    requireStore,
+    async (req, res) => {
+      try {
+        const store = await storage.getStoreByOwner(req.user!.userId);
+        if (!store) return res.status(404).json({ error: "Store not found" });
+
+        const { status } = req.body;
+        // Store owners may only move orders through their preparation steps
+        const allowed = ["preparing", "ready", "cancelled"];
+        if (!status || !allowed.includes(status)) {
+          return res.status(400).json({
+            error: `Store owners can only set status to: ${allowed.join(", ")}`,
+          });
+        }
+
+        // Verify this order belongs to the store (contains at least one product from it)
+        const storeOrders = await storage.getOrdersByStore(store.id);
+        const orderBelongsToStore = storeOrders.some((o: any) => o.id === req.params.id);
+        if (!orderBelongsToStore) {
+          return res.status(403).json({ error: "This order does not belong to your store" });
+        }
+
+        const order = await storage.updateOrderStatus(req.params.id, status);
+        broadcast("orders-changed");
+        res.json(order);
+      } catch (error) {
+        console.error("Error updating store order status:", error);
+        res.status(500).json({ error: "Failed to update order status" });
+      }
+    }
+  );
+
   // Get store dashboard stats
   app.get("/api/store/stats",
     authenticateToken,
