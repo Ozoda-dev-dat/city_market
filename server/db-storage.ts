@@ -64,7 +64,7 @@ export interface IStorage {
   softDeleteStore(id: string): Promise<void>;
   getProductsByStore(storeId: string): Promise<Product[]>;
   getOrdersByStore(storeId: string): Promise<Order[]>;
-  notifyStoresForOrder(order: Order): Promise<void>;
+  notifyStoresForOrder(order: Order): Promise<string[]>;
 }
 
 export class DbStorage implements IStorage {
@@ -638,12 +638,12 @@ export class DbStorage implements IStorage {
     });
   }
 
-  async notifyStoresForOrder(order: Order): Promise<void> {
+  async notifyStoresForOrder(order: Order): Promise<string[]> {
     const items: any[] = Array.isArray(order.items) ? order.items : [];
-    if (items.length === 0) return;
+    if (items.length === 0) return [];
 
     const productIds = items.map((i: any) => i.id || i.productId).filter(Boolean);
-    if (productIds.length === 0) return;
+    if (productIds.length === 0) return [];
 
     const products = await this.db
       .select({ id: schema.products.id, name: schema.products.name, storeId: schema.products.storeId })
@@ -665,6 +665,8 @@ export class DbStorage implements IStorage {
         quantity: item.quantity || 1,
       });
     }
+
+    const affectedOwnerIds: string[] = [];
 
     for (const [storeId, storeItems] of storeItemsMap) {
       const store = await this.getStore(storeId);
@@ -688,7 +690,11 @@ export class DbStorage implements IStorage {
         isRead: false,
         priority: "high",
       });
+
+      affectedOwnerIds.push(store.ownerId);
     }
+
+    return affectedOwnerIds;
   }
 
   async seedNotificationsForUser(userId: string): Promise<void> {

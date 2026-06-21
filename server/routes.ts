@@ -795,12 +795,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const order = await storage.createOrder(orderData);
         broadcast("orders-changed");
 
-        // Notify store owners about items from their store
+        // Notify only store owners whose products are in this order
         try {
-          await storage.notifyStoresForOrder(order);
-          const stores = await storage.getStores();
-          for (const s of stores) {
-            sendToUser(s.ownerId, "new-order", { orderId: order.id });
+          const affectedOwnerIds = await storage.notifyStoresForOrder(order);
+          for (const ownerId of affectedOwnerIds) {
+            sendToUser(ownerId, "new-order", { orderId: order.id });
           }
         } catch (notifErr) {
           console.error("Store notification error:", notifErr);

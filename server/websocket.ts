@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import type { Server } from "node:http";
+import { verifyToken } from "../lib/jwt";
 
 let wss: WebSocketServer | null = null;
 
@@ -8,20 +9,24 @@ const userSockets = new Map<string, Set<WebSocket>>();
 export function setupWebSocket(httpServer: Server): void {
   wss = new WebSocketServer({ server: httpServer, path: "/ws" });
 
-  wss.on("connection", (ws, req) => {
+  wss.on("connection", (ws) => {
     let userId: string | null = null;
 
     ws.on("message", (raw) => {
       try {
         const msg = JSON.parse(raw.toString());
-        if (msg.type === "auth" && msg.userId) {
-          userId = msg.userId;
+        if (msg.type === "auth" && msg.token) {
+          const payload = verifyToken(msg.token);
+          userId = payload.userId;
           if (!userSockets.has(userId)) {
             userSockets.set(userId, new Set());
           }
           userSockets.get(userId)!.add(ws);
+          ws.send(JSON.stringify({ event: "auth-ok", userId }));
         }
-      } catch (_) {}
+      } catch (_) {
+        // Invalid token or malformed message — ignore silently
+      }
     });
 
     ws.on("error", () => {});
