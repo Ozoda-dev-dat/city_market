@@ -7,6 +7,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/query-client";
+import { useStoreRealtime } from "@/hooks/useStoreRealtime";
 
 function useUnreadOrderNotifications() {
   const { data } = useQuery({
@@ -26,6 +27,7 @@ export default function StoreLayout() {
   const { user, isLoading } = useAuth();
   const Colors = getColors(isDarkMode);
   const unread = useUnreadOrderNotifications();
+  useStoreRealtime();
 
   if (isLoading) return null;
 

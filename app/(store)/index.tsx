@@ -58,6 +58,28 @@ export default function StoreDashboard() {
   const orders: any[] = Array.isArray(ordersData) ? ordersData : [];
   const recentOrders = orders.slice(0, 5);
 
+  // Calculate top-selling products from order items
+  const topProducts = React.useMemo(() => {
+    const countMap = new Map<string, { name: string; qty: number; unit: string }>();
+    for (const order of orders) {
+      if (order.status === "cancelled") continue;
+      const items: any[] = Array.isArray(order.items) ? order.items : [];
+      for (const item of items) {
+        const key = item.productId ?? item.name ?? String(item.id);
+        const existing = countMap.get(key);
+        const qty = Number(item.quantity) || 1;
+        if (existing) {
+          existing.qty += qty;
+        } else {
+          countMap.set(key, { name: item.name ?? key, qty, unit: item.unit ?? "ta" });
+        }
+      }
+    }
+    return Array.from(countMap.values())
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 5);
+  }, [orders]);
+
   const todayOrders = orders.filter((o: any) => {
     const d = new Date(o.createdAt);
     const now = new Date();
@@ -134,6 +156,23 @@ export default function StoreDashboard() {
           <Text style={styles.quickLabel}>Do'kon sozlash</Text>
         </Pressable>
       </View>
+
+      {topProducts.length > 0 && (
+        <View style={{ marginBottom: 28 }}>
+          <Text style={styles.sectionTitle}>Eng ko'p sotilgan mahsulotlar</Text>
+          {topProducts.map((p, idx) => (
+            <View key={idx} style={styles.topProductRow}>
+              <View style={[styles.topProductRank, { backgroundColor: idx === 0 ? Colors.primary : Colors.primaryLight }]}>
+                <Text style={[styles.topProductRankText, { color: idx === 0 ? "#fff" : Colors.primary }]}>
+                  {idx + 1}
+                </Text>
+              </View>
+              <Text style={styles.topProductName} numberOfLines={1}>{p.name}</Text>
+              <Text style={styles.topProductQty}>{p.qty} {p.unit}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>So'nggi buyurtmalar</Text>
@@ -335,6 +374,42 @@ const getStyles = (isDarkMode: boolean) => {
     statusText: {
       fontFamily: "Poppins_600SemiBold",
       fontSize: 11,
+    },
+    topProductRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: Colors.card,
+      borderRadius: 14,
+      padding: 12,
+      marginBottom: 8,
+      gap: 12,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    },
+    topProductRank: {
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    topProductRankText: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 14,
+    },
+    topProductName: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.text,
+      flex: 1,
+    },
+    topProductQty: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 13,
+      color: Colors.primary,
     },
     emptyBox: {
       alignItems: "center",
