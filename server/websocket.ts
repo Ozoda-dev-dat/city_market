@@ -34,6 +34,16 @@ export function setupWebSocket(httpServer: Server): void {
           }
           userSockets.get(userId)!.add(ws);
           ws.send(JSON.stringify({ event: "auth-ok", userId }));
+        } else if (msg.type === "deauth") {
+          // Client is logging out — remove this socket from user targeting immediately
+          if (userId) {
+            const sockets = userSockets.get(userId);
+            if (sockets) {
+              sockets.delete(ws);
+              if (sockets.size === 0) userSockets.delete(userId);
+            }
+            userId = null;
+          }
         }
       } catch (_) {
         // Invalid token or malformed message — ignore silently

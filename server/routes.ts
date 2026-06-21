@@ -966,11 +966,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Update product (store owner — own products only)
-  app.patch("/api/store/products/:id",
+  // Update product (store owner — own products only) — both PATCH and PUT supported
+  const storeProductUpdateHandler = [
     authenticateToken,
     requireStore,
-    async (req, res) => {
+    async (req: any, res: any) => {
       try {
         const store = await storage.getStoreByOwner(req.user!.userId);
         if (!store) return res.status(404).json({ error: "Store not found" });
@@ -986,8 +986,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         res.status(500).json({ error: "Failed to update product" });
       }
-    }
-  );
+    },
+  ];
+  app.patch("/api/store/products/:id", ...storeProductUpdateHandler);
+  app.put("/api/store/products/:id", ...storeProductUpdateHandler);
 
   // Delete product (store owner — own products only)
   app.delete("/api/store/products/:id",

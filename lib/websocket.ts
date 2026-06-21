@@ -20,9 +20,12 @@ class WsManager {
     this._sendAuth();
   }
 
-  /** Remove auth binding (e.g. on logout). */
+  /** Remove auth binding on logout — notifies server to stop targeting this socket. */
   clearAuth(): void {
     this.authToken = null;
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: "deauth" }));
+    }
   }
 
   connect(): void {
