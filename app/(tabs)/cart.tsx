@@ -29,6 +29,24 @@ import { apiRequest, queryClient, resolveImageUrl } from "@/lib/query-client";
 import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
+import { useLocation } from "@/context/LocationContext";
+
+const STORE_ORIGIN = { latitude: 41.2995, longitude: 69.2401 };
+const DELIVERY_RATE_PER_KM = 1500;
+const MIN_DELIVERY_FEE = 3000;
+const FREE_DELIVERY_THRESHOLD = 100000;
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 function CartItemRow({
   item,
@@ -156,6 +174,7 @@ export default function CartScreen() {
   const { user } = useAuth();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
+  const { location } = useLocation();
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedPromoMin, setAppliedPromoMin] = useState(0);
@@ -180,7 +199,24 @@ export default function CartScreen() {
   const TAB_BAR_HEIGHT = 62;
   const tabBarBottomInset = Platform.OS === "web" ? 20 : Math.max(insets.bottom, 8) + 8;
   const footerBottomOffset = Platform.OS === "web" ? 20 : tabBarBottomInset + TAB_BAR_HEIGHT + 8;
-  const delivery = totalPrice > 100000 ? 0 : 15000;
+
+  const deliveryDistanceKm: number | null =
+    location?.latitude && location?.longitude
+      ? haversineKm(
+          parseFloat(location.latitude),
+          parseFloat(location.longitude),
+          STORE_ORIGIN.latitude,
+          STORE_ORIGIN.longitude
+        )
+      : null;
+
+  const delivery =
+    totalPrice >= FREE_DELIVERY_THRESHOLD
+      ? 0
+      : deliveryDistanceKm !== null
+      ? Math.max(MIN_DELIVERY_FEE, Math.round(deliveryDistanceKm * DELIVERY_RATE_PER_KM))
+      : 15000;
+
   const finalTotal = Math.max(0, totalPrice + delivery - (totalPrice * discount / 100));
 
   const applyPromo = async () => {
@@ -349,7 +385,14 @@ export default function CartScreen() {
             <Text style={[styles.summaryValue, { color: Colors.text }]}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Yetkazib berish</Text>
+            <View style={{ gap: 2 }}>
+              <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Yetkazib berish</Text>
+              {deliveryDistanceKm !== null && delivery > 0 && (
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.textMuted }}>
+                  {deliveryDistanceKm.toFixed(1)} km × 1 500 so'm
+                </Text>
+              )}
+            </View>
             <Text style={[styles.summaryValue, delivery === 0 ? styles.freeText : { color: Colors.text }]}>
               {delivery === 0 ? "Bepul" : formatPrice(delivery)}
             </Text>
