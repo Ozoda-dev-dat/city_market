@@ -99,6 +99,14 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="orders"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "receipt" : "receipt-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (

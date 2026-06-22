@@ -419,8 +419,8 @@ export default function CourierOrderDetail() {
             <Text style={styles.sectionTitle}>Mahsulotlar</Text>
             {(order.items as any[]).map((item, i) => (
               <View key={i} style={styles.itemRow}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemQty}>x{item.qty}</Text>
+                <Text style={styles.itemName} numberOfLines={2}>{item.name ?? item.productId}</Text>
+                <Text style={styles.itemQty}>x{item.quantity ?? item.qty ?? 1}</Text>
               </View>
             ))}
             <View style={styles.divider} />
