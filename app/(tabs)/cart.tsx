@@ -31,7 +31,7 @@ import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
 import { useLocation } from "@/context/LocationContext";
 
-const STORE_ORIGIN = { latitude: 41.474193, longitude: 60.773275 };
+const STORE_ORIGIN = { latitude: 41.4741824, longitude: 60.7735868 };
 const DELIVERY_RATE_PER_KM = 1500;
 const MIN_DELIVERY_FEE = 3000;
 const FREE_DELIVERY_THRESHOLD = 100000;
@@ -428,7 +428,7 @@ export default function CartScreen() {
               <Ionicons name="location" size={16} color="#16A34A" />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.pickupInfoTitle}>Do'kon manzili</Text>
-                <Text style={styles.pickupInfoAddr}>41°28'27.1"N 60°46'23.8"E</Text>
+                <Text style={styles.pickupInfoAddr}>Al-Xorazmiy 2-tor ko'chasi, 48/5, Xonqa, Xorazm viloyati</Text>
                 <Text style={styles.pickupInfoNote}>Zakaz tayyor bo'lganda SMS xabar olasiz</Text>
               </View>
             </View>
