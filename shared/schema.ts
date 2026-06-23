@@ -137,6 +137,7 @@ export const orders = pgTable("orders", {
   total: integer("total").notNull(),
   discount: integer("discount").default(0).notNull(),
   status: text("status").default("pending").notNull(),
+  deliveryType: text("delivery_type").default("delivery").notNull(),
   items: jsonb("items").notNull(),
   promoCodeId: varchar("promo_code_id").references(() => promoCodes.id, { onDelete: "set null" }),
   isActive: boolean("is_active").default(true).notNull(),
@@ -476,6 +477,7 @@ export const insertOrderSchema = createInsertSchema(orders, {
   total: z.number().min(0).max(10000000),
   discount: z.number().min(0).max(10000000).optional(),
   status: z.enum(["pending", "confirmed", "preparing", "ready", "delivering", "delivered", "cancelled"]).optional(),
+  deliveryType: z.enum(["delivery", "pickup"]).optional(),
 });
 
 export const insertPromoCodeSchema = createInsertSchema(promoCodes, {

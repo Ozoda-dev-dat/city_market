@@ -179,6 +179,7 @@ export default function CartScreen() {
   const [discount, setDiscount] = useState(0);
   const [appliedPromoMin, setAppliedPromoMin] = useState(0);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
 
   const checkoutScale = useSharedValue(1);
   const checkoutAnim = useAnimatedStyle(() => ({ transform: [{ scale: checkoutScale.value }] }));
@@ -210,13 +211,14 @@ export default function CartScreen() {
         )
       : null;
 
-  const delivery =
+  const deliveryFeeBase =
     totalPrice >= FREE_DELIVERY_THRESHOLD
       ? 0
       : deliveryDistanceKm !== null
       ? Math.max(MIN_DELIVERY_FEE, Math.round(deliveryDistanceKm * DELIVERY_RATE_PER_KM))
       : 15000;
 
+  const delivery = deliveryType === "pickup" ? 0 : deliveryFeeBase;
   const finalTotal = Math.max(0, totalPrice + delivery - (totalPrice * discount / 100));
 
   const applyPromo = async () => {
@@ -264,11 +266,12 @@ export default function CartScreen() {
         customerId: user?.id,
         customerName: user?.name || "Mehmon",
         phoneNumber: user?.phoneNumber || "",
-        address: userLocation?.address || "Toshkent shahri",
-        latitude: userLocation?.latitude || null,
-        longitude: userLocation?.longitude || null,
+        address: deliveryType === "pickup" ? "Do'kondan olib ketiladi" : (userLocation?.address || "Toshkent shahri"),
+        latitude: deliveryType === "pickup" ? null : (userLocation?.latitude || null),
+        longitude: deliveryType === "pickup" ? null : (userLocation?.longitude || null),
         total: finalTotal,
         discount,
+        deliveryType,
         items: items.map((i) => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
       };
 
@@ -350,6 +353,89 @@ export default function CartScreen() {
         ))}
 
         <View style={[
+          styles.deliveryToggleCard,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.82)",
+            borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+          }
+        ]}>
+          <Text style={[styles.deliveryToggleTitle, { color: Colors.text }]}>
+            Yetkazib berish usuli
+          </Text>
+          <View style={styles.deliveryToggleRow}>
+            <Pressable
+              style={[
+                styles.deliveryToggleBtn,
+                deliveryType === "delivery" && styles.deliveryToggleBtnActive,
+                {
+                  backgroundColor: deliveryType === "delivery"
+                    ? "#16A34A"
+                    : isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                }
+              ]}
+              onPress={() => {
+                setDeliveryType("delivery");
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            >
+              <Ionicons
+                name="bicycle"
+                size={18}
+                color={deliveryType === "delivery" ? "#fff" : Colors.textSecondary}
+              />
+              <Text style={[
+                styles.deliveryToggleBtnText,
+                { color: deliveryType === "delivery" ? "#fff" : Colors.textSecondary }
+              ]}>
+                Yetkazib berish
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.deliveryToggleBtn,
+                deliveryType === "pickup" && styles.deliveryToggleBtnActive,
+                {
+                  backgroundColor: deliveryType === "pickup"
+                    ? "#16A34A"
+                    : isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                }
+              ]}
+              onPress={() => {
+                setDeliveryType("pickup");
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+            >
+              <Ionicons
+                name="storefront-outline"
+                size={18}
+                color={deliveryType === "pickup" ? "#fff" : Colors.textSecondary}
+              />
+              <Text style={[
+                styles.deliveryToggleBtnText,
+                { color: deliveryType === "pickup" ? "#fff" : Colors.textSecondary }
+              ]}>
+                O'zim olib ketaman
+              </Text>
+            </Pressable>
+          </View>
+
+          {deliveryType === "pickup" && (
+            <View style={[
+              styles.pickupInfo,
+              { backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.08)" }
+            ]}>
+              <Ionicons name="location" size={16} color="#16A34A" />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.pickupInfoTitle}>Do'kon manzili</Text>
+                <Text style={styles.pickupInfoAddr}>Toshkent, Chilonzor tumani, 7-mavze</Text>
+                <Text style={styles.pickupInfoNote}>Zakaz tayyor bo'lganda SMS xabar olasiz</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        <View style={[
           styles.promoRow,
           {
             backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
@@ -386,15 +472,22 @@ export default function CartScreen() {
           </View>
           <View style={styles.summaryRow}>
             <View style={{ gap: 2 }}>
-              <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Yetkazib berish</Text>
-              {deliveryDistanceKm !== null && delivery > 0 && (
+              <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>
+                {deliveryType === "pickup" ? "Yetkazib berish" : "Yetkazib berish"}
+              </Text>
+              {deliveryType === "delivery" && deliveryDistanceKm !== null && deliveryFeeBase > 0 && (
                 <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.textMuted }}>
                   {deliveryDistanceKm.toFixed(1)} km × 1 500 so'm
                 </Text>
               )}
+              {deliveryType === "pickup" && (
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: "#16A34A" }}>
+                  O'zim olib ketaman
+                </Text>
+              )}
             </View>
             <Text style={[styles.summaryValue, delivery === 0 ? styles.freeText : { color: Colors.text }]}>
-              {delivery === 0 ? "Bepul" : formatPrice(delivery)}
+              {deliveryType === "pickup" ? "Bepul" : delivery === 0 ? "Bepul" : formatPrice(delivery)}
             </Text>
           </View>
           {discount > 0 && (
@@ -439,9 +532,9 @@ export default function CartScreen() {
             <View style={styles.checkoutLeft}>
               {isCheckingOut
                 ? <ActivityIndicator size="small" color="#fff" />
-                : <Ionicons name="bag-check-outline" size={20} color="#fff" />}
+                : <Ionicons name={deliveryType === "pickup" ? "storefront-outline" : "bag-check-outline"} size={20} color="#fff" />}
               <Text style={styles.checkoutText}>
-                {isCheckingOut ? "Yuklanmoqda..." : "Buyurtma berish"}
+                {isCheckingOut ? "Yuklanmoqda..." : deliveryType === "pickup" ? "Do'kondan olib ketaman" : "Buyurtma berish"}
               </Text>
             </View>
             {!isCheckingOut && (
@@ -640,6 +733,63 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     lineHeight: 18,
+  },
+  deliveryToggleCard: {
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
+  },
+  deliveryToggleTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
+  },
+  deliveryToggleRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  deliveryToggleBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    paddingVertical: 11,
+    borderRadius: 14,
+  },
+  deliveryToggleBtnActive: {},
+  deliveryToggleBtnText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+  },
+  pickupInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+  },
+  pickupInfoTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#16A34A",
+  },
+  pickupInfoAddr: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: "#16A34A",
+  },
+  pickupInfoNote: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 11,
+    color: "#4ADE80",
+    marginTop: 2,
   },
   footer: {
     position: "absolute",

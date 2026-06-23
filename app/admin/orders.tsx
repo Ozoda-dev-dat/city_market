@@ -186,6 +186,12 @@ export default function AdminOrdersScreen() {
                   <Text style={styles.customer}>{item.customerName}</Text>
                   <View style={styles.orderMeta}>
                     <Text style={styles.metaText}>{formatPrice(item.total)}</Text>
+                    {item.deliveryType === "pickup" && (
+                      <View style={styles.pickupBadge}>
+                        <Ionicons name="storefront-outline" size={11} color="#7C3AED" />
+                        <Text style={styles.pickupBadgeText}>O'zi olib ketadi</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
                 <Ionicons
@@ -199,10 +205,19 @@ export default function AdminOrdersScreen() {
                 <View style={styles.expanded}>
                   <View style={styles.divider} />
                   <View style={styles.customerInfo}>
-                    <View style={styles.infoRow}>
-                      <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
-                      <Text style={styles.infoText}>{item.address}</Text>
-                    </View>
+                    {item.deliveryType === "pickup" ? (
+                      <View style={[styles.infoRow, styles.pickupInfoRow]}>
+                        <Ionicons name="storefront-outline" size={14} color="#7C3AED" />
+                        <Text style={[styles.infoText, { color: "#7C3AED", fontFamily: "Poppins_600SemiBold" }]}>
+                          Mijoz o'zi olib ketadi
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.infoRow}>
+                        <Ionicons name="location-outline" size={14} color={Colors.textSecondary} />
+                        <Text style={styles.infoText}>{item.address}</Text>
+                      </View>
+                    )}
                     <View style={styles.infoRow}>
                       <Ionicons name="call-outline" size={14} color={Colors.textSecondary} />
                       <Text style={styles.infoText}>{item.phoneNumber}</Text>
@@ -233,13 +248,23 @@ export default function AdminOrdersScreen() {
 
                   {item.status === "pending" && (
                     <View style={{ gap: 8 }}>
-                      <Pressable
-                        style={styles.advanceBtn}
-                        onPress={() => setShowCourierList(showCourierList === item.id ? null : item.id)}
-                      >
-                        <Ionicons name="person-add-outline" size={18} color="#fff" />
-                        <Text style={styles.advanceBtnText}>Kuryer biriktirish</Text>
-                      </Pressable>
+                      {item.deliveryType === "pickup" ? (
+                        <Pressable
+                          style={[styles.advanceBtn, { backgroundColor: "#7C3AED" }]}
+                          onPress={() => updateOrderStatus(item.id, "preparing")}
+                        >
+                          <Ionicons name="storefront-outline" size={18} color="#fff" />
+                          <Text style={styles.advanceBtnText}>Tayyorlashni boshlash</Text>
+                        </Pressable>
+                      ) : (
+                        <Pressable
+                          style={styles.advanceBtn}
+                          onPress={() => setShowCourierList(showCourierList === item.id ? null : item.id)}
+                        >
+                          <Ionicons name="person-add-outline" size={18} color="#fff" />
+                          <Text style={styles.advanceBtnText}>Kuryer biriktirish</Text>
+                        </Pressable>
+                      )}
                       <Pressable
                         style={[styles.advanceBtn, { backgroundColor: Colors.error }]}
                         onPress={() => handleCancel(item.id)}
@@ -247,6 +272,15 @@ export default function AdminOrdersScreen() {
                         <Ionicons name="close-circle-outline" size={18} color="#fff" />
                         <Text style={styles.advanceBtnText}>Bekor qilish</Text>
                       </Pressable>
+                    </View>
+                  )}
+
+                  {item.status === "ready" && item.deliveryType === "pickup" && (
+                    <View style={[styles.pickupReadyBox, { backgroundColor: isDarkMode ? "rgba(124,58,237,0.12)" : "rgba(124,58,237,0.08)" }]}>
+                      <Ionicons name="notifications-outline" size={16} color="#7C3AED" />
+                      <Text style={styles.pickupReadyText}>
+                        Mijozga SMS yuborildi — do'konga kelishi kutilmoqda
+                      </Text>
                     </View>
                   )}
 
@@ -327,5 +361,18 @@ const getStyles = (isDarkMode: boolean) => {
     emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 12 },
     emptyTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 18, color: Colors.text },
     emptyText: { fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted, textAlign: "center" },
+    pickupBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      backgroundColor: isDarkMode ? "rgba(124,58,237,0.18)" : "rgba(124,58,237,0.1)",
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 8,
+    },
+    pickupBadgeText: { fontFamily: "Poppins_600SemiBold", fontSize: 11, color: "#7C3AED" },
+    pickupInfoRow: { backgroundColor: isDarkMode ? "rgba(124,58,237,0.1)" : "rgba(124,58,237,0.06)", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7 },
+    pickupReadyBox: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, marginTop: 10 },
+    pickupReadyText: { fontFamily: "Poppins_400Regular", fontSize: 12, color: "#7C3AED", flex: 1 },
   });
 };
