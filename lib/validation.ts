@@ -230,6 +230,21 @@ export const authSchemas = {
     }
   }),
 
+  sendOtp: z.object({
+    phoneNumber: z.string().regex(PHONE_REGEX, 'Invalid phone number format'),
+    purpose: z.enum(['register', 'login']).optional(),
+  }),
+
+  verifyOtpRegister: z.object({
+    phoneNumber: z.string().regex(PHONE_REGEX, 'Invalid phone number format'),
+    code: z.string().length(6, 'OTP must be 6 digits'),
+    name: z.string().min(2, 'Name must be at least 2 characters')
+      .max(50, 'Name must be less than 50 characters'),
+    role: z.enum(['customer', 'store', 'courier']).optional(),
+    storeName: z.string().min(2).max(200).optional(),
+    storeAddress: z.string().min(2).max(500).optional(),
+  }),
+
   login: z.object({
     phoneNumber: z.string().regex(PHONE_REGEX, 'Invalid phone number format'),
     password: z.string().min(1, 'Password is required'),

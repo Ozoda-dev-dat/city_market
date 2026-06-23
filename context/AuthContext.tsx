@@ -10,6 +10,8 @@ interface AuthContextValue {
   token: string | null;
   login: (phoneNumber: string, password: string) => Promise<void>;
   register: (phoneNumber: string, password: string, name: string, role?: string, storeName?: string, storeAddress?: string) => Promise<void>;
+  sendOtp: (phoneNumber: string, purpose?: string) => Promise<{ devCode?: string }>;
+  verifyOtpRegister: (phoneNumber: string, code: string, name: string, role?: string, storeName?: string, storeAddress?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   isLoading: boolean;
@@ -64,8 +66,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storeAddress) body.storeAddress = storeAddress;
     const res = await apiRequest("POST", "/api/auth/register", body);
     if (!res.ok) {
+      const body2 = await res.json().catch(() => ({}));
+      throw new Error(JSON.stringify(body2));
+    }
+    const authData = await res.json();
+    setUser(authData.user);
+    setToken(authData.token);
+    if (authData.token) wsManager.authenticate(authData.token);
+    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+  };
+
+  const sendOtp = async (phoneNumber: string, purpose = "register"): Promise<{ devCode?: string }> => {
+    const res = await apiRequest("POST", "/api/auth/send-otp", { phoneNumber, purpose });
+    if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(JSON.stringify(body));
+      throw new Error(body.error || "Kod yuborishda xatolik");
+    }
+    const data = await res.json();
+    return { devCode: data.devCode };
+  };
+
+  const verifyOtpRegister = async (phoneNumber: string, code: string, name: string, role?: string, storeName?: string, storeAddress?: string) => {
+    const body: any = { phoneNumber, code, name };
+    if (role) body.role = role;
+    if (storeName) body.storeName = storeName;
+    if (storeAddress) body.storeAddress = storeAddress;
+    const res = await apiRequest("POST", "/api/auth/verify-otp-register", body);
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || "Tasdiqlashda xatolik");
     }
     const authData = await res.json();
     setUser(authData.user);
@@ -102,10 +131,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token,
     login,
     register,
+    sendOtp,
+    verifyOtpRegister,
     logout,
     updateProfile,
     isLoading,
-  }), [user, token, login, register, logout, updateProfile, isLoading]);
+  }), [user, token, login, register, sendOtp, verifyOtpRegister, logout, updateProfile, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

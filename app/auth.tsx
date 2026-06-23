@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -22,9 +22,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useTranslation } from "@/lib/I18nProvider";
 import { useTheme } from "@/context/ThemeContext";
 
+type RegisterStep = "form" | "otp";
+
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
-  const { login, register, user, isLoading: authLoading } = useAuth();
+  const { login, sendOtp, verifyOtpRegister, user, isLoading: authLoading } = useAuth();
   const { t, lang, setLang } = useTranslation();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -37,10 +39,15 @@ export default function AuthScreen() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [isStore, setIsStore] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [storeAddress, setStoreAddress] = useState("");
+
+  const [registerStep, setRegisterStep] = useState<RegisterStep>("form");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [devCode, setDevCode] = useState<string | undefined>(undefined);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -51,40 +58,37 @@ export default function AuthScreen() {
     }
   }, [user, authLoading]);
 
-  const validatePassword = (pwd: string): string[] => {
-    const errors: string[] = [];
-    if (pwd.length < 8) errors.push("Kamida 8 ta belgi");
-    if (!/[A-Z]/.test(pwd)) errors.push("Kamida 1 ta katta harf");
-    if (!/[a-z]/.test(pwd)) errors.push("Kamida 1 ta kichik harf");
-    if (!/\d/.test(pwd)) errors.push("Kamida 1 ta raqam");
-    if (/\s/.test(pwd)) errors.push("Bo'sh joy bo'lmasligi kerak");
-    return errors;
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startTimer = () => {
+    setOtpTimer(60);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setOtpTimer((t) => {
+        if (t <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
   };
 
-  useEffect(() => {
-    if (!isLogin && password) {
-      setPasswordErrors(validatePassword(password));
-    } else {
-      setPasswordErrors([]);
-    }
-  }, [password, isLogin]);
-
-  const handleAuth = async () => {
-    if (!phoneNumber || !password || (!isLogin && !name)) {
-      Alert.alert("Xatolik", "Barcha maydonlarni to'ldiring");
-      return;
-    }
-    if (!isLogin && passwordErrors.length > 0) {
-      Alert.alert("Xatolik", "Parol talablariga javob bermaydi:\n" + passwordErrors.join("\n"));
+  const handleLogin = async () => {
+    if (!phoneSuffix || !password) {
+      Alert.alert("Xatolik", "Telefon raqam va parolni kiriting");
       return;
     }
     setLoading(true);
     try {
-      if (isLogin) await login(phoneNumber, password);
-      else await register(phoneNumber, password, name, isStore ? "store" : "customer", isStore ? storeName : undefined, isStore ? storeAddress : undefined);
+      await login(phoneNumber, password);
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
-      let errorMessage = t("error_invalid");
+      let errorMessage = "Telefon raqam yoki parol noto'g'ri";
       try {
         const match = rawMessage.match(/\{.*\}/);
         if (match) {
@@ -98,6 +102,77 @@ export default function AuthScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSendOtp = async () => {
+    if (!phoneSuffix || phoneSuffix.length < 9) {
+      Alert.alert("Xatolik", "To'liq telefon raqamni kiriting");
+      return;
+    }
+    if (!name || name.trim().length < 2) {
+      Alert.alert("Xatolik", "Ismingizni kiriting (kamida 2 ta harf)");
+      return;
+    }
+    if (isStore && (!storeName || storeName.trim().length < 2)) {
+      Alert.alert("Xatolik", "Do'kon nomini kiriting");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await sendOtp(phoneNumber, "register");
+      setDevCode(result.devCode);
+      setRegisterStep("otp");
+      startTimer();
+    } catch (e: any) {
+      Alert.alert("Xatolik", e?.message || "Kod yuborishda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      Alert.alert("Xatolik", "6 xonali kodni kiriting");
+      return;
+    }
+    setLoading(true);
+    try {
+      await verifyOtpRegister(
+        phoneNumber,
+        otpCode,
+        name,
+        isStore ? "store" : "customer",
+        isStore ? storeName : undefined,
+        isStore ? storeAddress : undefined,
+      );
+    } catch (e: any) {
+      Alert.alert("Xatolik", e?.message || "Tasdiqlashda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (otpTimer > 0) return;
+    setLoading(true);
+    try {
+      const result = await sendOtp(phoneNumber, "register");
+      setDevCode(result.devCode);
+      setOtpCode("");
+      startTimer();
+    } catch (e: any) {
+      Alert.alert("Xatolik", e?.message || "Kod yuborishda xatolik");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetRegister = () => {
+    setRegisterStep("form");
+    setOtpCode("");
+    setDevCode(undefined);
+    if (timerRef.current) clearInterval(timerRef.current);
+    setOtpTimer(0);
   };
 
   return (
@@ -145,19 +220,87 @@ export default function AuthScreen() {
           <View style={styles.tabRow}>
             <Pressable
               style={[styles.tab, isLogin && styles.tabActive]}
-              onPress={() => { setIsLogin(true); setPhoneSuffix(""); setPassword(""); setName(""); setIsStore(false); setStoreName(""); }}
+              onPress={() => {
+                setIsLogin(true);
+                setPhoneSuffix(""); setPassword(""); setName("");
+                setIsStore(false); setStoreName(""); setStoreAddress("");
+                resetRegister();
+              }}
             >
               <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
             </Pressable>
             <Pressable
               style={[styles.tab, !isLogin && styles.tabActive]}
-              onPress={() => { setIsLogin(false); setPhoneSuffix(""); setPassword(""); setName(""); }}
+              onPress={() => {
+                setIsLogin(false);
+                setPhoneSuffix(""); setPassword(""); setName("");
+                resetRegister();
+              }}
             >
               <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Ro'yxat</Text>
             </Pressable>
           </View>
 
-          {!isLogin && (
+          {isLogin ? (
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Telefon raqam</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <View style={styles.prefixBadge}>
+                    <Text style={styles.prefixText}>+998</Text>
+                  </View>
+                  <View style={styles.prefixDivider} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="90 123 45 67"
+                    placeholderTextColor={Colors.textMuted}
+                    value={phoneSuffix}
+                    onChangeText={(text) => {
+                      const digits = text.replace(/\D/g, "").slice(0, 9);
+                      setPhoneSuffix(digits);
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={9}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Parol</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="••••••••"
+                    placeholderTextColor={Colors.textMuted}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <Pressable onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? "eye-off-outline" : "eye-outline"}
+                      size={18}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
+              </View>
+
+              <Pressable
+                style={[styles.authBtn, loading && { opacity: 0.7 }]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.authBtnText}>Kirish</Text>
+                )}
+              </Pressable>
+            </>
+          ) : registerStep === "form" ? (
             <>
               <View style={styles.roleRow}>
                 <Pressable
@@ -223,84 +366,115 @@ export default function AuthScreen() {
                   </View>
                 </>
               )}
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Telefon raqam</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <View style={styles.prefixBadge}>
+                    <Text style={styles.prefixText}>+998</Text>
+                  </View>
+                  <View style={styles.prefixDivider} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="90 123 45 67"
+                    placeholderTextColor={Colors.textMuted}
+                    value={phoneSuffix}
+                    onChangeText={(text) => {
+                      const digits = text.replace(/\D/g, "").slice(0, 9);
+                      setPhoneSuffix(digits);
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={9}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.smsNote}>
+                <Ionicons name="information-circle-outline" size={15} color={Colors.textMuted} />
+                <Text style={styles.smsNoteText}>Telefon raqamingizga tasdiqlash kodi yuboriladi</Text>
+              </View>
+
+              <Pressable
+                style={[styles.authBtn, loading && { opacity: 0.7 }]}
+                onPress={handleSendOtp}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <View style={styles.btnInner}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />
+                    <Text style={styles.authBtnText}>SMS kod yuborish</Text>
+                  </View>
+                )}
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable style={styles.backBtn} onPress={resetRegister}>
+                <Ionicons name="arrow-back" size={18} color={Colors.primary} />
+                <Text style={styles.backBtnText}>Orqaga</Text>
+              </Pressable>
+
+              <View style={styles.otpHeader}>
+                <View style={styles.otpIconCircle}>
+                  <Ionicons name="phone-portrait-outline" size={28} color={Colors.primary} />
+                </View>
+                <Text style={styles.otpTitle}>Kodni kiriting</Text>
+                <Text style={styles.otpSubtitle}>
+                  <Text style={{ color: Colors.primary }}>+998 {phoneSuffix}</Text>
+                  {"\n"}raqamiga 6 xonali kod yuborildi
+                </Text>
+              </View>
+
+              {!!devCode && (
+                <View style={styles.devCodeBox}>
+                  <Ionicons name="bug-outline" size={14} color="#92400E" />
+                  <Text style={styles.devCodeText}>Test kodi: <Text style={{ fontFamily: "Poppins_700Bold" }}>{devCode}</Text></Text>
+                </View>
+              )}
+
+              <View style={styles.otpInputRow}>
+                <TextInput
+                  style={styles.otpInput}
+                  placeholder="------"
+                  placeholderTextColor={Colors.textMuted}
+                  value={otpCode}
+                  onChangeText={(t) => setOtpCode(t.replace(/\D/g, "").slice(0, 6))}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  autoFocus
+                />
+              </View>
+
+              <Pressable
+                style={[styles.authBtn, (loading || otpCode.length !== 6) && { opacity: 0.7 }]}
+                onPress={handleVerifyOtp}
+                disabled={loading || otpCode.length !== 6}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <View style={styles.btnInner}>
+                    <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
+                    <Text style={styles.authBtnText}>Tasdiqlash</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <Pressable
+                style={[styles.resendBtn, otpTimer > 0 && { opacity: 0.5 }]}
+                onPress={handleResendOtp}
+                disabled={otpTimer > 0 || loading}
+              >
+                <Ionicons name="refresh-outline" size={15} color={Colors.primary} />
+                <Text style={styles.resendText}>
+                  {otpTimer > 0 ? `Qayta yuborish (${otpTimer}s)` : "Qayta yuborish"}
+                </Text>
+              </Pressable>
             </>
           )}
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Telefon raqam</Text>
-            <View style={styles.inputBox}>
-              <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-              <View style={styles.prefixBadge}>
-                <Text style={styles.prefixText}>+998</Text>
-              </View>
-              <View style={styles.prefixDivider} />
-              <TextInput
-                style={styles.input}
-                placeholder="90 123 45 67"
-                placeholderTextColor={Colors.textMuted}
-                value={phoneSuffix}
-                onChangeText={(text) => {
-                  const digits = text.replace(/\D/g, "").slice(0, 9);
-                  setPhoneSuffix(digits);
-                }}
-                keyboardType="number-pad"
-                maxLength={9}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Parol</Text>
-            <View style={styles.inputBox}>
-              <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="••••••••"
-                placeholderTextColor={Colors.textMuted}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <Pressable onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={18}
-                  color={Colors.textMuted}
-                />
-              </Pressable>
-            </View>
-            {!isLogin && passwordErrors.length > 0 && (
-              <View style={styles.errorList}>
-                {passwordErrors.map((err, i) => (
-                  <View key={i} style={styles.errorItem}>
-                    <Ionicons name="close-circle" size={12} color={Colors.error} />
-                    <Text style={styles.errorText}>{err}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-            {!isLogin && password.length > 0 && passwordErrors.length === 0 && (
-              <View style={styles.successMsg}>
-                <Ionicons name="checkmark-circle" size={14} color={Colors.primary} />
-                <Text style={styles.successText}>Parol talablarga javob beradi</Text>
-              </View>
-            )}
-          </View>
-
-          <Pressable
-            style={[styles.authBtn, loading && { opacity: 0.7 }]}
-            onPress={handleAuth}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.authBtnText}>
-                {isLogin ? "Kirish" : "Ro'yxatdan o'tish"}
-              </Text>
-            )}
-          </Pressable>
-
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -452,31 +626,6 @@ const getStyles = (isDarkMode: boolean) => {
       backgroundColor: Colors.divider,
       marginHorizontal: 4,
     },
-    errorList: {
-      marginTop: 8,
-      gap: 4,
-    },
-    errorItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 5,
-    },
-    errorText: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 12,
-      color: Colors.error,
-    },
-    successMsg: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 5,
-      marginTop: 8,
-    },
-    successText: {
-      fontFamily: "Poppins_400Regular",
-      fontSize: 12,
-      color: Colors.primary,
-    },
     authBtn: {
       backgroundColor: Colors.primary,
       borderRadius: 16,
@@ -494,6 +643,11 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_700Bold",
       fontSize: 16,
       color: "#fff",
+    },
+    btnInner: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
     },
     roleRow: {
       flexDirection: "row",
@@ -523,6 +677,96 @@ const getStyles = (isDarkMode: boolean) => {
     },
     roleBtnTextActive: {
       color: "#fff",
+    },
+    smsNote: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 12,
+      marginTop: -4,
+    },
+    smsNoteText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 12,
+      color: Colors.textMuted,
+      flex: 1,
+    },
+    backBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      marginBottom: 20,
+    },
+    backBtnText: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.primary,
+    },
+    otpHeader: {
+      alignItems: "center",
+      marginBottom: 24,
+      gap: 10,
+    },
+    otpIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: isDarkMode ? "#1C2E1C" : "#F0FDF4",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    otpTitle: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 20,
+      color: Colors.text,
+    },
+    otpSubtitle: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 14,
+      color: Colors.textMuted,
+      textAlign: "center",
+      lineHeight: 22,
+    },
+    devCodeBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: "#FEF3C7",
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      marginBottom: 16,
+    },
+    devCodeText: {
+      fontFamily: "Poppins_400Regular",
+      fontSize: 13,
+      color: "#92400E",
+    },
+    otpInputRow: {
+      marginBottom: 16,
+    },
+    otpInput: {
+      backgroundColor: isDarkMode ? "#1C1C1E" : "#F5F6F5",
+      borderRadius: 14,
+      paddingHorizontal: 24,
+      paddingVertical: 18,
+      fontFamily: "Poppins_700Bold",
+      fontSize: 28,
+      color: Colors.primary,
+      textAlign: "center",
+      letterSpacing: 12,
+    },
+    resendBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      paddingVertical: 12,
+    },
+    resendText: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 14,
+      color: Colors.primary,
     },
   });
 };

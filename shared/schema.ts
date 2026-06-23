@@ -512,3 +512,17 @@ export type Refund = typeof refunds.$inferSelect;
 export type AdminSetting = typeof adminSettings.$inferSelect;
 export type InventoryMovement = typeof inventoryMovements.$inferSelect;
 export type SystemLog = typeof systemLogs.$inferSelect;
+
+export const otpCodes = pgTable("otp_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  phoneNumber: text("phone_number").notNull(),
+  code: text("code").notNull(),
+  purpose: text("purpose").notNull().default("register"),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  phoneIdx: index("idx_otp_phone").on(table.phoneNumber),
+}));
+
+export type OtpCode = typeof otpCodes.$inferSelect;

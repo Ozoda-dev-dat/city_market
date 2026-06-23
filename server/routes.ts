@@ -7,6 +7,8 @@ import * as XLSX from "xlsx";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../lib/password";
 import { generateToken } from "../lib/jwt";
 import { validateRequestBody, authSchemas } from "../lib/validation";
+import { sendSms, isSmsConfigured } from "./sms-service";
+import { otpService } from "./otp-service";
 import { 
   authenticateToken, 
   requireAdmin, 
@@ -68,6 +70,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Apply rate limiting to auth endpoints
   app.use('/api/auth', rateLimiters.auth);
+
+  // Ensure OTP table exists on startup
+  otpService.ensureTable().catch((e) => console.error("[OTP] Table init error:", e));
+
+  // ── OTP: Send code ────────────────────────────────────────────────────────
+  app.post("/api/auth/send-otp",
+    validateRequestBody(authSchemas.sendOtp),
+    async (req, res) => {
+      try {
+        const { phoneNumber, purpose = "register" } = req.body;
+
+        if (purpose === "register") {
+          const existing = await storage.getUserByPhone(phoneNumber);
+          if (existing) {
+            return res.status(400).json({ error: "Bu telefon raqam allaqachon ro'yxatdan o'tgan" });
+          }
+        }
+
+        const code = await otpService.createOtp(phoneNumber, purpose);
+        const message = `City Market: tasdiqlash kodi ${code}. Kod 5 daqiqa amal qiladi.`;
+
+        const smsSent = await sendSms(phoneNumber, message);
+
+        if (!smsSent && isSmsConfigured()) {
+          return res.status(500).json({ error: "SMS yuborishda xatolik yuz berdi" });
+        }
+
+        const devCode = !isSmsConfigured() ? code : undefined;
+
+        res.json({
+          success: true,
+          message: "Tasdiqlash kodi yuborildi",
+          ...(devCode ? { devCode } : {}),
+        });
+      } catch (error) {
+        console.error("Send OTP error:", error);
+        res.status(500).json({ error: "Kod yuborishda xatolik" });
+      }
+    }
+  );
+
+  // ── OTP: Verify and register ──────────────────────────────────────────────
+  app.post("/api/auth/verify-otp-register",
+    validateRequestBody(authSchemas.verifyOtpRegister),
+    async (req, res) => {
+      try {
+        const { phoneNumber, code, name, role, storeName, storeAddress } = req.body;
+
+        const valid = await otpService.verifyOtp(phoneNumber, code, "register");
+        if (!valid) {
+          return res.status(400).json({ error: "Kod noto'g'ri yoki muddati o'tgan" });
+        }
+
+        const existing = await storage.getUserByPhone(phoneNumber);
+        if (existing) {
+          return res.status(400).json({ error: "Bu telefon raqam allaqachon ro'yxatdan o'tgan" });
+        }
+
+        const allowedRoles = ["customer", "store"];
+        const userRole = allowedRoles.includes(role) ? role : "customer";
+
+        const tempPassword = await hashPassword(Math.random().toString(36).slice(2) + Date.now());
+
+        let user = await storage.createUser({
+          phoneNumber,
+          password: tempPassword,
+          name,
+          role: userRole,
+        });
+
+        let store = null;
+        if (userRole === "store") {
+          store = await storage.createStore({
+            ownerId: user.id,
+            name: storeName || name || "Mening do'konim",
+            address: storeAddress || null,
+            phone: phoneNumber,
+            isActive: true,
+          });
+          await storage.updateUser(user.id, { storeId: store.id });
+          user = { ...user, storeId: store.id };
+        }
+
+        const token = generateToken({
+          userId: user.id,
+          phoneNumber: user.phoneNumber,
+          role: user.role,
+        });
+
+        const { password: _, ...userWithoutPassword } = user;
+
+        res.status(201).json({
+          user: userWithoutPassword,
+          token,
+          store,
+        });
+      } catch (error) {
+        console.error("Verify OTP register error:", error);
+        res.status(500).json({ error: "Ro'yxatdan o'tishda xatolik" });
+      }
+    }
+  );
 
   // ── Public store listing (no auth required) ───────────────────────────────
   app.get("/api/stores", async (_req, res) => {
