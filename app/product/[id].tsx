@@ -32,6 +32,16 @@ const BADGE_CONFIG: Record<string, { label: string; color: string }> = {
   hot: { label: "Ommabop", color: "#F97316" },
 };
 
+const CATEGORY_PAIRS: Record<string, string[]> = {
+  ichimliklar: ["shokoladlar", "konservalar"],
+  shokoladlar: ["ichimliklar", "konservalar"],
+  konservalar: ["ichimliklar", "shokoladlar"],
+  fruits: ["dairy", "shokoladlar"],
+  vegetables: ["meat", "konservalar"],
+  meat: ["vegetables", "dairy"],
+  dairy: ["fruits", "konservalar"],
+};
+
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
@@ -43,6 +53,7 @@ export default function ProductDetailScreen() {
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
   const [liked, setLiked] = useState(false);
+  const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const likeScale = useSharedValue(1);
   const cartItemCount = items.find((i) => i.product.id === id)?.quantity ?? 0;
   const btnScale = useSharedValue(1);
@@ -64,9 +75,16 @@ export default function ProductDetailScreen() {
   }
 
   const badgeCfg = product.badge ? BADGE_CONFIG[product.badge] : null;
-  const relatedProducts = products.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, 4);
+
+  const relatedProducts = products
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
+
+  const pairedCategories = CATEGORY_PAIRS[product.category] ?? [];
+  const recommendedProducts = products
+    .filter((p) => pairedCategories.includes(p.category) && p.inStock)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 8);
 
   const handleAddToCart = () => {
     if (Platform.OS !== "web") {
@@ -74,6 +92,17 @@ export default function ProductDetailScreen() {
     }
     btnScale.value = withSequence(withSpring(0.94), withSpring(1));
     addToCart(product);
+  };
+
+  const handleQuickAdd = (p: typeof product) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    addToCart(p);
+    setAddedIds((prev) => ({ ...prev, [p.id]: true }));
+    setTimeout(() => {
+      setAddedIds((prev) => ({ ...prev, [p.id]: false }));
+    }, 1500);
   };
 
   const handleLike = () => {
@@ -91,8 +120,8 @@ export default function ProductDetailScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View style={[styles.hero, { paddingTop: topPad + 60 }]}>
-          <Image 
-            source={{ uri: resolveImageUrl(product.image || "") }} 
+          <Image
+            source={{ uri: resolveImageUrl(product.image || "") }}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -161,6 +190,62 @@ export default function ProductDetailScreen() {
           <Text style={styles.descTitle}>Tavsif</Text>
           <Text style={styles.description}>{product.description}</Text>
 
+          {recommendedProducts.length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <View style={styles.recommendHeader}>
+                <Ionicons name="bag-add-outline" size={18} color={Colors.primary} />
+                <Text style={styles.recommendTitle}>Haridingizda qo'shib olishingiz mumkin</Text>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.recommendScroll}
+                contentContainerStyle={{ paddingVertical: 4 }}
+              >
+                {recommendedProducts.map((rp) => {
+                  const alreadyAdded = addedIds[rp.id];
+                  const inCart = items.find((i) => i.product.id === rp.id);
+                  return (
+                    <Pressable
+                      key={rp.id}
+                      style={styles.recommendCard}
+                      onPress={() =>
+                        router.push({ pathname: "/product/[id]", params: { id: rp.id } })
+                      }
+                    >
+                      <Image
+                        source={{ uri: resolveImageUrl(rp.image || "") }}
+                        style={styles.recommendImage}
+                        resizeMode="cover"
+                      />
+                      <Text style={styles.recommendName} numberOfLines={2}>
+                        {rp.name}
+                      </Text>
+                      <Text style={styles.recommendPrice}>{formatPrice(rp.price)}</Text>
+                      <Pressable
+                        style={[
+                          styles.recommendAddBtn,
+                          (alreadyAdded || inCart) && styles.recommendAddBtnDone,
+                        ]}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleQuickAdd(rp);
+                        }}
+                      >
+                        <Ionicons
+                          name={alreadyAdded || inCart ? "checkmark" : "add"}
+                          size={16}
+                          color="#fff"
+                        />
+                      </Pressable>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </>
+          )}
+
           {relatedProducts.length > 0 && (
             <>
               <View style={styles.divider} />
@@ -173,8 +258,8 @@ export default function ProductDetailScreen() {
                     onPress={() => router.push({ pathname: "/product/[id]", params: { id: rp.id } })}
                   >
                     <View style={styles.relatedImageContainer}>
-                      <Image 
-                        source={{ uri: rp.image }} 
+                      <Image
+                        source={{ uri: rp.image }}
                         style={styles.relatedImage}
                         resizeMode="cover"
                       />
@@ -423,6 +508,64 @@ const getStyles = (isDarkMode: boolean) => {
       fontSize: 14,
       color: Colors.textSecondary,
       lineHeight: 22,
+    },
+    recommendHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    recommendTitle: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 15,
+      color: Colors.text,
+      flex: 1,
+    },
+    recommendScroll: {
+      marginHorizontal: -4,
+    },
+    recommendCard: {
+      width: 130,
+      backgroundColor: Colors.card,
+      borderRadius: 16,
+      padding: 10,
+      marginHorizontal: 4,
+      alignItems: "center",
+      gap: 6,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 2,
+      position: "relative",
+    },
+    recommendImage: {
+      width: 80,
+      height: 80,
+      borderRadius: 12,
+    },
+    recommendName: {
+      fontFamily: "Poppins_500Medium",
+      fontSize: 12,
+      color: Colors.text,
+      textAlign: "center",
+      lineHeight: 17,
+    },
+    recommendPrice: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 12,
+      color: Colors.primary,
+    },
+    recommendAddBtn: {
+      width: 28,
+      height: 28,
+      backgroundColor: Colors.primary,
+      borderRadius: 9,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    recommendAddBtnDone: {
+      backgroundColor: "#22C55E",
     },
     relatedScroll: {
       marginHorizontal: -4,
