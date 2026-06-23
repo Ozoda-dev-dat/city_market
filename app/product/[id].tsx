@@ -157,10 +157,10 @@ export default function ProductDetailScreen() {
           <View style={styles.priceRow}>
             <Text style={styles.price}>{formatPrice(product.price)}</Text>
             <Text style={styles.unit}>/ {product.unit}</Text>
-            {product.originalPrice && (
+            {!!product.originalPrice && (
               <Text style={styles.originalPrice}>{formatPrice(product.originalPrice)}</Text>
             )}
-            {product.originalPrice && (
+            {!!product.originalPrice && (
               <View style={styles.savingBadge}>
                 <Text style={styles.savingText}>
                   -{Math.round((1 - product.price / product.originalPrice) * 100)}%
