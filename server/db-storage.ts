@@ -73,17 +73,23 @@ export class DbStorage implements IStorage {
   private db: ReturnType<typeof drizzle>;
 
   constructor() {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL is not set");
+    let connectionString: string;
+
+    if (process.env.DATABASE_URL) {
+      connectionString = process.env.DATABASE_URL.trim();
+      const psqlMatch = connectionString.match(/^psql\s+'(.+)'$/);
+      if (psqlMatch) connectionString = psqlMatch[1];
+    } else if (process.env.PGHOST && process.env.PGUSER && process.env.PGDATABASE) {
+      const host = process.env.PGHOST;
+      const port = process.env.PGPORT || '5432';
+      const user = process.env.PGUSER;
+      const password = encodeURIComponent(process.env.PGPASSWORD || '');
+      const db = process.env.PGDATABASE;
+      connectionString = `postgresql://${user}:${password}@${host}:${port}/${db}`;
+    } else {
+      throw new Error("DATABASE_URL or PG* environment variables are not set");
     }
-    
-    // Strip psql wrapper if present: psql 'postgresql://...' -> postgresql://...
-    let connectionString = process.env.DATABASE_URL.trim();
-    const psqlMatch = connectionString.match(/^psql\s+'(.+)'$/);
-    if (psqlMatch) {
-      connectionString = psqlMatch[1];
-    }
-    
+
     const client = postgres(connectionString, { ssl: 'require' });
     this.db = drizzle(client, { schema });
     
