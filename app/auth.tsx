@@ -83,6 +83,10 @@ export default function AuthScreen() {
       Alert.alert("Xatolik", "Telefon raqam va parolni kiriting");
       return;
     }
+    if (!/^\d{9}$/.test(phoneSuffix)) {
+      Alert.alert("Xatolik", "Telefon raqam 9 xonali bo'lishi kerak (masalan: 901234567)");
+      return;
+    }
     setLoading(true);
     try {
       await login(phoneNumber, password);

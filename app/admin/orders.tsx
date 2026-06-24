@@ -103,9 +103,11 @@ export default function AdminOrdersScreen() {
 
   const filtered = activeTab === "all" ? orders : orders.filter((o) => o.status === activeTab);
 
-  const handleAssign = async (orderId: string, courierId: string) => {
+  const handleAssign = async (orderId: string, courierId: string, currentStatus: string) => {
     try {
-      await updateOrderStatus(orderId, "delivering", courierId);
+      // Move to "confirmed" when assigning courier from pending, or keep "delivering" if already ready
+      const nextStatus = currentStatus === "ready" ? "delivering" : "confirmed";
+      await updateOrderStatus(orderId, nextStatus, courierId);
       Alert.alert("Muvaffaqiyat", "Buyurtma kuryerga biriktirildi");
       setShowCourierList(null);
     } catch (e) {
@@ -294,7 +296,7 @@ export default function AdminOrdersScreen() {
                           <Pressable
                             key={c.id}
                             style={styles.courierItem}
-                            onPress={() => handleAssign(item.id, c.id)}
+                            onPress={() => handleAssign(item.id, c.id, item.status)}
                           >
                             <Ionicons name="bicycle" size={16} color={Colors.primary} />
                             <Text style={styles.courierName}>{c.name}</Text>

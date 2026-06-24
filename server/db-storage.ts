@@ -444,6 +444,19 @@ export class DbStorage implements IStorage {
   async createOrder(order: any): Promise<Order> {
     const result = await this.db.insert(schema.orders).values(order).returning();
     await auditService.logInsert("orders", result[0].id);
+
+    // Decrement stock for each item that has a productId
+    if (Array.isArray(order.items)) {
+      for (const item of order.items) {
+        if (item.productId) {
+          await this.db
+            .update(schema.products)
+            .set({ stockQuantity: sql`GREATEST(0, stock_quantity - ${item.qty || 1})` })
+            .where(eq(schema.products.id, item.productId));
+        }
+      }
+    }
+
     return result[0];
   }
 

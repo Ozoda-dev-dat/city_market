@@ -898,15 +898,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!result.success) {
           return res.status(400).json({ error: "Invalid order data", details: result.error });
         }
-        
+
+        const { items, promoCode, deliveryFee: clientDeliveryFee, deliveryType } = req.body;
+
+        // Server-side: validate stock and recalculate subtotal from DB prices
+        let serverSubtotal = 0;
+        if (Array.isArray(items) && items.length > 0) {
+          for (const item of items) {
+            const qty = item.qty || 1;
+            if (item.productId) {
+              const product = await storage.getProduct(item.productId);
+              if (!product) {
+                return res.status(400).json({ error: `Mahsulot topilmadi: ${item.name}` });
+              }
+              if (product.stockQuantity !== null && product.stockQuantity < qty) {
+                return res.status(400).json({ error: `Omborda yetarli mahsulot yo'q: ${product.name}` });
+              }
+              serverSubtotal += product.price * qty;
+            } else {
+              serverSubtotal += (item.price || 0) * qty;
+            }
+          }
+        }
+
+        // Server-side: validate promo code
+        let serverDiscountPercent = 0;
+        let promoCodeId: string | undefined;
+        if (promoCode) {
+          const promo = await storage.getPromoCode(promoCode);
+          const now = new Date();
+          if (
+            promo &&
+            promo.isActive &&
+            promo.usedCount < promo.maxUses &&
+            (!promo.validUntil || new Date(promo.validUntil) > now) &&
+            (promo.minAmount <= 0 || serverSubtotal >= promo.minAmount)
+          ) {
+            serverDiscountPercent = promo.discountPercent;
+            promoCodeId = promo.id;
+          }
+        }
+
+        // Accept delivery fee from client (depends on GPS distance)
+        const deliveryFee = deliveryType === "pickup" ? 0 : Math.max(0, Number(clientDeliveryFee) || 0);
+        const serverTotal = Math.max(0, serverSubtotal + deliveryFee - Math.round(serverSubtotal * serverDiscountPercent / 100));
+
         // Add customer info from authenticated user
         const orderData = {
           ...result.data,
           customerId: req.user!.userId,
           customerName: result.data.customerName || req.user!.phoneNumber,
           phoneNumber: req.user!.phoneNumber,
-          status: result.data.status ?? "pending",
-          discount: result.data.discount ?? 0,
+          status: "pending",
+          discount: serverDiscountPercent,
+          total: serverTotal,
+          promoCodeId: promoCodeId ?? null,
         };
         
         const order = await storage.createOrder(orderData);
@@ -930,12 +976,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // GET /api/orders/:id — accessible by owner, admin, or assigned courier
+  app.get("/api/orders/:id",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const order = await storage.getOrder(req.params.id);
+        if (!order) return res.status(404).json({ error: "Order not found" });
+        const { role, userId } = req.user!;
+        if (role !== "admin" && role !== "courier" && order.customerId !== userId) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+        res.json(order);
+      } catch (error) {
+        console.error("Error fetching order:", error);
+        res.status(500).json({ error: "Failed to fetch order" });
+      }
+    }
+  );
+
+  const VALID_TRANSITIONS: Record<string, string[]> = {
+    pending:    ["confirmed", "cancelled"],
+    confirmed:  ["preparing", "delivering", "cancelled"],
+    preparing:  ["ready", "cancelled"],
+    ready:      ["delivering", "cancelled"],
+    delivering: ["delivered"],
+    delivered:  [],
+    cancelled:  [],
+  };
+
   app.patch("/api/orders/:id/status", 
     authenticateToken,
     requireAdminOrCourier,
     async (req, res) => {
       try {
         const { status, courierId } = req.body;
+
+        const existing = await storage.getOrder(req.params.id);
+        if (!existing) return res.status(404).json({ error: "Order not found" });
+
+        const allowed = VALID_TRANSITIONS[existing.status] ?? [];
+        if (!allowed.includes(status)) {
+          return res.status(400).json({
+            error: `'${existing.status}' holatidan '${status}' holatiga o'tish mumkin emas`,
+          });
+        }
+
         const order = await storage.updateOrderStatus(req.params.id, status, courierId);
         broadcast("orders-changed");
         if (order.customerId) {

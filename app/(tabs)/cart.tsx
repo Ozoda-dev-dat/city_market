@@ -272,7 +272,9 @@ export default function CartScreen() {
         total: finalTotal,
         discount,
         deliveryType,
-        items: items.map((i) => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
+        deliveryFee: delivery,
+        promoCode: discount > 0 ? promo : undefined,
+        items: items.map((i) => ({ productId: i.product.id, name: i.product.name, qty: i.quantity, price: i.product.price })),
       };
 
       const res = await apiRequest("POST", "/api/orders", data);
