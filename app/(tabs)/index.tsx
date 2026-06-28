@@ -43,42 +43,124 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 48) / 2;
 const CARD_H = CARD_W * 0.72;
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
-  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
-  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
-  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
-  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
-  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
-  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
-  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
-  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
-  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
-  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
-  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
-  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
-  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
-  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
-  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
-  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
-  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
-  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
-  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
-  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
-  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
-  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
-  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
-  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
-  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
+// ── Yandex Go style: solid bg color + right-side floating image ───────────
+const CAT_STYLES: { keys: string[]; bg: string; dark: string; img: string }[] = [
+  {
+    keys: ["fruit", "meva"],
+    bg: "#FF6B35", dark: "#E85A25",
+    img: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
+  },
+  {
+    keys: ["vegetab", "sabzavot"],
+    bg: "#27AE60", dark: "#1E9450",
+    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+  },
+  {
+    keys: ["dairy", "sut", "milk", "moloch"],
+    bg: "#29B6D2", dark: "#1FA0B8",
+    img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+  },
+  {
+    keys: ["baker", "bread", "non", "novvoy", "xoʻrak"],
+    bg: "#D4A827", dark: "#B88E1C",
+    img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+  },
+  {
+    keys: ["meat", "gosht", "myaso", "chicken", "tovuq"],
+    bg: "#E53935", dark: "#C62828",
+    img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
+  },
+  {
+    keys: ["seafood", "fish", "baliq", "dengiz"],
+    bg: "#1565C0", dark: "#0D47A1",
+    img: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
+  },
+  {
+    keys: ["beverage", "drink", "ichimlik", "napitok"],
+    bg: "#7B61FF", dark: "#6246E5",
+    img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
+  },
+  {
+    keys: ["snack", "chip", "cracker", "gazak", "shirinlik", "sweet", "candy"],
+    bg: "#F59E0B", dark: "#D97706",
+    img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
+  },
+  {
+    keys: ["frozen", "muzlatilgan", "ice", "muzqaymoq", "moroj"],
+    bg: "#42A5F5", dark: "#1E88E5",
+    img: "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
+  },
+  {
+    keys: ["organic", "organik", "eco", "bio"],
+    bg: "#43A047", dark: "#2E7D32",
+    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
+  },
+  {
+    keys: ["coffee", "qahva", "kofe", "kafe"],
+    bg: "#795548", dark: "#5D4037",
+    img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
+  },
+  {
+    keys: ["chocolate", "shokolad", "shokolad", "choco"],
+    bg: "#6D4C41", dark: "#4E342E",
+    img: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
+  },
+  {
+    keys: ["pasta", "makaroni", "noodle"],
+    bg: "#EF6C00", dark: "#E65100",
+    img: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&q=80",
+  },
+  {
+    keys: ["sauce", "kondiment", "spice", "ziravorlar"],
+    bg: "#C0392B", dark: "#96281B",
+    img: "https://images.unsplash.com/photo-1589187151053-5ec8818e661b?w=400&q=80",
+  },
+  {
+    keys: ["cereal", "granola", "muesli"],
+    bg: "#FFA000", dark: "#FF8F00",
+    img: "https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?w=400&q=80",
+  },
+  {
+    keys: ["oil", "yog", "butter"],
+    bg: "#F9A825", dark: "#F57F17",
+    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80",
+  },
+  {
+    keys: ["canned", "konserva", "tushenka"],
+    bg: "#546E7A", dark: "#37474F",
+    img: "https://images.unsplash.com/photo-1584714268709-c3dd9c92b378?w=400&q=80",
+  },
+  {
+    keys: ["hygiene", "gigiyena", "cleaning", "tozalik"],
+    bg: "#00ACC1", dark: "#00838F",
+    img: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80",
+  },
+  {
+    keys: ["baby", "bola", "child", "kids"],
+    bg: "#EC407A", dark: "#D81B60",
+    img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80",
+  },
+  {
+    keys: ["pet", "hayvon", "dog", "cat"],
+    bg: "#8D6E63", dark: "#6D4C41",
+    img: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&q=80",
+  },
+];
+
+const DEFAULT_CAT_STYLE = {
+  bg: "#16A34A", dark: "#15803D",
+  img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
 };
 
-function getCategoryImage(name: string, id: string): string {
-  const nameL = (name || "").toLowerCase();
-  const idL = (id || "").toLowerCase();
-  for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
-    if (nameL.includes(key) || idL.includes(key)) return url;
+function getCatStyle(name: string, id: string) {
+  const str = ((name || "") + " " + (id || "")).toLowerCase();
+  for (const style of CAT_STYLES) {
+    if (style.keys.some((k) => str.includes(k))) return style;
   }
-  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80";
+  // Hash-based fallback so each category gets a unique color
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return CAT_STYLES[Math.abs(hash) % CAT_STYLES.length] || DEFAULT_CAT_STYLE;
 }
 
 function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
