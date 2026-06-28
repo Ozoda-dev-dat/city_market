@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { Platform, View, Text } from "react-native";
+import { Platform } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import getColors from "@/constants/colors";
@@ -7,6 +7,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "@/lib/I18nProvider";
 
 function ClassicTabLayout() {
   const { totalItems } = useCart();
@@ -14,6 +15,7 @@ function ClassicTabLayout() {
   const Colors = getColors(isDarkMode);
   const insets = useSafeAreaInsets();
   const isWeb = Platform.OS === "web";
+  const { t } = useTranslation();
 
   const tabBarHeight = isWeb ? 64 : 60 + insets.bottom;
 
@@ -50,7 +52,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          tabBarLabel: "Home",
+          tabBarLabel: t("tab_home"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
           ),
@@ -59,7 +61,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="catalog"
         options={{
-          tabBarLabel: "Browse",
+          tabBarLabel: t("tab_browse"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
           ),
@@ -68,7 +70,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="cart"
         options={{
-          tabBarLabel: "Cart",
+          tabBarLabel: t("tab_cart"),
           tabBarBadge: totalItems > 0 ? totalItems : undefined,
           tabBarBadgeStyle: {
             backgroundColor: Colors.primary,
@@ -90,7 +92,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarLabel: "Profile",
+          tabBarLabel: t("tab_profile"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
           ),

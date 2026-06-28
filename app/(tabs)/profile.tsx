@@ -31,16 +31,6 @@ import { LocationPicker } from "@/components/LocationPicker";
 import { useTranslation } from "@/lib/I18nProvider";
 import { apiRequest } from "@/lib/query-client";
 
-const MENU_ITEMS = [
-  { icon: "bag-handle-outline",        label: "My Orders",     sub: "24 orders placed",   color: "#F97316", bg: "#FFF7ED", route: "/orders" },
-  { icon: "location-outline",          label: "Addresses",     sub: "2 saved locations",  color: "#3B82F6", bg: "#EFF6FF", route: null },
-  { icon: "heart-outline",             label: "Wishlist",      sub: "12 saved items",     color: "#EF4444", bg: "#FEF2F2", route: null },
-  { icon: "pricetag-outline",          label: "Promo Codes",   sub: "3 active coupons",   color: "#8B5CF6", bg: "#F5F3FF", route: null },
-  { icon: "gift-outline",              label: "Refer & Earn",  sub: "Earn 5,000 so'm",    color: "#EAB308", bg: "#FEFCE8", route: null },
-  { icon: "card-outline",              label: "Payment",       sub: "Visa •••• 4242",     color: "#06B6D4", bg: "#ECFEFF", route: null },
-  { icon: "settings-outline",          label: "Settings",      sub: "App preferences",    color: "#6B7280", bg: "#F9FAFB", route: null },
-];
-
 function MenuItem({ icon, label, sub, color, bg, onPress, toggle, toggleValue, onToggle, isDarkMode }: {
   icon: string; label: string; sub?: string; color: string; bg: string;
   onPress?: () => void; toggle?: boolean; toggleValue?: boolean;
@@ -53,9 +43,7 @@ function MenuItem({ icon, label, sub, color, bg, onPress, toggle, toggleValue, o
   return (
     <Animated.View style={anim}>
       <Pressable
-        style={[styles.menuItem, {
-          backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
-        }]}
+        style={[styles.menuItem, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
         onPress={onPress}
         onPressIn={() => { if (!toggle) scale.value = withSpring(0.97, { damping: 12 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
@@ -90,7 +78,7 @@ export default function ProfileScreen() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const { location } = useLocation();
-  const { lang, setLang } = useTranslation();
+  const { t, lang, setLang } = useTranslation();
 
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -115,36 +103,44 @@ export default function ProfileScreen() {
   const initial = (user.name || "U").charAt(0).toUpperCase();
 
   const handleLogout = () => {
-    Alert.alert("Sign out", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Sign out", style: "destructive", onPress: async () => { await logout(); router.replace("/auth"); } },
+    Alert.alert(t("sign_out_title"), t("sign_out_confirm"), [
+      { text: t("cancel"), style: "cancel" },
+      { text: t("yes"), style: "destructive", onPress: async () => { await logout(); router.replace("/auth"); } },
     ]);
   };
 
   const handleSaveName = async () => {
-    if (!editName.trim()) { Alert.alert("Error", "Name cannot be empty"); return; }
+    if (!editName.trim()) { Alert.alert(t("error"), t("name_empty")); return; }
     setSavingName(true);
     try {
       await updateProfile(editName.trim());
       setShowEditModal(false);
-    } catch { Alert.alert("Error", "Could not update name"); }
-    finally { setSavingName(false); }
+      Alert.alert(t("success"), t("successfully_changed"));
+    } catch {
+      Alert.alert(t("error"), t("could_not_update"));
+    } finally { setSavingName(false); }
   };
 
   const handleChangePassword = async () => {
-    if (!oldPassword || !newPassword || !confirmPassword) { Alert.alert("Error", "Fill in all fields"); return; }
-    if (newPassword !== confirmPassword) { Alert.alert("Error", "New passwords do not match"); return; }
-    if (newPassword.length < 6) { Alert.alert("Error", "Password must be at least 6 characters"); return; }
+    if (!oldPassword || !newPassword || !confirmPassword) { Alert.alert(t("error"), t("error_fill")); return; }
+    if (newPassword !== confirmPassword) { Alert.alert(t("error"), t("passwords_not_match")); return; }
+    if (newPassword.length < 6) { Alert.alert(t("error"), t("password_min_6")); return; }
     setSavingPassword(true);
     try {
       const res = await apiRequest("PATCH", "/api/password", { oldPassword, newPassword });
-      if (!res.ok) { const d = await res.json(); Alert.alert("Error", d.error || "Failed"); return; }
+      if (!res.ok) { const d = await res.json(); Alert.alert(t("error"), d.error || t("something_wrong")); return; }
       setShowPasswordModal(false);
       setOldPassword(""); setNewPassword(""); setConfirmPassword("");
-      Alert.alert("Success", "Password changed successfully");
-    } catch { Alert.alert("Error", "Something went wrong"); }
+      Alert.alert(t("success"), t("password_changed"));
+    } catch { Alert.alert(t("error"), t("something_wrong")); }
     finally { setSavingPassword(false); }
   };
+
+  const memberLabel = user.role === "admin"
+    ? t("admin")
+    : user.role === "courier"
+    ? t("courier")
+    : t("gold_member");
 
   return (
     <>
@@ -171,32 +167,29 @@ export default function ProfileScreen() {
                 </View>
               </Pressable>
               <View style={{ flex: 1, gap: 3 }}>
-                <Text style={styles.heroName}>{user.name || "User"}</Text>
+                <Text style={styles.heroName}>{user.name || t("profile")}</Text>
                 <Text style={styles.heroPhone}>{user.phoneNumber}</Text>
                 <View style={styles.memberBadge}>
                   <Ionicons name="star" size={11} color="#F59E0B" />
-                  <Text style={styles.memberBadgeText}>
-                    {user.role === "admin" ? "Administrator" : user.role === "courier" ? "Courier" : "Gold Member"}
-                  </Text>
+                  <Text style={styles.memberBadgeText}>{memberLabel}</Text>
                 </View>
               </View>
             </View>
 
-            {/* Stats inside header */}
-            <View style={[styles.statsRow, { backgroundColor: isDarkMode ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.18)" }]}>
+            <View style={[styles.statsRow, { backgroundColor: "rgba(0,0,0,0.18)" }]}>
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: "#fff" }]}>{userOrders.length}</Text>
-                <Text style={styles.statLabel}>Orders</Text>
+                <Text style={styles.statNumber}>{userOrders.length}</Text>
+                <Text style={styles.statLabel}>{t("orders_stat")}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: "#fff" }]}>{cartItemCount}</Text>
-                <Text style={styles.statLabel}>In Cart</Text>
+                <Text style={styles.statNumber}>{cartItemCount}</Text>
+                <Text style={styles.statLabel}>{t("in_cart_stat")}</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: "#fff" }]}>0</Text>
-                <Text style={styles.statLabel}>Reviews</Text>
+                <Text style={styles.statNumber}>0</Text>
+                <Text style={styles.statLabel}>{t("reviews_stat")}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -211,8 +204,8 @@ export default function ProfileScreen() {
                 <View style={[styles.quickIcon, { backgroundColor: "#FFF7ED" }]}>
                   <Ionicons name="bag-handle-outline" size={20} color="#F97316" />
                 </View>
-                <Text style={[styles.quickLabel, { color: Colors.text }]}>My Orders</Text>
-                <Text style={[styles.quickSub, { color: Colors.textMuted }]}>{userOrders.length} placed</Text>
+                <Text style={[styles.quickLabel, { color: Colors.text }]}>{t("my_orders")}</Text>
+                <Text style={[styles.quickSub, { color: Colors.textMuted }]}>{userOrders.length} {t("orders_placed")}</Text>
               </Pressable>
               <Pressable
                 style={[styles.quickCard, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
@@ -221,116 +214,112 @@ export default function ProfileScreen() {
                 <View style={[styles.quickIcon, { backgroundColor: "#EFF6FF" }]}>
                   <Ionicons name="location-outline" size={20} color="#3B82F6" />
                 </View>
-                <Text style={[styles.quickLabel, { color: Colors.text }]}>Address</Text>
+                <Text style={[styles.quickLabel, { color: Colors.text }]}>{t("addresses")}</Text>
                 <Text style={[styles.quickSub, { color: Colors.textMuted }]} numberOfLines={1}>
-                  {location?.address ? location.address.slice(0, 14) + "…" : "Set location"}
+                  {location?.address ? location.address.slice(0, 14) + "…" : t("no_address")}
                 </Text>
               </Pressable>
               <Pressable
                 style={[styles.quickCard, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
-                onPress={() => Alert.alert("Wishlist", "Coming soon!")}
+                onPress={() => Alert.alert(t("wishlist"), t("coming_soon"))}
               >
                 <View style={[styles.quickIcon, { backgroundColor: "#FEF2F2" }]}>
                   <Ionicons name="heart-outline" size={20} color="#EF4444" />
                 </View>
-                <Text style={[styles.quickLabel, { color: Colors.text }]}>Wishlist</Text>
-                <Text style={[styles.quickSub, { color: Colors.textMuted }]}>Saved items</Text>
+                <Text style={[styles.quickLabel, { color: Colors.text }]}>{t("wishlist")}</Text>
+                <Text style={[styles.quickSub, { color: Colors.textMuted }]}>{t("saved_items")}</Text>
               </Pressable>
             </View>
 
-            {/* Admin/Courier shortcut */}
+            {/* Courier/Admin shortcut */}
             {user.role === "courier" && (
-              <Pressable
-                style={[styles.roleCard, { backgroundColor: "#16A34A" }]}
-                onPress={() => router.push("/courier")}
-              >
+              <Pressable style={[styles.roleCard, { backgroundColor: "#16A34A" }]} onPress={() => router.push("/courier")}>
                 <View style={styles.roleLeft}>
-                  <View style={styles.roleIconBox}>
-                    <Ionicons name="bicycle" size={22} color="#fff" />
-                  </View>
+                  <View style={styles.roleIconBox}><Ionicons name="bicycle" size={22} color="#fff" /></View>
                   <View>
-                    <Text style={styles.roleTitle}>Courier Dashboard</Text>
-                    <Text style={styles.roleSub}>Manage deliveries</Text>
+                    <Text style={styles.roleTitle}>{t("courier_dashboard")}</Text>
+                    <Text style={styles.roleSub}>{t("manage_deliveries")}</Text>
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
               </Pressable>
             )}
             {user.role === "admin" && (
-              <Pressable
-                style={[styles.roleCard, { backgroundColor: "#16A34A" }]}
-                onPress={() => router.push("/admin")}
-              >
+              <Pressable style={[styles.roleCard, { backgroundColor: "#16A34A" }]} onPress={() => router.push("/admin")}>
                 <View style={styles.roleLeft}>
-                  <View style={styles.roleIconBox}>
-                    <Ionicons name="shield-checkmark" size={22} color="#fff" />
-                  </View>
+                  <View style={styles.roleIconBox}><Ionicons name="shield-checkmark" size={22} color="#fff" /></View>
                   <View>
-                    <Text style={styles.roleTitle}>Admin Panel</Text>
-                    <Text style={styles.roleSub}>Manage everything</Text>
+                    <Text style={styles.roleTitle}>{t("admin_panel")}</Text>
+                    <Text style={styles.roleSub}>{t("manage_everything")}</Text>
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
               </Pressable>
             )}
 
-            {/* Main menu */}
-            <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>ACCOUNT</Text>
+            {/* Account menu */}
+            <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>{t("section_account")}</Text>
             <View style={styles.menuGroup}>
-              <MenuItem icon="bag-handle-outline" label="My Orders" sub={`${userOrders.length} orders placed`} color="#F97316" bg="#FFF7ED" onPress={() => router.push("/orders")} isDarkMode={isDarkMode} />
+              <MenuItem icon="bag-handle-outline" label={t("my_orders")} sub={`${userOrders.length} ${t("orders_placed")}`} color="#F97316" bg="#FFF7ED" onPress={() => router.push("/orders")} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="location-outline" label="Addresses" sub={location?.address ? location.address.slice(0, 25) + "…" : "No address saved"} color="#3B82F6" bg="#EFF6FF" onPress={() => setShowLocationPicker(true)} isDarkMode={isDarkMode} />
+              <MenuItem icon="location-outline" label={t("addresses")} sub={location?.address ? location.address.slice(0, 25) + "…" : t("no_address")} color="#3B82F6" bg="#EFF6FF" onPress={() => setShowLocationPicker(true)} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="heart-outline" label="Wishlist" sub="Saved items" color="#EF4444" bg="#FEF2F2" onPress={() => Alert.alert("Wishlist", "Coming soon!")} isDarkMode={isDarkMode} />
+              <MenuItem icon="heart-outline" label={t("wishlist")} sub={t("saved_items")} color="#EF4444" bg="#FEF2F2" onPress={() => Alert.alert(t("wishlist"), t("coming_soon"))} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="pricetag-outline" label="Promo Codes" sub="Active coupons" color="#8B5CF6" bg="#F5F3FF" onPress={() => Alert.alert("Promo Codes", "Coming soon!")} isDarkMode={isDarkMode} />
+              <MenuItem icon="pricetag-outline" label={t("promo_codes")} sub={t("active_coupons")} color="#8B5CF6" bg="#F5F3FF" onPress={() => Alert.alert(t("promo_codes"), t("coming_soon"))} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="card-outline" label="Payment" sub="Cash on delivery" color="#06B6D4" bg="#ECFEFF" onPress={() => Alert.alert("Payment", "Cash on delivery is currently the only payment method.")} isDarkMode={isDarkMode} />
+              <MenuItem icon="card-outline" label={t("payment")} sub={t("cash_on_delivery")} color="#06B6D4" bg="#ECFEFF" onPress={() => Alert.alert(t("payment"), t("cash_on_delivery"))} isDarkMode={isDarkMode} />
             </View>
 
-            <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>PREFERENCES</Text>
+            {/* Preferences menu */}
+            <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>{t("section_preferences")}</Text>
             <View style={styles.menuGroup}>
-              <MenuItem icon="notifications-outline" label="Notifications" sub="Push notifications" color="#F97316" bg="#FFF7ED" toggle toggleValue={notifications} onToggle={setNotifications} isDarkMode={isDarkMode} />
+              <MenuItem icon="notifications-outline" label={t("notifications")} sub={t("push_notifications")} color="#F97316" bg="#FFF7ED" toggle toggleValue={notifications} onToggle={setNotifications} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="moon-outline" label="Dark Mode" sub="Toggle theme" color="#6366F1" bg="#EEF2FF" toggle toggleValue={isDarkMode} onToggle={toggleDarkMode} isDarkMode={isDarkMode} />
+              <MenuItem icon="moon-outline" label={t("dark_mode")} sub={t("toggle_theme")} color="#6366F1" bg="#EEF2FF" toggle toggleValue={isDarkMode} onToggle={toggleDarkMode} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="language-outline" label="Language" sub={lang === "uz" ? "O'zbek" : "Русский"} color="#16A34A" bg="#F0FDF4" onPress={() => setLang(lang === "uz" ? "ru" : "uz")} isDarkMode={isDarkMode} />
+              <MenuItem
+                icon="language-outline" label={t("language")} sub={t("language_name")} color="#16A34A" bg="#F0FDF4"
+                onPress={() => setLang(lang === "uz" ? "ru" : "uz")}
+                isDarkMode={isDarkMode}
+              />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="shield-checkmark-outline" label="Change Password" sub="Update your password" color="#EF4444" bg="#FEF2F2" onPress={() => { setOldPassword(""); setNewPassword(""); setConfirmPassword(""); setShowPasswordModal(true); }} isDarkMode={isDarkMode} />
+              <MenuItem icon="shield-checkmark-outline" label={t("change_password")} sub={t("update_password")} color="#EF4444" bg="#FEF2F2" onPress={() => { setOldPassword(""); setNewPassword(""); setConfirmPassword(""); setShowPasswordModal(true); }} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="help-circle-outline" label="Help & Support" sub="Contact us" color="#6B7280" bg="#F9FAFB" onPress={() => Alert.alert("Support", "+998 71 000 00 00\nsupport@citymarket.uz")} isDarkMode={isDarkMode} />
+              <MenuItem icon="help-circle-outline" label={t("help_support")} sub={t("contact_us")} color="#6B7280" bg="#F9FAFB" onPress={() => Alert.alert(t("help_support"), "+998 71 000 00 00\nsupport@citymarket.uz")} isDarkMode={isDarkMode} />
             </View>
 
             <Pressable style={styles.signOutBtn} onPress={handleLogout}>
               <Ionicons name="log-out-outline" size={18} color="#EF4444" />
-              <Text style={styles.signOutText}>Sign Out</Text>
+              <Text style={styles.signOutText}>{t("sign_out")}</Text>
             </Pressable>
 
-            <Text style={[styles.version, { color: Colors.textMuted }]}>City Market v1.0.0</Text>
+            <Text style={[styles.version, { color: Colors.textMuted }]}>{t("version")}</Text>
           </View>
         </ScrollView>
       </View>
 
       <LocationPicker visible={showLocationPicker} onClose={() => setShowLocationPicker(false)} />
 
+      {/* Edit Name Modal */}
       <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
           <Pressable style={styles.modalOverlay} onPress={() => setShowEditModal(false)}>
             <Pressable style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff" }]} onPress={(e) => e.stopPropagation()}>
               <View style={styles.modalHandle} />
-              <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>Edit Name</Text>
+              <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>{t("edit_name")}</Text>
               <TextInput
                 style={[styles.modalInput, { color: isDarkMode ? "#fff" : "#111827", backgroundColor: isDarkMode ? "#2C2C2E" : "#F5F5F5" }]}
                 value={editName} onChangeText={setEditName}
-                placeholder="Your name" placeholderTextColor="#9CA3AF"
+                placeholder={t("your_name")} placeholderTextColor="#9CA3AF"
                 autoFocus maxLength={50}
               />
               <View style={styles.modalButtons}>
                 <Pressable style={[styles.modalCancelBtn, { borderColor: isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }]} onPress={() => setShowEditModal(false)}>
-                  <Text style={[styles.modalCancelText, { color: isDarkMode ? "#9CA3AF" : "#6B7280" }]}>Cancel</Text>
+                  <Text style={[styles.modalCancelText, { color: isDarkMode ? "#9CA3AF" : "#6B7280" }]}>{t("cancel")}</Text>
                 </Pressable>
                 <Pressable style={[styles.modalSaveBtn, savingName && { opacity: 0.6 }]} onPress={handleSaveName} disabled={savingName}>
-                  <Text style={styles.modalSaveText}>{savingName ? "Saving..." : "Save"}</Text>
+                  <Text style={styles.modalSaveText}>{savingName ? t("saving") : t("save")}</Text>
                 </Pressable>
               </View>
             </Pressable>
@@ -338,16 +327,17 @@ export default function ProfileScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
+      {/* Change Password Modal */}
       <Modal visible={showPasswordModal} transparent animationType="slide" onRequestClose={() => setShowPasswordModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
           <Pressable style={styles.modalOverlay} onPress={() => setShowPasswordModal(false)}>
             <Pressable style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff" }]} onPress={(e) => e.stopPropagation()}>
               <View style={styles.modalHandle} />
-              <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>Change Password</Text>
+              <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>{t("change_password_title")}</Text>
               {[
-                { val: oldPassword, set: setOldPassword, ph: "Current password" },
-                { val: newPassword, set: setNewPassword, ph: "New password" },
-                { val: confirmPassword, set: setConfirmPassword, ph: "Confirm new password" },
+                { val: oldPassword, set: setOldPassword, ph: t("current_password") },
+                { val: newPassword, set: setNewPassword, ph: t("new_password") },
+                { val: confirmPassword, set: setConfirmPassword, ph: t("confirm_new_password") },
               ].map((field, i) => (
                 <TextInput key={i}
                   style={[styles.modalInput, { color: isDarkMode ? "#fff" : "#111827", backgroundColor: isDarkMode ? "#2C2C2E" : "#F5F5F5", marginTop: i > 0 ? 10 : 0 }]}
@@ -358,10 +348,10 @@ export default function ProfileScreen() {
               ))}
               <View style={styles.modalButtons}>
                 <Pressable style={[styles.modalCancelBtn, { borderColor: isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)" }]} onPress={() => setShowPasswordModal(false)}>
-                  <Text style={[styles.modalCancelText, { color: isDarkMode ? "#9CA3AF" : "#6B7280" }]}>Cancel</Text>
+                  <Text style={[styles.modalCancelText, { color: isDarkMode ? "#9CA3AF" : "#6B7280" }]}>{t("cancel")}</Text>
                 </Pressable>
                 <Pressable style={[styles.modalSaveBtn, savingPassword && { opacity: 0.6 }]} onPress={handleChangePassword} disabled={savingPassword}>
-                  <Text style={styles.modalSaveText}>{savingPassword ? "Saving..." : "Change"}</Text>
+                  <Text style={styles.modalSaveText}>{savingPassword ? t("saving") : t("change_btn")}</Text>
                 </Pressable>
               </View>
             </Pressable>
@@ -374,285 +364,69 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  heroHeader: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  heroContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    marginBottom: 20,
-  },
+  heroHeader: { paddingHorizontal: 20, paddingBottom: 20 },
+  heroContent: { flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 20 },
   avatarCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 72, height: 72, borderRadius: 36,
     backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.5)",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 3, borderColor: "rgba(255,255,255,0.5)",
   },
-  avatarInitial: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 28,
-    color: "#fff",
-  },
+  avatarInitial: { fontFamily: "Poppins_700Bold", fontSize: 28, color: "#fff" },
   editBadge: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#15803D",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
+    position: "absolute", bottom: 0, right: 0,
+    width: 22, height: 22, borderRadius: 11,
+    backgroundColor: "#15803D", alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#fff",
   },
-  heroName: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    color: "#fff",
-  },
-  heroPhone: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
-  },
+  heroName: { fontFamily: "Poppins_700Bold", fontSize: 20, color: "#fff" },
+  heroPhone: { fontFamily: "Poppins_400Regular", fontSize: 13, color: "rgba(255,255,255,0.8)" },
   memberBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    flexDirection: "row", alignItems: "center", gap: 4,
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: "flex-start",
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, alignSelf: "flex-start",
   },
-  memberBadgeText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    color: "#fff",
-  },
-  statsRow: {
-    flexDirection: "row",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
-  statNumber: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-  },
-  statLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.75)",
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    marginVertical: 4,
-  },
-  body: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    gap: 0,
-  },
-  quickRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 20,
-  },
+  memberBadgeText: { fontFamily: "Poppins_600SemiBold", fontSize: 11, color: "#fff" },
+  statsRow: { flexDirection: "row", borderRadius: 16, paddingVertical: 14, paddingHorizontal: 10 },
+  statItem: { flex: 1, alignItems: "center", gap: 2 },
+  statNumber: { fontFamily: "Poppins_700Bold", fontSize: 20, color: "#fff" },
+  statLabel: { fontFamily: "Poppins_400Regular", fontSize: 11, color: "rgba(255,255,255,0.75)" },
+  statDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.25)", marginVertical: 4 },
+  body: { paddingHorizontal: 16, paddingTop: 20 },
+  quickRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   quickCard: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 14,
-    alignItems: "center",
-    gap: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    flex: 1, borderRadius: 16, padding: 14, alignItems: "center", gap: 6,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
   },
-  quickIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  quickLabel: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    textAlign: "center",
-  },
-  quickSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 10,
-    textAlign: "center",
-  },
-  roleCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  roleLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  roleIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roleTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 15,
-    color: "#fff",
-  },
-  roleSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.75)",
-  },
-  sectionTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1,
-    marginBottom: 8,
-    marginTop: 4,
-  },
+  quickIcon: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  quickLabel: { fontFamily: "Poppins_600SemiBold", fontSize: 12, textAlign: "center" },
+  quickSub: { fontFamily: "Poppins_400Regular", fontSize: 10, textAlign: "center" },
+  roleCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 16, padding: 16, marginBottom: 20 },
+  roleLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  roleIconBox: { width: 44, height: 44, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
+  roleTitle: { fontFamily: "Poppins_700Bold", fontSize: 15, color: "#fff" },
+  roleSub: { fontFamily: "Poppins_400Regular", fontSize: 12, color: "rgba(255,255,255,0.75)" },
+  sectionTitle: { fontFamily: "Poppins_600SemiBold", fontSize: 11, letterSpacing: 1, marginBottom: 8, marginTop: 4 },
   menuGroup: {
-    borderRadius: 20,
-    overflow: "hidden",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    borderRadius: 20, overflow: "hidden", marginBottom: 20,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3,
   },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  menuIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  menuLabel: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-  },
-  menuSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-  },
-  divider: {
-    height: 1,
-    marginLeft: 70,
-  },
-  signOutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginBottom: 16,
-  },
-  signOutText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-    color: "#EF4444",
-  },
-  version: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalSheet: {
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(0,0,0,0.15)",
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    marginBottom: 16,
-  },
-  modalInput: {
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    fontFamily: "Poppins_400Regular",
-    fontSize: 15,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 20,
-  },
-  modalCancelBtn: {
-    flex: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  modalCancelText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-  },
-  modalSaveBtn: {
-    flex: 1,
-    backgroundColor: "#16A34A",
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  modalSaveText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 15,
-    color: "#fff",
-  },
+  menuItem: { flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 16, paddingVertical: 14 },
+  menuIconCircle: { width: 40, height: 40, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  menuLabel: { fontFamily: "Poppins_600SemiBold", fontSize: 14 },
+  menuSub: { fontFamily: "Poppins_400Regular", fontSize: 11 },
+  divider: { height: 1, marginLeft: 70 },
+  signOutBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#FEF2F2", borderRadius: 16, paddingVertical: 16, marginBottom: 16 },
+  signOutText: { fontFamily: "Poppins_600SemiBold", fontSize: 15, color: "#EF4444" },
+  version: { fontFamily: "Poppins_400Regular", fontSize: 12, textAlign: "center", marginBottom: 8 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
+  modalSheet: { borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40 },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "rgba(0,0,0,0.15)", alignSelf: "center", marginBottom: 20 },
+  modalTitle: { fontFamily: "Poppins_700Bold", fontSize: 20, marginBottom: 16 },
+  modalInput: { borderRadius: 14, paddingHorizontal: 16, paddingVertical: 13, fontFamily: "Poppins_400Regular", fontSize: 15 },
+  modalButtons: { flexDirection: "row", gap: 12, marginTop: 20 },
+  modalCancelBtn: { flex: 1, borderRadius: 14, paddingVertical: 14, alignItems: "center", borderWidth: 1 },
+  modalCancelText: { fontFamily: "Poppins_600SemiBold", fontSize: 15 },
+  modalSaveBtn: { flex: 1, backgroundColor: "#16A34A", borderRadius: 14, paddingVertical: 14, alignItems: "center" },
+  modalSaveText: { fontFamily: "Poppins_700Bold", fontSize: 15, color: "#fff" },
 });

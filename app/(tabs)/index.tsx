@@ -23,7 +23,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
-import { BANNERS, formatPrice } from "@/constants/data";
+import { BANNERS } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
@@ -36,6 +36,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
+import { useTranslation } from "@/lib/I18nProvider";
 
 const CATEGORY_IMAGES: Record<string, string> = {
   fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&q=80",
@@ -75,11 +76,11 @@ function getCategoryImage(name: string, id: string): string {
   return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80";
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
+function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
+  const h = new Date().getHours();
+  if (h < 12) return "greeting_morning";
+  if (h < 17) return "greeting_afternoon";
+  return "greeting_evening";
 }
 
 const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
@@ -110,7 +111,7 @@ function BannerDot({ isActive }: { isActive: boolean }) {
   return <Animated.View style={[{ height: 6, borderRadius: 3, backgroundColor: "#16A34A" }, style]} />;
 }
 
-function CategoryCircle({ item, count, onPress }: { item: any; count: number; onPress: () => void }) {
+function CategoryCircle({ item, onPress }: { item: any; onPress: () => void }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const img = getCategoryImage(item.name, item.id);
@@ -175,6 +176,7 @@ export default function HomeScreen() {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { location, isLoading: locationLoading } = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user?.role !== "customer") return;
@@ -197,7 +199,10 @@ export default function HomeScreen() {
   const unreadCount = unreadData?.count ?? 0;
 
   const handleAddToCart = (product: any) => {
-    if (!product.inStock) { Alert.alert("Out of stock", "This product is temporarily unavailable"); return; }
+    if (!product.inStock) {
+      Alert.alert(t("error"), t("out_of_stock"));
+      return;
+    }
     const p: SchemaProduct = {
       id: product.id, name: product.name, category: product.category,
       price: product.price, originalPrice: product.originalPrice || null,
@@ -215,7 +220,6 @@ export default function HomeScreen() {
   const popularProducts = activeFilter
     ? products.filter((p) => p.category === activeFilter).slice(0, 12)
     : products.filter((p) => p.badge === "sale" || p.badge === "hot" || p.badge === "new").slice(0, 12);
-
   const allPopular = popularProducts.length === 0 ? products.slice(0, 12) : popularProducts;
 
   const bannerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -236,8 +240,8 @@ export default function HomeScreen() {
   }, [startBannerAutoScroll]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
-  const greeting = getGreeting();
-  const firstName = user?.name ? user.name.split(" ")[0] : "there";
+  const greetingKey = getGreetingKey();
+  const firstName = user?.name ? user.name.split(" ")[0] : "";
 
   return (
     <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
@@ -253,12 +257,12 @@ export default function HomeScreen() {
               <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
                 {location?.address
                   ? location.address.length > 28 ? location.address.slice(0, 28) + "…" : location.address
-                  : "Set your location"}
+                  : t("set_location")}
               </Text>
               <Ionicons name={locationLoading ? "reload-outline" : "chevron-down"} size={12} color={Colors.textMuted} />
             </Pressable>
             <Text style={[styles.greeting, { color: Colors.text }]}>
-              {greeting}, {firstName}
+              {t(greetingKey)}{firstName ? ", " + firstName : ""}
             </Text>
           </View>
 
@@ -285,7 +289,7 @@ export default function HomeScreen() {
         >
           <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
-            Search products, brands...
+            {t("search_placeholder")}
           </Text>
           <View style={styles.filterIcon}>
             <Ionicons name="options-outline" size={17} color="#16A34A" />
@@ -300,9 +304,9 @@ export default function HomeScreen() {
           style={{ marginBottom: 16 }}
         >
           {[
-            { icon: "bicycle-outline", title: "Free delivery", sub: "On all orders", color: "#16A34A", bg: "#F0FDF4" },
-            { icon: "time-outline", title: "30 min", sub: "Express", color: "#F97316", bg: "#FFF7ED" },
-            { icon: "shield-checkmark-outline", title: "Guarantee", sub: "100% fresh", color: "#3B82F6", bg: "#EFF6FF" },
+            { icon: "bicycle-outline", title: t("free_delivery"), sub: t("free_delivery_sub"), color: "#16A34A", bg: "#F0FDF4" },
+            { icon: "time-outline",    title: t("express"),       sub: t("express_sub"),        color: "#F97316", bg: "#FFF7ED" },
+            { icon: "shield-checkmark-outline", title: t("guarantee"), sub: t("guarantee_sub"), color: "#3B82F6", bg: "#EFF6FF" },
           ].map((pill) => (
             <View key={pill.title} style={[styles.pill, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : pill.bg }]}>
               <Ionicons name={pill.icon as any} size={18} color={pill.color} />
@@ -348,14 +352,14 @@ export default function HomeScreen() {
                 </View>
                 <View style={styles.bannerDelivery}>
                   <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
-                  <Text style={styles.bannerDeliveryText}>30 min</Text>
+                  <Text style={styles.bannerDeliveryText}>{t("express")}</Text>
                 </View>
               </View>
               <View style={styles.bannerBottom}>
                 <Text style={styles.bannerSub}>{item.subtitle}</Text>
                 <Text style={styles.bannerTitle}>{item.title}</Text>
                 <View style={styles.bannerCta}>
-                  <Text style={styles.bannerCtaText}>Shop Now</Text>
+                  <Text style={styles.bannerCtaText}>{t("shop_now")}</Text>
                   <Ionicons name="arrow-forward" size={13} color="#fff" />
                 </View>
               </View>
@@ -372,9 +376,9 @@ export default function HomeScreen() {
 
         {/* Categories */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Categories</Text>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("categories")}</Text>
           <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.seeAll}>See all</Text>
+            <Text style={styles.seeAll}>{t("see_all")}</Text>
           </Pressable>
         </View>
 
@@ -384,16 +388,12 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.id}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesRow}
-          renderItem={({ item }) => {
-            const count = products.filter((p) => p.category === item.id).length;
-            return (
-              <CategoryCircle
-                item={item}
-                count={count}
-                onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
-              />
-            );
-          }}
+          renderItem={({ item }) => (
+            <CategoryCircle
+              item={item}
+              onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
+            />
+          )}
         />
 
         {/* Filter chips */}
@@ -404,15 +404,20 @@ export default function HomeScreen() {
           style={{ marginBottom: 20 }}
         >
           <Pressable
-            style={[styles.chip, !activeFilter && styles.chipActive]}
+            style={[styles.chip, !activeFilter && styles.chipActive, {
+              backgroundColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
+              borderColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+            }]}
             onPress={() => setActiveFilter(null)}
           >
-            <Text style={[styles.chipText, !activeFilter && styles.chipTextActive]}>All</Text>
+            <Text style={[styles.chipText, { color: !activeFilter ? "#fff" : Colors.text }]}>
+              {t("filter_all")}
+            </Text>
           </Pressable>
           {categories.slice(0, 6).map((cat: any) => (
             <Pressable
               key={cat.id}
-              style={[styles.chip, activeFilter === cat.id && styles.chipActive, {
+              style={[styles.chip, {
                 backgroundColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
                 borderColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
               }]}
@@ -421,18 +426,18 @@ export default function HomeScreen() {
                 setActiveFilter(activeFilter === cat.id ? null : cat.id);
               }}
             >
-              <Text style={[styles.chipText, activeFilter === cat.id && styles.chipTextActive, {
-                color: activeFilter === cat.id ? "#fff" : Colors.text
-              }]}>{cat.name}</Text>
+              <Text style={[styles.chipText, { color: activeFilter === cat.id ? "#fff" : Colors.text }]}>
+                {cat.name}
+              </Text>
             </Pressable>
           ))}
         </ScrollView>
 
         {/* Popular Today */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Popular Today</Text>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("popular_today")}</Text>
           <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
-            <Text style={styles.countBadgeText}>{allPopular.length} items</Text>
+            <Text style={styles.countBadgeText}>{allPopular.length} {t("items_unit")}</Text>
           </View>
         </View>
 
@@ -671,9 +676,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.07)",
   },
   chipActive: {
     backgroundColor: "#16A34A",
@@ -682,10 +685,6 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
-    color: "#374151",
-  },
-  chipTextActive: {
-    color: "#fff",
   },
   countBadge: {
     paddingHorizontal: 10,

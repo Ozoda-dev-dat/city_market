@@ -26,38 +26,39 @@ import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/context/ProductsContext";
 import { useApp } from "@/context/ProductsContext";
 import { Product } from "@/constants/data";
+import { useTranslation } from "@/lib/I18nProvider";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 48) / 2;
 const CARD_H = CARD_W * 0.75;
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  fruits:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
-  mevalar:    "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
-  vegetables: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
-  sabzavotlar:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
-  dairy:      "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  sut:        "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  sutli:      "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  bakery:     "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  novvoy:     "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  non:        "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  meat:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
-  gosht:      "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
-  seafood:    "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
-  dengiz:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
-  beverages:  "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
-  ichimlik:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
-  snacks:     "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
-  shirinlik:  "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
-  frozen:     "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
-  muzqaymoq:  "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
-  organic:    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
-  organik:    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
-  coffee:     "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
-  qahva:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
-  chocolate:  "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
-  shokolad:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
+  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
+  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
+  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
+  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
+  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
+  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
+  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
+  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
+  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
+  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
+  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
+  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
+  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
+  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
+  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
+  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
+  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
+  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
+  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
+  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
+  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
 };
 
 function getCategoryImage(name: string, id: string): string {
@@ -69,9 +70,10 @@ function getCategoryImage(name: string, id: string): string {
   return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
 }
 
-function CategoryPhotoCard({ category, productCount, onPress }: {
+function CategoryPhotoCard({ category, productCount, itemsLabel, onPress }: {
   category: any;
   productCount: number;
+  itemsLabel: string;
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
@@ -102,7 +104,7 @@ function CategoryPhotoCard({ category, productCount, onPress }: {
         />
         <View style={photoCardStyles.content}>
           <Text style={photoCardStyles.name} numberOfLines={2}>{category.name}</Text>
-          <Text style={photoCardStyles.count}>{productCount} items</Text>
+          <Text style={photoCardStyles.count}>{productCount} {itemsLabel}</Text>
         </View>
       </Pressable>
     </Animated.View>
@@ -138,9 +140,9 @@ export default function BrowseScreen() {
   const Colors = getColors(isDarkMode);
   const { products: allProducts } = useProducts();
   const { categories } = useApp();
+  const { t } = useTranslation();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   const totalProductCount = allProducts.length;
 
   const filteredProducts = useMemo(() => {
@@ -171,9 +173,9 @@ export default function BrowseScreen() {
   return (
     <View style={[styles.container, { backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-        <Text style={[styles.title, { color: Colors.text }]}>All Categories</Text>
+        <Text style={[styles.title, { color: Colors.text }]}>{t("all_categories")}</Text>
         <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-          {categories.length} categories · {totalProductCount}+ products
+          {categories.length} {t("tab_browse").toLowerCase()} · {totalProductCount}+ {t("items_unit")}
         </Text>
 
         <View style={[styles.searchBar, {
@@ -183,7 +185,7 @@ export default function BrowseScreen() {
           <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
           <TextInput
             style={[styles.searchInput, { color: Colors.text }]}
-            placeholder="Search products..."
+            placeholder={t("search_products")}
             placeholderTextColor={Colors.textMuted}
             value={search}
             onChangeText={setSearch}
@@ -200,8 +202,8 @@ export default function BrowseScreen() {
         filteredProducts.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={48} color={Colors.textMuted} />
-            <Text style={[styles.emptyTitle, { color: Colors.text }]}>No products found</Text>
-            <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>Try a different search term</Text>
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>{t("no_products_found")}</Text>
+            <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>{t("try_different_search")}</Text>
           </View>
         ) : (
           <FlatList
@@ -213,7 +215,7 @@ export default function BrowseScreen() {
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={
               <Text style={[styles.resultsLabel, { color: Colors.textSecondary }]}>
-                {filteredProducts.length} results for "{search}"
+                {filteredProducts.length} {t("items_unit")}
               </Text>
             }
             renderItem={({ item }) => (
@@ -238,6 +240,7 @@ export default function BrowseScreen() {
               <CategoryPhotoCard
                 category={item}
                 productCount={count}
+                itemsLabel={t("items_unit")}
                 onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
               />
             );
@@ -249,9 +252,7 @@ export default function BrowseScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 16,
