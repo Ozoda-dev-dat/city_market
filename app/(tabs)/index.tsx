@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   Image,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,33 +39,37 @@ import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 import { useTranslation } from "@/lib/I18nProvider";
 
+const { width: SCREEN_W } = Dimensions.get("window");
+const CARD_W = (SCREEN_W - 48) / 2;
+const CARD_H = CARD_W * 0.72;
+
 const CATEGORY_IMAGES: Record<string, string> = {
-  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&q=80",
-  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&q=80",
-  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80",
-  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80",
-  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
-  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
-  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
-  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
-  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
-  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
-  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&q=80",
-  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&q=80",
-  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=300&q=80",
-  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=300&q=80",
-  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&q=80",
-  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&q=80",
-  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=300&q=80",
-  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=300&q=80",
-  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=300&q=80",
-  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=300&q=80",
-  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80",
-  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80",
-  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&q=80",
-  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&q=80",
-  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=300&q=80",
-  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=300&q=80",
+  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
+  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
+  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
+  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
+  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
+  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
+  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
+  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
+  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
+  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
+  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
+  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
+  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
+  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
+  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
+  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
+  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
+  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
 };
 
 function getCategoryImage(name: string, id: string): string {
@@ -73,7 +78,7 @@ function getCategoryImage(name: string, id: string): string {
   for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
     if (nameL.includes(key) || idL.includes(key)) return url;
   }
-  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80";
+  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80";
 }
 
 function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
@@ -161,6 +166,50 @@ const circleStyles = StyleSheet.create({
   },
 });
 
+function CategoryPhotoCard({ category, productCount, itemsLabel, isDarkMode, onPress }: {
+  category: any; productCount: number; itemsLabel: string; isDarkMode: boolean; onPress: () => void;
+}) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const img = getCategoryImage(category.name, category.id);
+
+  return (
+    <Animated.View style={[{ width: CARD_W, height: CARD_H, marginBottom: 12 }, anim]}>
+      <Pressable
+        style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}
+        onPress={() => {
+          if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress();
+        }}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+      >
+        <Image
+          source={{ uri: img }}
+          style={StyleSheet.absoluteFillObject as any}
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.72)"]}
+          start={{ x: 0, y: 0.25 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFillObject as any}
+        />
+        <View style={catCardStyles.content}>
+          <Text style={catCardStyles.name} numberOfLines={2}>{category.name}</Text>
+          <Text style={catCardStyles.count}>{productCount} {itemsLabel}</Text>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const catCardStyles = StyleSheet.create({
+  content: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 12 },
+  name: { fontFamily: "Poppins_700Bold", fontSize: 15, color: "#fff", lineHeight: 20 },
+  count: { fontFamily: "Poppins_500Medium", fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2 },
+});
+
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const BANNER_W = width - 32;
@@ -243,13 +292,19 @@ export default function HomeScreen() {
   const greetingKey = getGreetingKey();
   const firstName = user?.name ? user.name.split(" ")[0] : "";
 
+  // Build category rows (2 per row) for the grid
+  const catRows: any[][] = [];
+  for (let i = 0; i < categories.length; i += 2) {
+    catRows.push(categories.slice(i, i + 2));
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 40 : 110 }}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={[styles.header, { paddingTop: topPadding + 14 }]}>
           <View style={{ flex: 1 }}>
             <Pressable style={styles.locationRow} onPress={() => setShowLocationModal(true)}>
@@ -282,7 +337,7 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        {/* Search bar */}
+        {/* ── Search bar ── */}
         <Pressable
           style={[styles.searchBar, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
           onPress={() => router.push("/(tabs)/catalog")}
@@ -296,7 +351,7 @@ export default function HomeScreen() {
           </View>
         </Pressable>
 
-        {/* Feature pills */}
+        {/* ── Feature pills ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -318,7 +373,7 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* Hero Banner */}
+        {/* ── Hero Banner ── */}
         <FlatList
           ref={scrollRef}
           data={BANNERS}
@@ -374,14 +429,10 @@ export default function HomeScreen() {
           {BANNERS.map((_, i) => <BannerDot key={i} isActive={i === activeBanner} />)}
         </View>
 
-        {/* Categories */}
+        {/* ── Category circles ── */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("categories")}</Text>
-          <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.seeAll}>{t("see_all")}</Text>
-          </Pressable>
         </View>
-
         <FlatList
           horizontal
           data={categories}
@@ -396,7 +447,7 @@ export default function HomeScreen() {
           )}
         />
 
-        {/* Filter chips */}
+        {/* ── Filter chips ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -404,7 +455,7 @@ export default function HomeScreen() {
           style={{ marginBottom: 20 }}
         >
           <Pressable
-            style={[styles.chip, !activeFilter && styles.chipActive, {
+            style={[styles.chip, {
               backgroundColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
               borderColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
             }]}
@@ -433,18 +484,17 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* Popular Today */}
+        {/* ── Popular Today ── */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("popular_today")}</Text>
           <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
             <Text style={styles.countBadgeText}>{allPopular.length} {t("items_unit")}</Text>
           </View>
         </View>
-
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 12, marginBottom: 0 }}
         >
           {allPopular.map((product) => (
             <ProductCard
@@ -454,6 +504,34 @@ export default function HomeScreen() {
             />
           ))}
         </ScrollView>
+
+        {/* ── All Categories Grid ── */}
+        <View style={[styles.sectionHeader, { marginTop: 28 }]}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
+          <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
+            <Text style={styles.countBadgeText}>{categories.length} ta</Text>
+          </View>
+        </View>
+        <View style={styles.catGrid}>
+          {catRows.map((row, rowIdx) => (
+            <View key={rowIdx} style={styles.catRow}>
+              {row.map((cat: any) => {
+                const count = products.filter((p) => p.category === cat.id).length;
+                return (
+                  <CategoryPhotoCard
+                    key={cat.id}
+                    category={cat}
+                    productCount={count}
+                    itemsLabel={t("items_unit")}
+                    isDarkMode={isDarkMode}
+                    onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+                  />
+                );
+              })}
+              {row.length === 1 && <View style={{ width: CARD_W }} />}
+            </View>
+          ))}
+        </View>
       </ScrollView>
 
       <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
@@ -678,10 +756,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
   },
-  chipActive: {
-    backgroundColor: "#16A34A",
-    borderColor: "#16A34A",
-  },
   chipText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
@@ -695,5 +769,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
     fontSize: 12,
     color: "#16A34A",
+  },
+  catGrid: {
+    paddingHorizontal: 16,
+    gap: 0,
+  },
+  catRow: {
+    flexDirection: "row",
+    gap: 12,
   },
 });

@@ -60,12 +60,7 @@ function ClassicTabLayout() {
       />
       <Tabs.Screen
         name="catalog"
-        options={{
-          tabBarLabel: t("tab_browse"),
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="cart"
