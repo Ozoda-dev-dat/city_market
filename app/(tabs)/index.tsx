@@ -14,14 +14,11 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
-  interpolate,
-  Extrapolation,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -37,10 +34,53 @@ import { NotificationsModal } from "@/components/NotificationsModal";
 import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/LocationPermissionModal";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&q=80",
+  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=300&q=80",
+  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80",
+  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80",
+  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
+  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
+  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=80",
+  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
+  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
+  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80",
+  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&q=80",
+  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&q=80",
+  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=300&q=80",
+  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=300&q=80",
+  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&q=80",
+  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=300&q=80",
+  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=300&q=80",
+  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=300&q=80",
+  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=300&q=80",
+  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=300&q=80",
+  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80",
+  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80",
+  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&q=80",
+  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&q=80",
+  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=300&q=80",
+  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=300&q=80",
+};
+
+function getCategoryImage(name: string, id: string): string {
+  const nameL = (name || "").toLowerCase();
+  const idL = (id || "").toLowerCase();
+  for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
+    if (nameL.includes(key) || idL.includes(key)) return url;
+  }
+  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80";
+}
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
   id: schemaProduct.id,
@@ -59,283 +99,64 @@ const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
   stockQuantity: schemaProduct.stockQuantity,
 });
 
-function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: boolean }) {
-  const w = useSharedValue(isActive ? 22 : 7);
-  const op = useSharedValue(isActive ? 1 : 0.35);
-
+function BannerDot({ isActive }: { isActive: boolean }) {
+  const w = useSharedValue(isActive ? 20 : 6);
+  const op = useSharedValue(isActive ? 1 : 0.4);
   useEffect(() => {
-    w.value = withSpring(isActive ? 22 : 7, { damping: 14, stiffness: 140 });
-    op.value = withTiming(isActive ? 1 : 0.35, { duration: 220 });
+    w.value = withSpring(isActive ? 20 : 6, { damping: 14, stiffness: 140 });
+    op.value = withTiming(isActive ? 1 : 0.4, { duration: 200 });
   }, [isActive]);
-
   const style = useAnimatedStyle(() => ({ width: w.value, opacity: op.value }));
-  return <Animated.View style={[styles.dot, { backgroundColor: "#16A34A" }, style]} />;
+  return <Animated.View style={[{ height: 6, borderRadius: 3, backgroundColor: "#16A34A" }, style]} />;
 }
 
-function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number }) {
+function CategoryCircle({ item, count, onPress }: { item: any; count: number; onPress: () => void }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const img = getCategoryImage(item.name, item.id);
 
   return (
-    <Animated.View style={[bannerStyles.card, { width: bannerWidth }, anim]}>
+    <Animated.View style={[circleStyles.wrapper, anim]}>
       <Pressable
-        style={{ flex: 1 }}
-        onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.975, { damping: 14 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
-      >
-        <Image
-          source={{ uri: (item as any).image }}
-          style={bannerStyles.image}
-          resizeMode="cover"
-        />
-        <LinearGradient
-          colors={[(item as any).overlayStart, (item as any).overlayEnd]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.4, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={bannerStyles.shimmer} />
-
-        <View style={bannerStyles.topRow}>
-          <View style={[bannerStyles.tagBadge, { backgroundColor: (item as any).tagColor }]}>
-            <Ionicons name="pricetag" size={10} color="#fff" />
-            <Text style={bannerStyles.tagText}>{(item as any).tag}</Text>
-          </View>
-          <View style={bannerStyles.deliveryPill}>
-            <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
-            <Text style={bannerStyles.deliveryText}>30 daqiqa</Text>
-          </View>
-        </View>
-
-        <View style={bannerStyles.bottomContent}>
-          <Text style={bannerStyles.bannerSubtitle}>{item.subtitle}</Text>
-          <Text style={bannerStyles.bannerTitle}>{item.title}</Text>
-          <View style={bannerStyles.ctaRow}>
-            <View style={bannerStyles.ctaBtn}>
-              <Text style={bannerStyles.ctaText}>{(item as any).cta}</Text>
-              <Ionicons name="arrow-forward" size={13} color="#fff" />
-            </View>
-          </View>
-        </View>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-const BANNER_H = 210;
-
-const bannerStyles = StyleSheet.create({
-  card: {
-    height: BANNER_H,
-    borderRadius: 26,
-    marginHorizontal: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.28,
-    shadowRadius: 22,
-    elevation: 12,
-  },
-  image: {
-    ...StyleSheet.absoluteFillObject,
-    width: "100%",
-    height: "100%",
-  },
-  shimmer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.04)",
-  },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    paddingTop: 18,
-  },
-  tagBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  tagText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    color: "#fff",
-  },
-  deliveryPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  deliveryText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.92)",
-  },
-  bottomContent: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    paddingTop: 14,
-    gap: 3,
-  },
-  bannerSubtitle: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 12,
-    color: "rgba(255,255,255,0.78)",
-  },
-  bannerTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 21,
-    color: "#fff",
-    lineHeight: 27,
-  },
-  ctaRow: {
-    marginTop: 10,
-  },
-  ctaBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.22)",
-    alignSelf: "flex-start",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
-  },
-  ctaText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: "#fff",
-  },
-});
-
-function CategoryCard({ item, onPress, isDarkMode, productCount }: {
-  item: any;
-  onPress: () => void;
-  isDarkMode: boolean;
-  productCount: number;
-}) {
-  const scale = useSharedValue(1);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const accentColor: string = item.color ?? "#16A34A";
-
-  const gradStart = accentColor + (isDarkMode ? "40" : "22");
-  const gradEnd = accentColor + (isDarkMode ? "10" : "06");
-
-  return (
-    <Animated.View style={[catStyles.card, anim]}>
-      <Pressable
-        style={{ flex: 1 }}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
+        onPressIn={() => { scale.value = withSpring(0.9, { damping: 12 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        style={{ alignItems: "center", gap: 6 }}
       >
-        <View style={[
-          catStyles.inner,
-          {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.88)" : "#fff",
-            borderColor: isDarkMode ? accentColor + "30" : accentColor + "25",
-          }
-        ]}>
-          <LinearGradient
-            colors={[gradStart, gradEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-            borderRadius={22}
-          />
-          <View style={[catStyles.iconCircle, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
-            <Ionicons name={item.icon as any} size={32} color={accentColor} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
-              {item.name}
-            </Text>
-            <View style={[catStyles.countPill, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
-              <Ionicons name="cube-outline" size={11} color={accentColor} />
-              <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta mahsulot</Text>
-            </View>
-          </View>
-          <View style={[catStyles.arrow, { backgroundColor: accentColor + (isDarkMode ? "25" : "15") }]}>
-            <Ionicons name="chevron-forward" size={14} color={accentColor} />
-          </View>
+        <View style={circleStyles.circle}>
+          <Image source={{ uri: img }} style={circleStyles.circleImg} resizeMode="cover" />
+          <View style={circleStyles.circleOverlay} />
         </View>
+        <Text style={circleStyles.label} numberOfLines={1}>{item.name}</Text>
       </Pressable>
     </Animated.View>
   );
 }
 
-const catStyles = StyleSheet.create({
-  card: {
-    width: "48.5%" as any,
-    marginBottom: 12,
-  },
-  inner: {
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 14,
-    gap: 10,
-    borderWidth: 1.5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    elevation: 5,
-    minHeight: 140,
+const circleStyles = StyleSheet.create({
+  wrapper: { width: 78, alignItems: "center" },
+  circle: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
     overflow: "hidden",
+    borderWidth: 2.5,
+    borderColor: "rgba(22,163,74,0.25)",
   },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
+  circleImg: { width: "100%", height: "100%" },
+  circleOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.06)",
   },
   label: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  countPill: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: "flex-start" as const,
-  },
-  countText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-  },
-  arrow: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    alignSelf: "flex-end" as const,
+    fontSize: 10,
+    color: "#374151",
+    textAlign: "center",
+    maxWidth: 72,
   },
 });
 
@@ -345,16 +166,15 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
-
   const { products, categories } = useApp();
   const { addToCart } = useCart();
-
   const { user } = useAuth();
   const { location, isLoading: locationLoading } = useLocation();
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (user?.role !== "customer") return;
@@ -376,43 +196,29 @@ export default function HomeScreen() {
   });
   const unreadCount = unreadData?.count ?? 0;
 
-  const notifScale = useSharedValue(1);
-  const notifAnim = useAnimatedStyle(() => ({ transform: [{ scale: notifScale.value }] }));
-
   const handleAddToCart = (product: any) => {
-    if (!product.inStock) {
-      Alert.alert("Xatolik", "Ushbu mahsulot vaqtincha tugagan");
-      return;
-    }
-    const productForCart: SchemaProduct = {
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      originalPrice: product.originalPrice || null,
-      unit: product.unit,
-      image: product.image,
-      badge: product.badge || null,
+    if (!product.inStock) { Alert.alert("Out of stock", "This product is temporarily unavailable"); return; }
+    const p: SchemaProduct = {
+      id: product.id, name: product.name, category: product.category,
+      price: product.price, originalPrice: product.originalPrice || null,
+      unit: product.unit, image: product.image, badge: product.badge || null,
       rating: product.rating != null ? product.rating.toString() : null,
-      description: product.description || null,
-      brand: product.brand || null,
-      weight: product.weight || null,
-      inStock: product.inStock,
-      stockQuantity: product.stockQuantity || 0,
-      isActive: true,
-      deletedAt: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      description: product.description || null, brand: product.brand || null,
+      weight: product.weight || null, inStock: product.inStock,
+      stockQuantity: product.stockQuantity || 0, isActive: true,
+      deletedAt: null, createdAt: new Date(), updatedAt: new Date(),
     };
-    addToCart(productForCart);
+    addToCart(p);
     if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const featuredProducts = products.filter((p) => p.badge === "hot" || p.badge === "new");
-  const saleProducts = products.filter((p) => p.badge === "sale");
+  const popularProducts = activeFilter
+    ? products.filter((p) => p.category === activeFilter).slice(0, 12)
+    : products.filter((p) => p.badge === "sale" || p.badge === "hot" || p.badge === "new").slice(0, 12);
+
+  const allPopular = popularProducts.length === 0 ? products.slice(0, 12) : popularProducts;
 
   const bannerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const startBannerAutoScroll = useCallback(() => {
     if (bannerIntervalRef.current) clearInterval(bannerIntervalRef.current);
     bannerIntervalRef.current = setInterval(() => {
@@ -421,7 +227,7 @@ export default function HomeScreen() {
         scrollRef.current?.scrollToIndex({ index: next, animated: true });
         return next;
       });
-    }, 3500);
+    }, 3800);
   }, []);
 
   useEffect(() => {
@@ -430,130 +236,85 @@ export default function HomeScreen() {
   }, [startBannerAutoScroll]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
-  const bgColors: [string, string, string] = isDarkMode
-    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
-    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
+  const greeting = getGreeting();
+  const firstName = user?.name ? user.name.split(" ")[0] : "there";
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={bgColors}
-        locations={[0, 0.3, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={[
-        styles.blobTR,
-        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.09)" : "rgba(22,163,74,0.14)" }
-      ]} />
-      <View style={[
-        styles.blobBL,
-        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.04)" : "rgba(22,163,74,0.07)" }
-      ]} />
-
+    <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
       <ScrollView
-        style={{ backgroundColor: "transparent" }}
-        contentContainerStyle={[styles.content, { paddingTop: topPadding + 12 }]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 40 : 110 }}
       >
-        <View style={styles.logoBanner}>
-          <Image
-            source={require("@/assets/logo.png")}
-            style={styles.logoBannerImage}
-            resizeMode="contain"
-          />
-        </View>
-
-        <View style={styles.header}>
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: topPadding + 14 }]}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
-            <Pressable
-              style={styles.locationRow}
-              onPress={() => setShowLocationModal(true)}
-            >
-              <Ionicons name="location" size={14} color="#16A34A" />
+            <Pressable style={styles.locationRow} onPress={() => setShowLocationModal(true)}>
+              <Ionicons name="location" size={13} color="#16A34A" />
               <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
                 {location?.address
-                  ? location.address.length > 32
-                    ? location.address.slice(0, 32) + "…"
-                    : location.address
-                  : "Joylashuvni aniqlash"}
+                  ? location.address.length > 28 ? location.address.slice(0, 28) + "…" : location.address
+                  : "Set your location"}
               </Text>
-              <Ionicons
-                name={locationLoading ? "reload-outline" : "chevron-down"}
-                size={13}
-                color={Colors.textMuted}
-              />
+              <Ionicons name={locationLoading ? "reload-outline" : "chevron-down"} size={12} color={Colors.textMuted} />
             </Pressable>
+            <Text style={[styles.greeting, { color: Colors.text }]}>
+              {greeting}, {firstName}
+            </Text>
           </View>
-          <Animated.View style={notifAnim}>
-            <Pressable
-              style={[
-                styles.notifBtn,
-                {
-                  backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
-                  borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-                }
-              ]}
-              onPress={() => {
-                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setShowNotifications(true);
-              }}
-              onPressIn={() => { notifScale.value = withSpring(0.88); }}
-              onPressOut={() => { notifScale.value = withSpring(1); }}
-            >
-              <Ionicons name="notifications-outline" size={21} color={Colors.text} />
-              {unreadCount > 0 && (
-                <View style={styles.notifDot}>
-                  {unreadCount <= 9 && (
-                    <Text style={styles.notifDotText}>{unreadCount}</Text>
-                  )}
-                </View>
-              )}
-            </Pressable>
-          </Animated.View>
+
+          <Pressable
+            style={[styles.notifBtn, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
+            onPress={() => {
+              if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowNotifications(true);
+            }}
+          >
+            <Ionicons name="notifications-outline" size={20} color={Colors.text} />
+            {unreadCount > 0 && (
+              <View style={styles.notifDot}>
+                <Text style={styles.notifDotText}>{unreadCount > 9 ? "9+" : unreadCount}</Text>
+              </View>
+            )}
+          </Pressable>
         </View>
 
+        {/* Search bar */}
         <Pressable
-          style={[
-            styles.searchBar,
-            {
-              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.82)",
-              borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-            }
-          ]}
+          style={[styles.searchBar, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
           onPress={() => router.push("/(tabs)/catalog")}
         >
-          <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
-            <Ionicons name="search" size={16} color="#16A34A" />
-          </View>
+          <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
-            Mahsulot yoki kategoriya...
+            Search products, brands...
           </Text>
-          <View style={[styles.filterBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
-            <Ionicons name="options-outline" size={16} color="#16A34A" />
+          <View style={styles.filterIcon}>
+            <Ionicons name="options-outline" size={17} color="#16A34A" />
           </View>
         </Pressable>
 
-        <View style={[styles.deliveryStrip, {
-          backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.08)",
-          borderColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.18)",
-        }]}>
-          <View style={styles.deliveryItem}>
-            <Ionicons name="bicycle-outline" size={16} color="#16A34A" />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>30 daqiqada yetkazish</Text>
-          </View>
-          <View style={styles.deliverySep} />
-          <View style={styles.deliveryItem}>
-            <Ionicons name="shield-checkmark-outline" size={16} color="#16A34A" />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Sifat kafolati</Text>
-          </View>
-          <View style={styles.deliverySep} />
-          <View style={styles.deliveryItem}>
-            <Ionicons name="storefront-outline" size={16} color="#16A34A" />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Yangi mahsulotlar</Text>
-          </View>
-        </View>
+        {/* Feature pills */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.pillsRow}
+          style={{ marginBottom: 16 }}
+        >
+          {[
+            { icon: "bicycle-outline", title: "Free delivery", sub: "On all orders", color: "#16A34A", bg: "#F0FDF4" },
+            { icon: "time-outline", title: "30 min", sub: "Express", color: "#F97316", bg: "#FFF7ED" },
+            { icon: "shield-checkmark-outline", title: "Guarantee", sub: "100% fresh", color: "#3B82F6", bg: "#EFF6FF" },
+          ].map((pill) => (
+            <View key={pill.title} style={[styles.pill, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : pill.bg }]}>
+              <Ionicons name={pill.icon as any} size={18} color={pill.color} />
+              <View style={{ gap: 1 }}>
+                <Text style={[styles.pillTitle, { color: Colors.text }]}>{pill.title}</Text>
+                <Text style={[styles.pillSub, { color: Colors.textSecondary }]}>{pill.sub}</Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
 
+        {/* Hero Banner */}
         <FlatList
           ref={scrollRef}
           data={BANNERS}
@@ -561,321 +322,379 @@ export default function HomeScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
-            const index = Math.round(e.nativeEvent.contentOffset.x / width);
+            const index = Math.round(e.nativeEvent.contentOffset.x / BANNER_W);
             setActiveBanner(index);
             startBannerAutoScroll();
           }}
           renderItem={({ item }) => (
-            <Banner
-              item={item}
-              bannerWidth={BANNER_W}
+            <Pressable
+              style={[styles.bannerCard, { width: BANNER_W }]}
               onPress={() => router.push("/(tabs)/catalog")}
-            />
+            >
+              <Image
+                source={{ uri: (item as any).image }}
+                style={StyleSheet.absoluteFillObject as any}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={[(item as any).overlayStart || "rgba(0,60,20,0.7)", (item as any).overlayEnd || "rgba(0,30,10,0.3)"]}
+                start={{ x: 0.1, y: 0 }}
+                end={{ x: 0.7, y: 1 }}
+                style={StyleSheet.absoluteFillObject as any}
+              />
+              <View style={styles.bannerTop}>
+                <View style={[styles.bannerTag, { backgroundColor: (item as any).tagColor || "#16A34A" }]}>
+                  <Text style={styles.bannerTagText}>{(item as any).tag || "SALE"}</Text>
+                </View>
+                <View style={styles.bannerDelivery}>
+                  <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
+                  <Text style={styles.bannerDeliveryText}>30 min</Text>
+                </View>
+              </View>
+              <View style={styles.bannerBottom}>
+                <Text style={styles.bannerSub}>{item.subtitle}</Text>
+                <Text style={styles.bannerTitle}>{item.title}</Text>
+                <View style={styles.bannerCta}>
+                  <Text style={styles.bannerCtaText}>Shop Now</Text>
+                  <Ionicons name="arrow-forward" size={13} color="#fff" />
+                </View>
+              </View>
+            </Pressable>
           )}
-          style={styles.bannerList}
-          snapToInterval={width}
+          style={{ marginHorizontal: 16, borderRadius: 24, overflow: "hidden" }}
+          snapToInterval={BANNER_W}
           decelerationRate="fast"
-          contentContainerStyle={{ paddingHorizontal: 0 }}
+          contentContainerStyle={{ gap: 0 }}
         />
         <View style={styles.dotsRow}>
-          {BANNERS.map((_, i) => (
-            <BannerDot key={i} isActive={i === activeBanner} isDarkMode={isDarkMode} />
-          ))}
+          {BANNERS.map((_, i) => <BannerDot key={i} isActive={i === activeBanner} />)}
         </View>
 
+        {/* Categories */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Categories</Text>
           <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
+            <Text style={styles.seeAll}>See all</Text>
           </Pressable>
         </View>
 
-        <View style={styles.catGrid}>
-          {categories.map((cat) => {
-            const count = products.filter((p) => p.category === cat.id).length;
+        <FlatList
+          horizontal
+          data={categories}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesRow}
+          renderItem={({ item }) => {
+            const count = products.filter((p) => p.category === item.id).length;
             return (
-              <CategoryCard
-                key={cat.id}
-                item={cat}
-                isDarkMode={isDarkMode}
-                productCount={count}
-                onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+              <CategoryCircle
+                item={item}
+                count={count}
+                onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
               />
             );
-          })}
+          }}
+        />
+
+        {/* Filter chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+          style={{ marginBottom: 20 }}
+        >
+          <Pressable
+            style={[styles.chip, !activeFilter && styles.chipActive]}
+            onPress={() => setActiveFilter(null)}
+          >
+            <Text style={[styles.chipText, !activeFilter && styles.chipTextActive]}>All</Text>
+          </Pressable>
+          {categories.slice(0, 6).map((cat: any) => (
+            <Pressable
+              key={cat.id}
+              style={[styles.chip, activeFilter === cat.id && styles.chipActive, {
+                backgroundColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
+                borderColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+              }]}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setActiveFilter(activeFilter === cat.id ? null : cat.id);
+              }}
+            >
+              <Text style={[styles.chipText, activeFilter === cat.id && styles.chipTextActive, {
+                color: activeFilter === cat.id ? "#fff" : Colors.text
+              }]}>{cat.name}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Popular Today */}
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Popular Today</Text>
+          <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
+            <Text style={styles.countBadgeText}>{allPopular.length} items</Text>
+          </View>
         </View>
 
-        {featuredProducts.length > 0 && (
-          <>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Tavsiya etilgan</Text>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
-              {featuredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={convertToProduct(product)}
-                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
-                />
-              ))}
-            </ScrollView>
-          </>
-        )}
-
-        {saleProducts.length > 0 && (
-          <>
-            <View style={[styles.sectionHeader, { marginTop: 8 }]}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Chegirmali</Text>
-              <View style={styles.saleBadge}>
-                <Ionicons name="pricetag" size={11} color="#fff" />
-                <Text style={styles.saleBadgeText}>30% gacha</Text>
-              </View>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
-              {saleProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={convertToProduct(product)}
-                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
-                />
-              ))}
-            </ScrollView>
-          </>
-        )}
-
-        {featuredProducts.length === 0 && saleProducts.length === 0 && products.length > 0 && (
-          <>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Barcha mahsulotlar</Text>
-              <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-                <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
-              </Pressable>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
-              {products.slice(0, 8).map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={convertToProduct(product)}
-                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
-                />
-              ))}
-            </ScrollView>
-          </>
-        )}
-
-        <View style={{ height: Platform.OS === "web" ? 34 : 100 }} />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
+        >
+          {allPopular.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={convertToProduct(product)}
+              onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+            />
+          ))}
+        </ScrollView>
       </ScrollView>
 
-      <NotificationsModal
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
-
-      <LocationPermissionModal
-        visible={showLocationModal}
-        onDismiss={() => setShowLocationModal(false)}
-      />
+      <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
+      <LocationPermissionModal visible={showLocationModal} onClose={() => setShowLocationModal(false)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  blobTR: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    top: -90,
-    right: -70,
-  },
-  blobBL: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    bottom: 120,
-    left: -80,
-  },
-  content: {
-    paddingHorizontal: 16,
-  },
-  logoBanner: {
-    alignItems: "center",
-    marginBottom: 10,
-    marginTop: 4,
-  },
-  logoBannerImage: {
-    width: 180,
-    height: 72,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  greeting: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
+    paddingHorizontal: 16,
+    marginBottom: 14,
+    gap: 12,
   },
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginTop: 3,
+    marginBottom: 4,
   },
   locationText: {
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_500Medium",
     fontSize: 12,
-    flex: 1,
+  },
+  greeting: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 22,
+    lineHeight: 30,
   },
   notifBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    marginTop: 16,
   },
   notifDot: {
     position: "absolute",
-    top: 6,
-    right: 6,
+    top: 7,
+    right: 7,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     backgroundColor: "#EF4444",
-    borderWidth: 1.5,
-    borderColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
   notifDotText: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 9,
+    fontSize: 8,
     color: "#fff",
-    lineHeight: 12,
-  },
-  deliveryStrip: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    marginBottom: 20,
-  },
-  deliveryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    flex: 1,
-    justifyContent: "center",
-  },
-  deliveryItemText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 10.5,
-  },
-  deliverySep: {
-    width: 1,
-    height: 20,
-    backgroundColor: "rgba(22,163,74,0.2)",
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
+    marginHorizontal: 16,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 18,
-    marginBottom: 22,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    elevation: 6,
-  },
-  searchIconWrap: {
-    width: 32,
-    height: 32,
+    paddingVertical: 13,
     borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchPlaceholder: {
     flex: 1,
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
   },
-  filterBtn: {
+  filterIcon: {
     width: 32,
     height: 32,
     borderRadius: 10,
+    backgroundColor: "rgba(22,163,74,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
-  bannerList: {
-    marginHorizontal: -16,
-    overflow: "visible",
+  pillsRow: {
+    paddingHorizontal: 16,
+    gap: 10,
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  pillTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+  },
+  pillSub: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 10,
+  },
+  bannerCard: {
+    height: 200,
+    borderRadius: 24,
+    overflow: "hidden",
+  },
+  bannerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  bannerTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  bannerTagText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 11,
+    color: "#fff",
+  },
+  bannerDelivery: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  bannerDeliveryText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.92)",
+  },
+  bannerBottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 18,
+    gap: 2,
+  },
+  bannerSub: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.75)",
+  },
+  bannerTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 20,
+    color: "#fff",
+    lineHeight: 26,
+  },
+  bannerCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+    marginTop: 8,
+  },
+  bannerCtaText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "#fff",
   },
   dotsRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 5,
-    marginTop: 14,
-  },
-  dot: {
-    height: 7,
-    borderRadius: 3.5,
-  },
-  catGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 0,
+    marginTop: 10,
+    marginBottom: 20,
   },
   sectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 26,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
     marginBottom: 14,
   },
   sectionTitle: {
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "Poppins_700Bold",
     fontSize: 18,
   },
   seeAll: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 14,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
     color: "#16A34A",
   },
-  hScroll: {
-    overflow: "visible",
+  categoriesRow: {
+    paddingHorizontal: 16,
+    gap: 8,
+    paddingBottom: 4,
+    marginBottom: 16,
   },
-  saleBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#EF4444",
+  chipsRow: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.07)",
+  },
+  chipActive: {
+    backgroundColor: "#16A34A",
+    borderColor: "#16A34A",
+  },
+  chipText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#374151",
+  },
+  chipTextActive: {
+    color: "#fff",
+  },
+  countBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 10,
   },
-  saleBadgeText: {
+  countBadgeText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
-    color: "#fff",
+    fontSize: 12,
+    color: "#16A34A",
   },
 });

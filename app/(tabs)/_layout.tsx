@@ -1,6 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { BlurView } from "expo-blur";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, View, Text } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import getColors from "@/constants/colors";
@@ -14,103 +13,86 @@ function ClassicTabLayout() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const insets = useSafeAreaInsets();
-  const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
-  const tabBarBottom = isWeb ? 20 : Math.max(insets.bottom, 8) + 8;
+  const tabBarHeight = isWeb ? 64 : 60 + insets.bottom;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: {
+          fontFamily: "Poppins_600SemiBold",
+          fontSize: 10,
+          marginTop: -2,
+        },
         tabBarItemStyle: {
-          paddingVertical: 0,
-          marginHorizontal: 4,
+          paddingVertical: 4,
         },
         tabBarStyle: {
-          position: "absolute",
-          bottom: tabBarBottom,
-          marginHorizontal: 40,
-          height: 62,
-          borderRadius: 31,
-          paddingHorizontal: 20,
+          height: tabBarHeight,
+          paddingBottom: isWeb ? 8 : insets.bottom + 4,
+          paddingTop: 6,
           backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: isDarkMode ? 0.4 : 0.14,
-          shadowRadius: 24,
-          elevation: 16,
-          borderTopWidth: 0,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: isDarkMode ? 0.3 : 0.08,
+          shadowRadius: 16,
+          elevation: 12,
         },
-        tabBarBackground: () =>
-          isIOS ? (
-            <BlurView
-              intensity={90}
-              tint={isDarkMode ? "dark" : "light"}
-              style={[StyleSheet.absoluteFill, { borderRadius: 31, overflow: "hidden" }]}
-            />
-          ) : (
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                {
-                  borderRadius: 31,
-                  backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
-                },
-              ]}
-            />
-          ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
+          tabBarLabel: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="catalog"
         options={{
+          tabBarLabel: "Browse",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
+          tabBarLabel: "Cart",
           tabBarBadge: totalItems > 0 ? totalItems : undefined,
           tabBarBadgeStyle: {
             backgroundColor: Colors.primary,
-            fontSize: 10,
+            fontSize: 9,
             fontFamily: "Poppins_700Bold",
-            minWidth: 18,
-            height: 18,
-            borderRadius: 9,
+            minWidth: 16,
+            height: 16,
+            borderRadius: 8,
           },
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "bag" : "bag-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "bag" : "bag-outline"} size={22} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="orders"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "receipt" : "receipt-outline"} size={24} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
       <Tabs.Screen
         name="profile"
         options={{
+          tabBarLabel: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+            <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
           ),
         }}
       />
