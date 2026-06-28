@@ -7,7 +7,12 @@ import { z } from 'zod';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('5001'),
-  DATABASE_URL: z.string().min(1, 'Database URL is required'),
+  DATABASE_URL: z.string().optional(),
+  PGHOST: z.string().optional(),
+  PGPORT: z.string().optional(),
+  PGUSER: z.string().optional(),
+  PGPASSWORD: z.string().optional(),
+  PGDATABASE: z.string().optional(),
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('7d'),
   API_KEYS: z.string().optional(),
@@ -27,7 +32,17 @@ let env: Env;
  */
 export function loadEnv(): Env {
   try {
+    // Construct DATABASE_URL from PG* vars if not directly set
+    if (!process.env.DATABASE_URL && process.env.PGHOST && process.env.PGUSER && process.env.PGPASSWORD && process.env.PGDATABASE) {
+      const port = process.env.PGPORT || '5432';
+      process.env.DATABASE_URL = `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${port}/${process.env.PGDATABASE}`;
+    }
+
     env = envSchema.parse(process.env);
+
+    if (!env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is required. Set DATABASE_URL or PGHOST/PGUSER/PGPASSWORD/PGDATABASE/PGPORT.');
+    }
     
     // Validate critical security requirements in production
     if (env.NODE_ENV === 'production') {
@@ -72,6 +87,7 @@ export function getEnv(): Env {
  */
 export function getDatabaseUrl(): string {
   const env = getEnv();
+  if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not configured');
   return env.DATABASE_URL;
 }
 

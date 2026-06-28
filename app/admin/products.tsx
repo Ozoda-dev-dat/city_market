@@ -9,6 +9,7 @@ import {
   Alert,
   Platform,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,16 +22,30 @@ import ExcelImportModal from "@/components/ExcelImportModal";
 
 export default function AdminProductsScreen() {
   const insets = useSafeAreaInsets();
-  const { products, categories, deleteProduct } = useApp();
+  const { products, categories, deleteProduct, updateProduct } = useApp();
   const [search, setSearch] = useState("");
   const categoryName = (id: string) =>
     categories.find((c) => c.id === id)?.name ?? id;
   const [showImport, setShowImport] = useState(false);
   const deletingIds = useRef<Set<string>>(new Set());
+  const togglingIds = useRef<Set<string>>(new Set());
+  const [togglingSet, setTogglingSet] = useState<Set<string>>(new Set());
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
+
+  const handleToggleActive = async (item: any) => {
+    if (togglingIds.current.has(item.id)) return;
+    togglingIds.current.add(item.id);
+    setTogglingSet(new Set(togglingIds.current));
+    try {
+      await updateProduct({ ...item, isActive: !item.isActive });
+    } finally {
+      togglingIds.current.delete(item.id);
+      setTogglingSet(new Set(togglingIds.current));
+    }
+  };
 
   const filtered = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -143,12 +158,20 @@ export default function AdminProductsScreen() {
             </View>
             <View style={styles.productActions}>
               <Pressable
-                style={styles.editBtn}
-                onPress={() =>
-                  router.push({ pathname: "/admin/add-product", params: { id: item.id } })
-                }
+                style={[
+                  styles.toggleBtn,
+                  item.isActive ? styles.toggleBtnActive : styles.toggleBtnInactive,
+                ]}
+                onPress={() => handleToggleActive(item)}
+                disabled={togglingSet.has(item.id)}
               >
-                <Ionicons name="create-outline" size={17} color={Colors.primary} />
+                {togglingSet.has(item.id) ? (
+                  <ActivityIndicator size="small" color={item.isActive ? "#fff" : Colors.primary} />
+                ) : item.isActive ? (
+                  <Ionicons name="checkmark" size={18} color="#fff" />
+                ) : (
+                  <Ionicons name="close" size={18} color={Colors.textMuted} />
+                )}
               </Pressable>
               <Pressable
                 style={styles.deleteBtn}
@@ -295,20 +318,28 @@ const getStyles = (isDarkMode: boolean) => {
     productActions: {
       flexDirection: "row",
       gap: 8,
+      alignItems: "center",
     },
-    editBtn: {
-      width: 38,
-      height: 38,
-      backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#DCFCE7",
-      borderRadius: 11,
+    toggleBtn: {
+      width: 42,
+      height: 42,
+      borderRadius: 13,
       alignItems: "center",
       justifyContent: "center",
     },
+    toggleBtnActive: {
+      backgroundColor: Colors.primary,
+    },
+    toggleBtnInactive: {
+      backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "#F3F4F6",
+      borderWidth: 1.5,
+      borderColor: isDarkMode ? "rgba(255,255,255,0.15)" : "#E5E7EB",
+    },
     deleteBtn: {
-      width: 38,
-      height: 38,
+      width: 42,
+      height: 42,
       backgroundColor: "#FEF2F2",
-      borderRadius: 11,
+      borderRadius: 13,
       alignItems: "center",
       justifyContent: "center",
     },
