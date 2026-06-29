@@ -41,126 +41,131 @@ import { useTranslation } from "@/lib/I18nProvider";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 48) / 2;
-const CARD_H = CARD_W * 0.72;
+const CARD_H = 118;
 
-// ── Yandex Go style: solid bg color + right-side floating image ───────────
-const CAT_STYLES: { keys: string[]; bg: string; dark: string; img: string }[] = [
+// ── Logo palette: green (buildings) + red (cart) only ────────────────────
+// Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
+// Reds:    #B71C1C → #C62828 → #D32F2F → #E53935 → #C0392B
+const CAT_STYLES: { keys: string[]; bg: string; shade: string; img: string }[] = [
   {
     keys: ["fruit", "meva"],
-    bg: "#FF6B35", dark: "#E85A25",
-    img: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80",
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=500&q=85",
   },
   {
     keys: ["vegetab", "sabzavot"],
-    bg: "#27AE60", dark: "#1E9450",
-    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+    bg: "#2E7D32", shade: "#1B5E20",
+    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&q=85",
   },
   {
-    keys: ["dairy", "sut", "milk", "moloch"],
-    bg: "#29B6D2", dark: "#1FA0B8",
-    img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80",
+    keys: ["dairy", "sut", "milk"],
+    bg: "#388E3C", shade: "#2E7D32",
+    img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&q=85",
   },
   {
-    keys: ["baker", "bread", "non", "novvoy", "xoʻrak"],
-    bg: "#D4A827", dark: "#B88E1C",
-    img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+    keys: ["baker", "bread", "non", "novvoy"],
+    bg: "#C62828", shade: "#B71C1C",
+    img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=85",
   },
   {
-    keys: ["meat", "gosht", "myaso", "chicken", "tovuq"],
-    bg: "#E53935", dark: "#C62828",
-    img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&q=80",
+    keys: ["meat", "gosht", "chicken", "tovuq"],
+    bg: "#D32F2F", shade: "#C62828",
+    img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=500&q=85",
   },
   {
     keys: ["seafood", "fish", "baliq", "dengiz"],
-    bg: "#1565C0", dark: "#0D47A1",
-    img: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=400&q=80",
+    bg: "#1B5E20", shade: "#154A18",
+    img: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=500&q=85",
   },
   {
-    keys: ["beverage", "drink", "ichimlik", "napitok"],
-    bg: "#7B61FF", dark: "#6246E5",
-    img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&q=80",
+    keys: ["beverage", "drink", "ichimlik"],
+    bg: "#43A047", shade: "#388E3C",
+    img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&q=85",
   },
   {
-    keys: ["snack", "chip", "cracker", "gazak", "shirinlik", "sweet", "candy"],
-    bg: "#F59E0B", dark: "#D97706",
-    img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=400&q=80",
+    keys: ["snack", "gazak", "shirinlik", "sweet", "candy"],
+    bg: "#B71C1C", shade: "#960E0E",
+    img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=500&q=85",
   },
   {
-    keys: ["frozen", "muzlatilgan", "ice", "muzqaymoq", "moroj"],
-    bg: "#42A5F5", dark: "#1E88E5",
-    img: "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=400&q=80",
+    keys: ["frozen", "muzlatilgan", "muzqaymoq"],
+    bg: "#4CAF50", shade: "#43A047",
+    img: "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=500&q=85",
   },
   {
     keys: ["organic", "organik", "eco", "bio"],
-    bg: "#43A047", dark: "#2E7D32",
-    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
+    bg: "#16A34A", shade: "#15803D",
+    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85",
   },
   {
-    keys: ["coffee", "qahva", "kofe", "kafe"],
-    bg: "#795548", dark: "#5D4037",
-    img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
+    keys: ["coffee", "qahva", "kofe"],
+    bg: "#388E3C", shade: "#2E7D32",
+    img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&q=85",
   },
   {
-    keys: ["chocolate", "shokolad", "shokolad", "choco"],
-    bg: "#6D4C41", dark: "#4E342E",
-    img: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",
+    keys: ["chocolate", "shokolad", "choco"],
+    bg: "#C0392B", shade: "#96281B",
+    img: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=500&q=85",
   },
   {
     keys: ["pasta", "makaroni", "noodle"],
-    bg: "#EF6C00", dark: "#E65100",
-    img: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=400&q=80",
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=500&q=85",
   },
   {
-    keys: ["sauce", "kondiment", "spice", "ziravorlar"],
-    bg: "#C0392B", dark: "#96281B",
-    img: "https://images.unsplash.com/photo-1589187151053-5ec8818e661b?w=400&q=80",
+    keys: ["sauce", "spice", "ziravorlar", "kondiment"],
+    bg: "#D32F2F", shade: "#B71C1C",
+    img: "https://images.unsplash.com/photo-1589187151053-5ec8818e661b?w=500&q=85",
   },
   {
-    keys: ["cereal", "granola", "muesli"],
-    bg: "#FFA000", dark: "#FF8F00",
-    img: "https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?w=400&q=80",
+    keys: ["cereal", "granola"],
+    bg: "#2E7D32", shade: "#1B5E20",
+    img: "https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?w=500&q=85",
   },
   {
     keys: ["oil", "yog", "butter"],
-    bg: "#F9A825", dark: "#F57F17",
-    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80",
+    bg: "#43A047", shade: "#388E3C",
+    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&q=85",
   },
   {
-    keys: ["canned", "konserva", "tushenka"],
-    bg: "#546E7A", dark: "#37474F",
-    img: "https://images.unsplash.com/photo-1584714268709-c3dd9c92b378?w=400&q=80",
+    keys: ["canned", "konserva"],
+    bg: "#C62828", shade: "#B71C1C",
+    img: "https://images.unsplash.com/photo-1584714268709-c3dd9c92b378?w=500&q=85",
   },
   {
-    keys: ["hygiene", "gigiyena", "cleaning", "tozalik"],
-    bg: "#00ACC1", dark: "#00838F",
-    img: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80",
+    keys: ["hygiene", "gigiyena", "tozalik"],
+    bg: "#1B5E20", shade: "#154A18",
+    img: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=500&q=85",
   },
   {
     keys: ["baby", "bola", "child", "kids"],
-    bg: "#EC407A", dark: "#D81B60",
-    img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80",
+    bg: "#16A34A", shade: "#15803D",
+    img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&q=85",
   },
   {
-    keys: ["pet", "hayvon", "dog", "cat"],
-    bg: "#8D6E63", dark: "#6D4C41",
-    img: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&q=80",
+    keys: ["pet", "hayvon"],
+    bg: "#388E3C", shade: "#2E7D32",
+    img: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=500&q=85",
   },
 ];
 
-const DEFAULT_CAT_STYLE = {
-  bg: "#16A34A", dark: "#15803D",
-  img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
-};
+// Alternating green/red fallback palette
+const FALLBACK_GREENS = ["#2E7D32", "#388E3C", "#43A047", "#16A34A", "#4CAF50", "#1B5E20"];
+const FALLBACK_REDS   = ["#E53935", "#D32F2F", "#C62828", "#B71C1C", "#C0392B"];
 
-function getCatStyle(name: string, id: string) {
+function getCatStyle(name: string, id: string, index: number) {
   const str = ((name || "") + " " + (id || "")).toLowerCase();
   for (const style of CAT_STYLES) {
     if (style.keys.some((k) => str.includes(k))) return style;
   }
-  // Hash-based fallback so each category gets a unique color
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return CAT_STYLES[Math.abs(hash) % CAT_STYLES.length] || DEFAULT_CAT_STYLE;
+  // Even indices → green, odd → red
+  if (index % 2 === 0) {
+    const bg = FALLBACK_GREENS[Math.floor(index / 2) % FALLBACK_GREENS.length];
+    return { bg, shade: "#1B5E20", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85" };
+  } else {
+    const bg = FALLBACK_REDS[Math.floor(index / 2) % FALLBACK_REDS.length];
+    return { bg, shade: "#960E0E", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85" };
+  }
 }
 
 function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
@@ -201,7 +206,7 @@ function BannerDot({ isActive }: { isActive: boolean }) {
 function CategoryCircle({ item, onPress }: { item: any; onPress: () => void }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const img = getCategoryImage(item.name, item.id);
+  const img = getCatStyle(item.name, item.id, 0).img;
 
   return (
     <Animated.View style={[circleStyles.wrapper, anim]}>
@@ -248,17 +253,18 @@ const circleStyles = StyleSheet.create({
   },
 });
 
-function CategoryPhotoCard({ category, productCount, itemsLabel, isDarkMode, onPress }: {
-  category: any; productCount: number; itemsLabel: string; isDarkMode: boolean; onPress: () => void;
+// Yandex Go card: solid color bg | text left | product photo right
+function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress }: {
+  category: any; productCount: number; itemsLabel: string; index: number; onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const img = getCategoryImage(category.name, category.id);
+  const style = getCatStyle(category.name, category.id, index);
 
   return (
-    <Animated.View style={[{ width: CARD_W, height: CARD_H, marginBottom: 12 }, anim]}>
+    <Animated.View style={[catCardStyles.wrapper, { width: CARD_W, height: CARD_H }, anim]}>
       <Pressable
-        style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}
+        style={[catCardStyles.card, { backgroundColor: style.bg }]}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
@@ -266,20 +272,31 @@ function CategoryPhotoCard({ category, productCount, itemsLabel, isDarkMode, onP
         onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
-        <Image
-          source={{ uri: img }}
-          style={StyleSheet.absoluteFillObject as any}
-          resizeMode="cover"
-        />
-        <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.72)"]}
-          start={{ x: 0, y: 0.25 }}
-          end={{ x: 0, y: 1 }}
-          style={StyleSheet.absoluteFillObject as any}
-        />
-        <View style={catCardStyles.content}>
-          <Text style={catCardStyles.name} numberOfLines={2}>{category.name}</Text>
-          <Text style={catCardStyles.count}>{productCount} {itemsLabel}</Text>
+        {/* Darker shade in bottom-right corner for depth */}
+        <View style={[catCardStyles.shade, { backgroundColor: style.shade }]} />
+
+        {/* LEFT: text */}
+        <View style={catCardStyles.textSide}>
+          <Text style={catCardStyles.catName} numberOfLines={2}>{category.name}</Text>
+          <View style={catCardStyles.countPill}>
+            <Text style={catCardStyles.countText}>{productCount}</Text>
+          </View>
+        </View>
+
+        {/* RIGHT: food photo */}
+        <View style={catCardStyles.imgSide}>
+          <Image
+            source={{ uri: style.img }}
+            style={catCardStyles.img}
+            resizeMode="cover"
+          />
+          {/* Soft left-edge fade so image blends into bg */}
+          <LinearGradient
+            colors={[style.bg, "transparent"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 0.45, y: 0.5 }}
+            style={catCardStyles.imgFade}
+          />
         </View>
       </Pressable>
     </Animated.View>
@@ -287,9 +304,77 @@ function CategoryPhotoCard({ category, productCount, itemsLabel, isDarkMode, onP
 }
 
 const catCardStyles = StyleSheet.create({
-  content: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 12 },
-  name: { fontFamily: "Poppins_700Bold", fontSize: 15, color: "#fff", lineHeight: 20 },
-  count: { fontFamily: "Poppins_500Medium", fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2 },
+  wrapper: { marginBottom: 12 },
+  card: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: "hidden",
+    flexDirection: "row",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  shade: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: "55%",
+    height: "55%",
+    borderTopLeftRadius: 60,
+    opacity: 0.35,
+  },
+  textSide: {
+    flex: 1,
+    paddingLeft: 14,
+    paddingTop: 16,
+    paddingBottom: 14,
+    paddingRight: 4,
+    justifyContent: "space-between",
+    zIndex: 2,
+  },
+  catName: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13,
+    color: "#fff",
+    lineHeight: 18,
+    letterSpacing: -0.1,
+  },
+  countPill: {
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  countText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 10,
+    color: "#fff",
+  },
+  imgSide: {
+    width: CARD_W * 0.52,
+    position: "relative",
+    overflow: "hidden",
+  },
+  img: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  imgFade: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    width: "60%",
+    zIndex: 1,
+  },
 });
 
 export default function HomeScreen() {
@@ -597,15 +682,16 @@ export default function HomeScreen() {
         <View style={styles.catGrid}>
           {catRows.map((row, rowIdx) => (
             <View key={rowIdx} style={styles.catRow}>
-              {row.map((cat: any) => {
+              {row.map((cat: any, colIdx: number) => {
                 const count = products.filter((p) => p.category === cat.id).length;
+                const catIndex = rowIdx * 2 + colIdx;
                 return (
                   <CategoryPhotoCard
                     key={cat.id}
                     category={cat}
                     productCount={count}
                     itemsLabel={t("items_unit")}
-                    isDarkMode={isDarkMode}
+                    index={catIndex}
                     onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
                   />
                 );
