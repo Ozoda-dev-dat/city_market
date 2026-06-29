@@ -15,7 +15,6 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -41,8 +40,8 @@ import { Product } from "@/constants/data";
 import { useTranslation } from "@/lib/I18nProvider";
 
 const { width: SCREEN_W } = Dimensions.get("window");
-const CARD_W = (SCREEN_W - 48) / 2;
-const CARD_H = 136;
+const CARD_W = (SCREEN_W - 40) / 3;
+const CARD_H = CARD_W * 1.08;
 
 // ── Logo palette: green (buildings) + red (cart) only ────────────────────
 // Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
@@ -171,103 +170,93 @@ const CAT_STYLES: { keys: string[]; bg: string; shade: string; img: string }[] =
   },
 ];
 
-// ── Exact DB category ID → style map (18 categories from DB) ─────────────
-const CAT_BY_ID: Record<string, { bg: string; shade: string; img: string }> = {
-  // Choy (Tea)
+// ── Pastel Korzinka-Go style: light bg + product image ────────────────────
+const CAT_BY_ID: Record<string, { bg: string; textColor: string; img: string }> = {
   "choy": {
-    bg: "#388E3C", shade: "#2E7D32",
+    bg: "#D4EDF0", textColor: "#1a4a4e",
     img: "https://images.pexels.com/photos/1417945/pexels-photo-1417945.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Coffee
   "coffee": {
-    bg: "#2E7D32", shade: "#1B5E20",
+    bg: "#E8D9C8", textColor: "#3d2a14",
     img: "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Go'sht mahsulotlari (Meat)
   "meat": {
-    bg: "#D32F2F", shade: "#C62828",
+    bg: "#FADADD", textColor: "#5a1a1e",
     img: "https://images.pexels.com/photos/1927378/pexels-photo-1927378.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Ichimliklar (Beverages)
   "ichimliklar": {
-    bg: "#43A047", shade: "#388E3C",
+    bg: "#D4EBF7", textColor: "#1a3a5a",
     img: "https://images.pexels.com/photos/2983100/pexels-photo-2983100.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Ketchuplar
   "ketchuplar": {
-    bg: "#E53935", shade: "#C62828",
+    bg: "#FADADD", textColor: "#5a1a1e",
     img: "https://images.pexels.com/photos/4198165/pexels-photo-4198165.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Konservalar
   "konservalar-": {
-    bg: "#C62828", shade: "#B71C1C",
+    bg: "#E8EDD4", textColor: "#2a3a1a",
     img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Mayonezlar
   "mayonezlar": {
-    bg: "#4CAF50", shade: "#43A047",
+    bg: "#FEF3D4", textColor: "#4a3a0a",
     img: "https://images.pexels.com/photos/3945671/pexels-photo-3945671.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Mevalar (Fruits)
   "fruits": {
-    bg: "#E53935", shade: "#C62828",
+    bg: "#FADADD", textColor: "#5a1a1e",
     img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Murabbo va djemlar (Jams)
   "murabbo-va-djemlar": {
-    bg: "#D32F2F", shade: "#B71C1C",
+    bg: "#EDD4F0", textColor: "#3a1a4a",
     img: "https://images.pexels.com/photos/2909081/pexels-photo-2909081.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Non mahsulotlari (Bakery)
   "bakery": {
-    bg: "#C62828", shade: "#B71C1C",
+    bg: "#F7EDDA", textColor: "#4a2e0a",
     img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Sabzavotlar (Vegetables)
   "vegetables": {
-    bg: "#2E7D32", shade: "#1B5E20",
+    bg: "#D6EDD4", textColor: "#1a3a1e",
     img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Shampunlar (Shampoos)
   "shampunlar": {
-    bg: "#1B5E20", shade: "#154A18",
+    bg: "#D4F0EE", textColor: "#1a3a38",
     img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Sharbatlar (Juices)
   "sharbatlar": {
-    bg: "#43A047", shade: "#388E3C",
+    bg: "#FDE8D4", textColor: "#4a2a0a",
     img: "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Shokoladlar (Chocolates)
   "shokoladlar": {
-    bg: "#B71C1C", shade: "#960E0E",
+    bg: "#F0E0D6", textColor: "#3a1a0a",
     img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Shokolatlar (Chocolates variant)
   "shokolatlar": {
-    bg: "#C0392B", shade: "#96281B",
+    bg: "#F0E0D6", textColor: "#3a1a0a",
     img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Shokolatli pastalar (Chocolate spreads / Nutella-style)
   "shokolatli-pastalar": {
-    bg: "#D32F2F", shade: "#C62828",
+    bg: "#F0E0D6", textColor: "#3a1a0a",
     img: "https://images.pexels.com/photos/3026804/pexels-photo-3026804.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Sut mahsulotlari (Dairy)
   "dairy": {
-    bg: "#388E3C", shade: "#2E7D32",
+    bg: "#D6E8F5", textColor: "#1a2e4a",
     img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
-  // Tagliklar (Sauces / condiments)
   "tagliklar": {
-    bg: "#E53935", shade: "#C62828",
+    bg: "#FEF3D4", textColor: "#4a3a0a",
     img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
 };
 
-// Alternating green/red fallback palette
-const FALLBACK_GREENS = ["#2E7D32", "#388E3C", "#43A047", "#16A34A", "#4CAF50", "#1B5E20"];
-const FALLBACK_REDS   = ["#E53935", "#D32F2F", "#C62828", "#B71C1C", "#C0392B"];
+// Pastel fallback palette (Korzinka Go style)
+const FALLBACK_PASTELS = [
+  { bg: "#D6E8F5", textColor: "#1a2e4a" },
+  { bg: "#FADADD", textColor: "#5a1a1e" },
+  { bg: "#D6EDD4", textColor: "#1a3a1e" },
+  { bg: "#F7EDDA", textColor: "#4a2e0a" },
+  { bg: "#D4EBF7", textColor: "#1a3a5a" },
+  { bg: "#F0E0D6", textColor: "#3a1a0a" },
+  { bg: "#EDD4F0", textColor: "#3a1a4a" },
+  { bg: "#FDE8D4", textColor: "#4a2a0a" },
+];
 const FALLBACK_IMGS = [
   "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
   "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -278,22 +267,16 @@ const FALLBACK_IMGS = [
 ];
 
 function getCatStyle(name: string, id: string, index: number) {
-  // 1. Exact DB ID match (fastest, most precise)
   if (id && CAT_BY_ID[id]) return CAT_BY_ID[id];
-  // 2. Keyword fallback for any future categories
   const str = ((name || "") + " " + (id || "")).toLowerCase();
   for (const style of CAT_STYLES) {
-    if (style.keys.some((k) => str.includes(k))) return style;
+    if (style.keys.some((k) => str.includes(k))) {
+      const p = FALLBACK_PASTELS[index % FALLBACK_PASTELS.length];
+      return { bg: p.bg, textColor: p.textColor, img: style.img };
+    }
   }
-  // 3. Alternating green/red with diverse images
-  const fallbackImg = FALLBACK_IMGS[index % FALLBACK_IMGS.length];
-  if (index % 2 === 0) {
-    const bg = FALLBACK_GREENS[Math.floor(index / 2) % FALLBACK_GREENS.length];
-    return { bg, shade: "#1B5E20", img: fallbackImg };
-  } else {
-    const bg = FALLBACK_REDS[Math.floor(index / 2) % FALLBACK_REDS.length];
-    return { bg, shade: "#960E0E", img: fallbackImg };
-  }
+  const p = FALLBACK_PASTELS[index % FALLBACK_PASTELS.length];
+  return { bg: p.bg, textColor: p.textColor, img: FALLBACK_IMGS[index % FALLBACK_IMGS.length] };
 }
 
 function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
@@ -382,151 +365,70 @@ const circleStyles = StyleSheet.create({
 });
 
 // Glass card: food image as bg → BlurView → color tint → text + clear round photo
-function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress }: {
-  category: any; productCount: number; itemsLabel: string; index: number; onPress: () => void;
+// ── Korzinka Go style CategoryCard ─────────────────────────────────────────
+function CategoryPhotoCard({ category, index, onPress }: {
+  category: any; productCount?: number; itemsLabel?: string; index: number; onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const style = getCatStyle(category.name, category.id, index);
-  const isGreen = index % 2 === 0 || style.bg.startsWith("#1") || style.bg.startsWith("#2") || style.bg.startsWith("#3") || style.bg.startsWith("#4");
-  const tint = isGreen ? "rgba(34,120,58,0.28)" : "rgba(180,30,30,0.28)";
 
   return (
-    <Animated.View style={[catCardStyles.outerShadow, { width: CARD_W, height: CARD_H }, anim]}>
+    <Animated.View style={[catCardStyles.card, { width: CARD_W, height: CARD_H, backgroundColor: style.bg }, anim]}>
       <Pressable
         style={catCardStyles.pressable}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.96, { damping: 15 }); }}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        {/* Layer 1: Full blurred food image as background */}
+        {/* Category name — top left */}
+        <Text style={[catCardStyles.catName, { color: style.textColor }]} numberOfLines={2}>
+          {category.name}
+        </Text>
+
+        {/* Product image — bottom, fills card */}
         <Image
           source={{ uri: style.img }}
-          style={catCardStyles.bgImg}
-          resizeMode="cover"
-          blurRadius={Platform.OS === "android" ? 8 : 0}
+          style={catCardStyles.img}
+          resizeMode="contain"
         />
-
-        {/* Layer 2: Frosted blur (iOS) */}
-        {Platform.OS === "ios" && (
-          <BlurView intensity={72} tint="light" style={StyleSheet.absoluteFillObject} />
-        )}
-
-        {/* Layer 3: Web / Android fallback — white frost */}
-        {Platform.OS !== "ios" && (
-          <View style={catCardStyles.webFrost} />
-        )}
-
-        {/* Layer 4: Subtle color tint so cards are distinguishable */}
-        <View style={[catCardStyles.colorTint, { backgroundColor: tint }]} />
-
-        {/* Layer 5: White glass border shine */}
-        <View style={catCardStyles.glassBorder} />
-
-        {/* TOP-LEFT: category name */}
-        <Text style={catCardStyles.catName} numberOfLines={2}>{category.name}</Text>
-
-        {/* BOTTOM-LEFT: item count */}
-        <View style={catCardStyles.countPill}>
-          <Text style={catCardStyles.countText}>{productCount} ta</Text>
-        </View>
-
-        {/* BOTTOM-RIGHT: sharp round food photo (not blurred) */}
-        <View style={catCardStyles.imgWrap}>
-          <Image
-            source={{ uri: style.img }}
-            style={catCardStyles.img}
-            resizeMode="cover"
-          />
-          {/* ring around the circle */}
-          <View style={catCardStyles.imgRing} />
-        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-const IMG_SIZE = CARD_H * 0.84;
-
 const catCardStyles = StyleSheet.create({
-  outerShadow: {
-    marginBottom: 12,
-    borderRadius: 22,
+  card: {
+    borderRadius: 14,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.13,
-    shadowRadius: 14,
-    elevation: 7,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   pressable: {
     flex: 1,
-    borderRadius: 22,
-    overflow: "hidden",
-  },
-  bgImg: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  webFrost: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.72)",
-  },
-  colorTint: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  glassBorder: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.55)",
   },
   catName: {
     position: "absolute",
-    top: 14,
-    left: 14,
+    top: 10,
+    left: 10,
+    right: 10,
     fontFamily: "Poppins_700Bold",
-    fontSize: 13.5,
-    color: "#1a1a1a",
-    lineHeight: 19,
-    letterSpacing: -0.2,
-    maxWidth: "58%",
-  },
-  countPill: {
-    position: "absolute",
-    bottom: 12,
-    left: 14,
-    backgroundColor: "rgba(255,255,255,0.55)",
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.7)",
-  },
-  countText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 10.5,
-    color: "#1a1a1a",
-  },
-  imgWrap: {
-    position: "absolute",
-    right: -8,
-    bottom: -8,
-    width: IMG_SIZE,
-    height: IMG_SIZE,
-    borderRadius: IMG_SIZE / 2,
-    overflow: "hidden",
+    fontSize: 12,
+    lineHeight: 16,
+    zIndex: 2,
   },
   img: {
-    width: "100%",
-    height: "100%",
-  },
-  imgRing: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: IMG_SIZE / 2,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.45)",
+    position: "absolute",
+    bottom: 0,
+    right: -4,
+    width: CARD_W * 0.78,
+    height: CARD_H * 0.72,
   },
 });
 
@@ -612,10 +514,10 @@ export default function HomeScreen() {
   const greetingKey = getGreetingKey();
   const firstName = user?.name ? user.name.split(" ")[0] : "";
 
-  // Build category rows (2 per row) for the grid
+  // Build category rows (3 per row) for Korzinka Go grid
   const catRows: any[][] = [];
-  for (let i = 0; i < categories.length; i += 2) {
-    catRows.push(categories.slice(i, i + 2));
+  for (let i = 0; i < categories.length; i += 3) {
+    catRows.push(categories.slice(i, i + 3));
   }
 
   return (
@@ -807,8 +709,8 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* ── All Categories Grid ── */}
-        <View style={[styles.sectionHeader, { marginTop: 28 }]}>
+        {/* ── All Categories Grid (Korzinka Go style) ── */}
+        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
           <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
             <Text style={styles.countBadgeText}>{categories.length} ta</Text>
@@ -818,20 +720,21 @@ export default function HomeScreen() {
           {catRows.map((row, rowIdx) => (
             <View key={rowIdx} style={styles.catRow}>
               {row.map((cat: any, colIdx: number) => {
-                const count = products.filter((p) => p.category === cat.id).length;
-                const catIndex = rowIdx * 2 + colIdx;
+                const catIndex = rowIdx * 3 + colIdx;
                 return (
                   <CategoryPhotoCard
                     key={cat.id}
                     category={cat}
-                    productCount={count}
-                    itemsLabel={t("items_unit")}
                     index={catIndex}
                     onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
                   />
                 );
               })}
-              {row.length === 1 && <View style={{ width: CARD_W }} />}
+              {row.length === 2 && <View style={{ width: CARD_W }} />}
+              {row.length === 1 && <>
+                <View style={{ width: CARD_W }} />
+                <View style={{ width: CARD_W }} />
+              </>}
             </View>
           ))}
         </View>
@@ -1074,11 +977,12 @@ const styles = StyleSheet.create({
     color: "#16A34A",
   },
   catGrid: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     gap: 0,
   },
   catRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 8,
+    marginBottom: 8,
   },
 });
