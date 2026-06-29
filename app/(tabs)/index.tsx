@@ -50,7 +50,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", imgs: ["/cat-images/choy.png", "/cat-images/choy2.png"] },
   "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", imgs: ["/cat-images/coffee.png", "/cat-images/coffee2.png"] },
   "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/meat.png", "/cat-images/meat2.png"] },
-  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png", "/cat-images/ichimliklar2.png"] },
+  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png"] },
   "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png", "/cat-images/ketchuplar2.png"] },
   "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", imgs: ["/cat-images/konservalar.png", "/cat-images/konservalar2.png"] },
   "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png", "/cat-images/mayonezlar2.png"] },
