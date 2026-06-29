@@ -47,125 +47,155 @@ const CARD_H = 136;
 // ── Logo palette: green (buildings) + red (cart) only ────────────────────
 // Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
 // Reds:    #B71C1C → #C62828 → #D32F2F → #E53935 → #C0392B
+// Korzinka Go style: clean product shots on white/light bg, Pexels white-bg photos
 const CAT_STYLES: { keys: string[]; bg: string; shade: string; img: string }[] = [
   {
     keys: ["fruit", "meva"],
     bg: "#E53935", shade: "#C62828",
-    img: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=500&q=85",
+    img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["vegetab", "sabzavot"],
     bg: "#2E7D32", shade: "#1B5E20",
-    img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&q=85",
+    img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["dairy", "sut", "milk"],
     bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=500&q=85",
+    img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["baker", "bread", "non", "novvoy"],
     bg: "#C62828", shade: "#B71C1C",
-    img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=85",
+    img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["meat", "gosht", "chicken", "tovuq"],
     bg: "#D32F2F", shade: "#C62828",
-    img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=500&q=85",
+    img: "https://images.pexels.com/photos/616354/pexels-photo-616354.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["seafood", "fish", "baliq", "dengiz"],
     bg: "#1B5E20", shade: "#154A18",
-    img: "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=500&q=85",
+    img: "https://images.pexels.com/photos/3296434/pexels-photo-3296434.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["beverage", "drink", "ichimlik"],
+    keys: ["beverage", "drink", "ichimlik", "sharbat", "juice"],
     bg: "#43A047", shade: "#388E3C",
-    img: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&q=85",
+    img: "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["snack", "gazak", "shirinlik", "sweet", "candy"],
+    keys: ["snack", "gazak", "shirinlik", "sweet", "candy", "konfet"],
     bg: "#B71C1C", shade: "#960E0E",
-    img: "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=500&q=85",
+    img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["frozen", "muzlatilgan", "muzqaymoq"],
     bg: "#4CAF50", shade: "#43A047",
-    img: "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=500&q=85",
+    img: "https://images.pexels.com/photos/3735170/pexels-photo-3735170.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["organic", "organik", "eco", "bio"],
     bg: "#16A34A", shade: "#15803D",
-    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85",
+    img: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["coffee", "qahva", "kofe"],
+    keys: ["coffee", "qahva", "kofe", "choy", "tea"],
     bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&q=85",
+    img: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
     keys: ["chocolate", "shokolad", "choco"],
     bg: "#C0392B", shade: "#96281B",
-    img: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=500&q=85",
+    img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["pasta", "makaroni", "noodle"],
+    keys: ["pasta", "makaroni", "noodle", "макарон"],
     bg: "#E53935", shade: "#C62828",
-    img: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=500&q=85",
+    img: "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["sauce", "spice", "ziravorlar", "kondiment"],
+    keys: ["sauce", "spice", "ziravorlar", "kondiment", "зирав"],
     bg: "#D32F2F", shade: "#B71C1C",
-    img: "https://images.unsplash.com/photo-1589187151053-5ec8818e661b?w=500&q=85",
+    img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["cereal", "granola"],
+    keys: ["cereal", "granola", "ботқа"],
     bg: "#2E7D32", shade: "#1B5E20",
-    img: "https://images.unsplash.com/photo-1517093157656-b9eccef91cb1?w=500&q=85",
+    img: "https://images.pexels.com/photos/2067438/pexels-photo-2067438.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["oil", "yog", "butter"],
+    keys: ["oil", "yog", "butter", "масло"],
     bg: "#43A047", shade: "#388E3C",
-    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&q=85",
+    img: "https://images.pexels.com/photos/33783/olive-oil-salad-dressing-food-cooking.jpg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["canned", "konserva"],
+    keys: ["canned", "konserva", "консерв"],
     bg: "#C62828", shade: "#B71C1C",
-    img: "https://images.unsplash.com/photo-1584714268709-c3dd9c92b378?w=500&q=85",
+    img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["hygiene", "gigiyena", "tozalik"],
+    keys: ["hygiene", "gigiyena", "tozalik", "косметик", "beauty"],
     bg: "#1B5E20", shade: "#154A18",
-    img: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=500&q=85",
+    img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["baby", "bola", "child", "kids"],
+    keys: ["baby", "bola", "child", "kids", "бола"],
     bg: "#16A34A", shade: "#15803D",
-    img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&q=85",
+    img: "https://images.pexels.com/photos/35537/child-children-girl-happy.jpg?auto=compress&cs=tinysrgb&w=400",
   },
   {
-    keys: ["pet", "hayvon"],
+    keys: ["pet", "hayvon", "cat", "dog"],
     bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=500&q=85",
+    img: "https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  {
+    keys: ["water", "suv", "вода", "mineral"],
+    bg: "#2E7D32", shade: "#1B5E20",
+    img: "https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  {
+    keys: ["egg", "tuxum", "яйц"],
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  {
+    keys: ["cheese", "pishloq", "сыр"],
+    bg: "#D32F2F", shade: "#C62828",
+    img: "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  {
+    keys: ["clean", "household", "uy", "детерж", "washing"],
+    bg: "#43A047", shade: "#388E3C",
+    img: "https://images.pexels.com/photos/4239091/pexels-photo-4239091.jpeg?auto=compress&cs=tinysrgb&w=400",
   },
 ];
 
 // Alternating green/red fallback palette
 const FALLBACK_GREENS = ["#2E7D32", "#388E3C", "#43A047", "#16A34A", "#4CAF50", "#1B5E20"];
 const FALLBACK_REDS   = ["#E53935", "#D32F2F", "#C62828", "#B71C1C", "#C0392B"];
+// Diverse fallback images so every unnamed category gets a unique photo
+const FALLBACK_IMGS = [
+  "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
+];
 
 function getCatStyle(name: string, id: string, index: number) {
   const str = ((name || "") + " " + (id || "")).toLowerCase();
   for (const style of CAT_STYLES) {
     if (style.keys.some((k) => str.includes(k))) return style;
   }
-  // Even indices → green, odd → red
+  const fallbackImg = FALLBACK_IMGS[index % FALLBACK_IMGS.length];
   if (index % 2 === 0) {
     const bg = FALLBACK_GREENS[Math.floor(index / 2) % FALLBACK_GREENS.length];
-    return { bg, shade: "#1B5E20", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85" };
+    return { bg, shade: "#1B5E20", img: fallbackImg };
   } else {
     const bg = FALLBACK_REDS[Math.floor(index / 2) % FALLBACK_REDS.length];
-    return { bg, shade: "#960E0E", img: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=85" };
+    return { bg, shade: "#960E0E", img: fallbackImg };
   }
 }
 
