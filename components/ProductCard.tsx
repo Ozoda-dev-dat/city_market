@@ -15,7 +15,6 @@ import Animated, {
   withSpring,
   withSequence,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
@@ -91,26 +90,28 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
     addToCart(productForCart);
   };
 
-  const glassCard = {
-    backgroundColor: isDarkMode ? "rgba(30,30,32,0.82)" : "rgba(255,255,255,0.82)",
-    borderColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.9)",
-  };
+  const cardBg = isDarkMode ? "#1C1C1E" : "#FFFFFF";
+  const imageBg = isDarkMode ? "#2A2A2C" : "#F5F5F5";
+  const borderCol = isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
 
+  /* ── HORIZONTAL card (Popular section) ── */
   if (horizontal) {
     return (
-      <Animated.View style={animStyle}>
+      <Animated.View style={[styles.hCard, { backgroundColor: cardBg, borderColor: borderCol }, animStyle]}>
         <Pressable
-          style={[styles.hCard, glassCard]}
+          style={{ flexDirection: "row", flex: 1 }}
           onPress={onPress}
           onPressIn={() => { scale.value = withSpring(0.97, { damping: 14 }); }}
           onPressOut={() => { scale.value = withSpring(1, { damping: 14 }); }}
         >
-          <View style={styles.hImageBox}>
+          <View style={[styles.hImageBox, { backgroundColor: imageBg }]}>
             {isValidImageUri(resolvedImage) ? (
-              <Image source={{ uri: resolvedImage }} style={styles.hImage} resizeMode="cover" />
+              <Image source={{ uri: resolvedImage }} style={styles.hImage} resizeMode="contain" />
             ) : (
-              <View style={[styles.hImage, styles.imageFallback]}>
-                <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
+              <View style={[styles.hImage, { alignItems: "center", justifyContent: "center" }]}>
+                <Text style={{ fontSize: 32, fontFamily: "Poppins_700Bold", color: "#16A34A" }}>
+                  {product.name.charAt(0).toUpperCase()}
+                </Text>
               </View>
             )}
             {product.badge && (
@@ -119,6 +120,7 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
               </View>
             )}
           </View>
+
           <View style={styles.hInfo}>
             <Text style={[styles.hName, { color: Colors.text }]} numberOfLines={2}>{product.name}</Text>
             <Text style={[styles.hUnit, { color: Colors.textMuted }]}>{product.brand ?? product.unit}</Text>
@@ -130,9 +132,9 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
                 )}
               </View>
               {inCart ? (
-                <View style={[styles.qtyRow, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.08)" }]}>
+                <View style={styles.qtyPill}>
                   <Pressable
-                    style={styles.qtyBtn}
+                    style={styles.qtyPillBtn}
                     onPress={() => {
                       if (cartItem.quantity === 1) removeFromCart(product.id);
                       else updateQuantity(product.id, cartItem.quantity - 1);
@@ -140,9 +142,9 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
                   >
                     <Ionicons name="remove" size={14} color="#16A34A" />
                   </Pressable>
-                  <Text style={styles.qtyText}>{cartItem.quantity}</Text>
+                  <Text style={styles.qtyPillText}>{cartItem.quantity}</Text>
                   <Pressable
-                    style={styles.qtyBtn}
+                    style={styles.qtyPillBtn}
                     onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
                   >
                     <Ionicons name="add" size={14} color="#16A34A" />
@@ -150,7 +152,7 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
                 </View>
               ) : (
                 <Animated.View style={btnAnimStyle}>
-                  <Pressable style={styles.addBtnSm} onPress={handleAdd}>
+                  <Pressable style={styles.addCircleSm} onPress={handleAdd}>
                     <Ionicons name="add" size={18} color="#fff" />
                   </Pressable>
                 </Animated.View>
@@ -162,91 +164,96 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
     );
   }
 
+  /* ── VERTICAL grid card (Korzinka Go style) ── */
   return (
-    <Animated.View style={[styles.card, glassCard, animStyle]}>
+    <Animated.View style={[styles.card, { backgroundColor: cardBg, borderColor: borderCol }, animStyle]}>
       <Pressable
         onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.96, { damping: 14 }); }}
+        onPressIn={() => { scale.value = withSpring(0.97, { damping: 14 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 14 }); }}
         style={{ flex: 1 }}
       >
-        <View style={styles.imageBox}>
+        {/* Image area */}
+        <View style={[styles.imageBox, { backgroundColor: imageBg }]}>
           {isValidImageUri(resolvedImage) ? (
-            <Image source={{ uri: resolvedImage }} style={styles.image} resizeMode="cover" />
+            <Image source={{ uri: resolvedImage }} style={styles.image} resizeMode="contain" />
           ) : (
-            <View style={[styles.image, styles.imageFallback]}>
-              <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
+            <View style={[styles.image, { alignItems: "center", justifyContent: "center" }]}>
+              <Text style={{ fontSize: 44, fontFamily: "Poppins_700Bold", color: "#16A34A" }}>
+                {product.name.charAt(0).toUpperCase()}
+              </Text>
             </View>
           )}
-          <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.18)"]}
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-          />
+
+          {/* Badge top-left */}
           {product.badge && (
             <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
               <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
             </View>
           )}
+
+          {/* Out of stock overlay */}
           {!product.inStock && (
             <View style={styles.outOfStockOverlay}>
               <Text style={styles.outOfStockText}>Tugagan</Text>
             </View>
           )}
+
+          {/* Cart button — bottom-right of image (Korzinka Go style) */}
+          {inCart ? (
+            <View style={styles.qtyOverlay}>
+              <Pressable
+                style={styles.qtyOverlayBtn}
+                onPress={() => {
+                  if (cartItem.quantity === 1) removeFromCart(product.id);
+                  else updateQuantity(product.id, cartItem.quantity - 1);
+                }}
+              >
+                <Ionicons name="remove" size={13} color="#16A34A" />
+              </Pressable>
+              <Text style={styles.qtyOverlayText}>{cartItem.quantity}</Text>
+              <Pressable
+                style={styles.qtyOverlayBtn}
+                onPress={() => {
+                  if (product.stockQuantity && cartItem.quantity >= product.stockQuantity) {
+                    Alert.alert("Xatolik", "Omborda yetarli mahsulot yo'q");
+                    return;
+                  }
+                  updateQuantity(product.id, cartItem.quantity + 1);
+                }}
+              >
+                <Ionicons name="add" size={13} color="#16A34A" />
+              </Pressable>
+            </View>
+          ) : (
+            <Animated.View style={[styles.addCircleWrap, btnAnimStyle]}>
+              <Pressable
+                style={[styles.addCircle, !product.inStock && styles.addCircleDisabled]}
+                onPress={handleAdd}
+                disabled={!product.inStock}
+              >
+                <Ionicons name="add" size={22} color="#fff" />
+              </Pressable>
+            </Animated.View>
+          )}
         </View>
+
+        {/* Info section */}
         <View style={styles.info}>
           <Text style={[styles.name, { color: Colors.text }]} numberOfLines={2}>{product.name}</Text>
           <Text style={[styles.unit, { color: Colors.textMuted }]}>{product.unit}</Text>
           {storeName ? (
-            <View style={styles.storeBadge}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 3, marginBottom: 2 }}>
               <Ionicons name="storefront" size={9} color="#16A34A" />
-              <Text style={styles.storeBadgeText} numberOfLines={1}>{storeName}</Text>
+              <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 10, color: "#16A34A", flexShrink: 1 }} numberOfLines={1}>
+                {storeName}
+              </Text>
             </View>
           ) : null}
-          <View style={styles.bottomRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.price, { color: Colors.text }]}>{formatPrice(product.price)}</Text>
-              {product.originalPrice && (
-                <Text style={[styles.originalPrice, { color: Colors.textMuted }]}>{formatPrice(product.originalPrice)}</Text>
-              )}
-            </View>
-            {inCart ? (
-              <View style={[styles.qtyRow, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.08)" }]}>
-                <Pressable
-                  style={styles.qtyBtn}
-                  onPress={() => {
-                    if (cartItem.quantity === 1) removeFromCart(product.id);
-                    else updateQuantity(product.id, cartItem.quantity - 1);
-                  }}
-                >
-                  <Ionicons name="remove" size={12} color="#16A34A" />
-                </Pressable>
-                <Text style={styles.qtyText}>{cartItem.quantity}</Text>
-                <Pressable
-                  style={styles.qtyBtn}
-                  onPress={() => {
-                    if (product.stockQuantity && cartItem.quantity >= product.stockQuantity) {
-                      Alert.alert("Xatolik", "Omborda yetarli mahsulot yo'q");
-                      return;
-                    }
-                    updateQuantity(product.id, cartItem.quantity + 1);
-                  }}
-                >
-                  <Ionicons name="add" size={12} color="#16A34A" />
-                </Pressable>
-              </View>
-            ) : (
-              <Animated.View style={btnAnimStyle}>
-                <Pressable
-                  style={[styles.addBtn, !product.inStock && styles.addBtnDisabled]}
-                  onPress={handleAdd}
-                  disabled={!product.inStock}
-                >
-                  <Ionicons name="add" size={18} color="#fff" />
-                </Pressable>
-              </Animated.View>
-            )}
-          </View>
+          <Text style={[styles.price, { color: Colors.text }]}>{formatPrice(product.price)}</Text>
+          {product.originalPrice && (
+            <Text style={[styles.originalPrice, { color: Colors.textMuted }]}>{formatPrice(product.originalPrice)}</Text>
+          )}
         </View>
       </Pressable>
     </Animated.View>
@@ -254,54 +261,34 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
 }
 
 const styles = StyleSheet.create({
+  /* ── Vertical card ── */
   card: {
     width: CARD_WIDTH,
-    borderRadius: 22,
+    borderRadius: 16,
     overflow: "hidden",
     borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.09,
-    shadowRadius: 16,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
   },
   imageBox: {
-    height: 138,
-    backgroundColor: "#F0F7F2",
+    height: 148,
     position: "relative",
+    padding: 8,
   },
   image: {
     width: "100%",
     height: "100%",
   },
-  imageFallback: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E8F5E9",
-  },
-  fallbackText: {
-    fontSize: 40,
-    fontFamily: "Poppins_700Bold",
-    color: "#16A34A",
-  },
-  outOfStockOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  outOfStockText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: "#fff",
-  },
   badge: {
     position: "absolute",
     top: 8,
     left: 8,
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   badgeText: {
     fontFamily: "Poppins_700Bold",
@@ -309,9 +296,79 @@ const styles = StyleSheet.create({
     color: "#fff",
     textTransform: "uppercase",
   },
+  outOfStockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 0,
+  },
+  outOfStockText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#fff",
+  },
+  /* Korzinka Go style: round "+" button bottom-right of image */
+  addCircleWrap: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+  },
+  addCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#16A34A",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#16A34A",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  addCircleDisabled: {
+    backgroundColor: "#9CA3AF",
+    shadowOpacity: 0,
+  },
+  /* Qty counter overlay on image */
+  qtyOverlay: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    gap: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1.5,
+    borderColor: "#16A34A",
+  },
+  qtyOverlayBtn: {
+    width: 26,
+    height: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 13,
+  },
+  qtyOverlayText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13,
+    color: "#16A34A",
+    minWidth: 18,
+    textAlign: "center",
+  },
   info: {
-    padding: 12,
-    gap: 3,
+    padding: 10,
+    paddingTop: 8,
+    gap: 1,
   },
   name: {
     fontFamily: "Poppins_600SemiBold",
@@ -321,12 +378,7 @@ const styles = StyleSheet.create({
   unit: {
     fontFamily: "Poppins_400Regular",
     fontSize: 11,
-    marginBottom: 6,
-  },
-  bottomRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    marginBottom: 4,
   },
   price: {
     fontFamily: "Poppins_700Bold",
@@ -337,72 +389,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textDecorationLine: "line-through",
   },
-  storeBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    marginBottom: 4,
-  },
-  storeBadgeText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 10,
-    color: "#16A34A",
-    flexShrink: 1,
-  },
-  addBtn: {
-    width: 32,
-    height: 32,
-    backgroundColor: "#16A34A",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#16A34A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addBtnDisabled: {
-    backgroundColor: "#9CA3AF",
-    shadowOpacity: 0,
-  },
-  qtyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 10,
-    padding: 2,
-    gap: 4,
-  },
-  qtyBtn: {
-    width: 26,
-    height: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-  },
-  qtyText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 13,
-    color: "#16A34A",
-    minWidth: 18,
-    textAlign: "center",
-  },
+
+  /* ── Horizontal card ── */
   hCard: {
-    borderRadius: 20,
-    flexDirection: "row",
-    marginBottom: 12,
+    borderRadius: 16,
+    marginBottom: 10,
     overflow: "hidden",
     borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.07,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+    width: 220,
   },
   hImageBox: {
-    width: 100,
-    height: 100,
-    backgroundColor: "#F0F7F2",
+    width: 90,
+    height: 90,
+    padding: 6,
     position: "relative",
   },
   hImage: {
@@ -411,17 +415,17 @@ const styles = StyleSheet.create({
   },
   hInfo: {
     flex: 1,
-    padding: 14,
-    gap: 3,
+    padding: 12,
+    gap: 2,
   },
   hName: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
   },
   hUnit: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 12,
+    fontSize: 11,
   },
   hBottom: {
     flexDirection: "row",
@@ -431,24 +435,48 @@ const styles = StyleSheet.create({
   },
   hPrice: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 15,
+    fontSize: 14,
   },
   hOriginal: {
     fontFamily: "Poppins_400Regular",
     fontSize: 11,
     textDecorationLine: "line-through",
   },
-  addBtnSm: {
+  addCircleSm: {
     width: 32,
     height: 32,
+    borderRadius: 16,
     backgroundColor: "#16A34A",
-    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#16A34A",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
     elevation: 3,
+  },
+  qtyPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(22,163,74,0.1)",
+    borderRadius: 16,
+    padding: 2,
+    gap: 2,
+    borderWidth: 1,
+    borderColor: "rgba(22,163,74,0.2)",
+  },
+  qtyPillBtn: {
+    width: 26,
+    height: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 13,
+  },
+  qtyPillText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13,
+    color: "#16A34A",
+    minWidth: 18,
+    textAlign: "center",
   },
 });
