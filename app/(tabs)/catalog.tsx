@@ -32,42 +32,33 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 48) / 2;
 const CARD_H = CARD_W * 0.75;
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  fruits:      "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
-  mevalar:     "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=600&q=80",
-  vegetables:  "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
-  sabzavotlar: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
-  dairy:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  sut:         "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  sutli:       "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&q=80",
-  bakery:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  novvoy:      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  non:         "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
-  meat:        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
-  gosht:       "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80",
-  seafood:     "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
-  dengiz:      "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&q=80",
-  beverages:   "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
-  ichimlik:    "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80",
-  snacks:      "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
-  shirinlik:   "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=600&q=80",
-  frozen:      "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
-  muzqaymoq:   "https://images.unsplash.com/photo-1574482620826-40685ca5ebd2?w=600&q=80",
-  organic:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
-  organik:     "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
-  coffee:      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
-  qahva:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
-  chocolate:   "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
-  shokolad:    "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=600&q=80",
+const CAT_IMAGES: Record<string, string> = {
+  "choy":                "/cat-images/choy.png",
+  "coffee":              "/cat-images/coffee.png",
+  "meat":                "/cat-images/meat.png",
+  "ichimliklar":         "/cat-images/ichimliklar.png",
+  "ketchuplar":          "/cat-images/ketchuplar.png",
+  "konservalar-":        "/cat-images/konservalar.png",
+  "mayonezlar":          "/cat-images/mayonezlar.png",
+  "fruits":              "/cat-images/fruits.png",
+  "murabbo-va-djemlar":  "/cat-images/murabbo.png",
+  "bakery":              "/cat-images/bakery.png",
+  "vegetables":          "/cat-images/vegetables.png",
+  "shampunlar":          "/cat-images/shampunlar.png",
+  "sharbatlar":          "/cat-images/sharbatlar.png",
+  "shokoladlar":         "/cat-images/shokoladlar.png",
+  "shokolatli-pastalar": "/cat-images/shokolatli-pastalar.png",
+  "dairy":               "/cat-images/dairy.png",
+  "tagliklar":           "/cat-images/tagliklar.png",
+  "makaron-un-yormalar": "/cat-images/makaron-un-yormalar.png",
+  "yog-va-souslar":      "/cat-images/yog-va-souslar.png",
+  "bolalar-ovqatlar":    "/cat-images/bolalar-ovqatlar.png",
+  "oyinchoqlar":         "/cat-images/oyinchoqlar.png",
+  "yongok-va-sneklar":   "/cat-images/yongok-va-sneklar.png",
 };
 
-function getCategoryImage(name: string, id: string): string {
-  const nameL = (name || "").toLowerCase();
-  const idL = (id || "").toLowerCase();
-  for (const [key, url] of Object.entries(CATEGORY_IMAGES)) {
-    if (nameL.includes(key) || idL.includes(key)) return url;
-  }
-  return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80";
+function getCategoryImage(_name: string, id: string): string {
+  return CAT_IMAGES[id] ?? "/cat-images/fruits.png";
 }
 
 function CategoryPhotoCard({ category, productCount, itemsLabel, onPress }: {
