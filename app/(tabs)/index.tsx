@@ -67,6 +67,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "yog-va-souslar":       { bg: "#FEF9EC", textColor: "#4a3a0a", imgs: ["/cat-images/yog-va-souslar.png"] },
   "bolalar-ovqatlar":     { bg: "#FFF5EC", textColor: "#4a2e0a", imgs: ["/cat-images/bolalar-ovqatlar.png"] },
   "oyinchoqlar":          { bg: "#F0FFF0", textColor: "#1a4a1a", imgs: ["/cat-images/oyinchoqlar.png"] },
+  "yongok-va-sneklar":    { bg: "#FEF8E7", textColor: "#4a3a0a", imgs: ["/cat-images/yongok-va-sneklar.png"] },
   "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png"] },
   "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png"] },
 };
