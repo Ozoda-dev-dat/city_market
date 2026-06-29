@@ -171,10 +171,103 @@ const CAT_STYLES: { keys: string[]; bg: string; shade: string; img: string }[] =
   },
 ];
 
+// ── Exact DB category ID → style map (18 categories from DB) ─────────────
+const CAT_BY_ID: Record<string, { bg: string; shade: string; img: string }> = {
+  // Choy (Tea)
+  "choy": {
+    bg: "#388E3C", shade: "#2E7D32",
+    img: "https://images.pexels.com/photos/1417945/pexels-photo-1417945.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Coffee
+  "coffee": {
+    bg: "#2E7D32", shade: "#1B5E20",
+    img: "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Go'sht mahsulotlari (Meat)
+  "meat": {
+    bg: "#D32F2F", shade: "#C62828",
+    img: "https://images.pexels.com/photos/1927378/pexels-photo-1927378.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Ichimliklar (Beverages)
+  "ichimliklar": {
+    bg: "#43A047", shade: "#388E3C",
+    img: "https://images.pexels.com/photos/2983100/pexels-photo-2983100.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Ketchuplar
+  "ketchuplar": {
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.pexels.com/photos/4198165/pexels-photo-4198165.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Konservalar
+  "konservalar-": {
+    bg: "#C62828", shade: "#B71C1C",
+    img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Mayonezlar
+  "mayonezlar": {
+    bg: "#4CAF50", shade: "#43A047",
+    img: "https://images.pexels.com/photos/3945671/pexels-photo-3945671.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Mevalar (Fruits)
+  "fruits": {
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Murabbo va djemlar (Jams)
+  "murabbo-va-djemlar": {
+    bg: "#D32F2F", shade: "#B71C1C",
+    img: "https://images.pexels.com/photos/2909081/pexels-photo-2909081.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Non mahsulotlari (Bakery)
+  "bakery": {
+    bg: "#C62828", shade: "#B71C1C",
+    img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Sabzavotlar (Vegetables)
+  "vegetables": {
+    bg: "#2E7D32", shade: "#1B5E20",
+    img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Shampunlar (Shampoos)
+  "shampunlar": {
+    bg: "#1B5E20", shade: "#154A18",
+    img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Sharbatlar (Juices)
+  "sharbatlar": {
+    bg: "#43A047", shade: "#388E3C",
+    img: "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Shokoladlar (Chocolates)
+  "shokoladlar": {
+    bg: "#B71C1C", shade: "#960E0E",
+    img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Shokolatlar (Chocolates variant)
+  "shokolatlar": {
+    bg: "#C0392B", shade: "#96281B",
+    img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Shokolatli pastalar (Chocolate spreads / Nutella-style)
+  "shokolatli-pastalar": {
+    bg: "#D32F2F", shade: "#C62828",
+    img: "https://images.pexels.com/photos/3026804/pexels-photo-3026804.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Sut mahsulotlari (Dairy)
+  "dairy": {
+    bg: "#388E3C", shade: "#2E7D32",
+    img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+  // Tagliklar (Sauces / condiments)
+  "tagliklar": {
+    bg: "#E53935", shade: "#C62828",
+    img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400",
+  },
+};
+
 // Alternating green/red fallback palette
 const FALLBACK_GREENS = ["#2E7D32", "#388E3C", "#43A047", "#16A34A", "#4CAF50", "#1B5E20"];
 const FALLBACK_REDS   = ["#E53935", "#D32F2F", "#C62828", "#B71C1C", "#C0392B"];
-// Diverse fallback images so every unnamed category gets a unique photo
 const FALLBACK_IMGS = [
   "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
   "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
@@ -185,10 +278,14 @@ const FALLBACK_IMGS = [
 ];
 
 function getCatStyle(name: string, id: string, index: number) {
+  // 1. Exact DB ID match (fastest, most precise)
+  if (id && CAT_BY_ID[id]) return CAT_BY_ID[id];
+  // 2. Keyword fallback for any future categories
   const str = ((name || "") + " " + (id || "")).toLowerCase();
   for (const style of CAT_STYLES) {
     if (style.keys.some((k) => str.includes(k))) return style;
   }
+  // 3. Alternating green/red with diverse images
   const fallbackImg = FALLBACK_IMGS[index % FALLBACK_IMGS.length];
   if (index % 2 === 0) {
     const bg = FALLBACK_GREENS[Math.floor(index / 2) % FALLBACK_GREENS.length];
