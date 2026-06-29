@@ -54,10 +54,10 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png", "/cat-images/ketchuplar2.png"] },
   "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", imgs: ["/cat-images/konservalar.png", "/cat-images/konservalar2.png"] },
   "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png", "/cat-images/mayonezlar2.png"] },
-  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", imgs: ["/cat-images/fruits.png", "/cat-images/fruits2.png"] },
+  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", imgs: ["/cat-images/fruits.png"] },
   "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", imgs: ["/cat-images/murabbo.png", "/cat-images/murabbo2.png"] },
   "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", imgs: ["/cat-images/bakery.png", "/cat-images/bakery2.png"] },
-  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", imgs: ["/cat-images/vegetables.png", "/cat-images/vegetables2.png"] },
+  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", imgs: ["/cat-images/vegetables.png"] },
   "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", imgs: ["/cat-images/shampunlar.png", "/cat-images/shampunlar2.png"] },
   "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", imgs: ["/cat-images/sharbatlar.png", "/cat-images/sharbatlar2.png"] },
   "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png", "/cat-images/shokoladlar2.png"] },
@@ -195,33 +195,50 @@ function CategoryPhotoCard({ category, index, onPress }: {
           {category.name}
         </Text>
 
-        {/* Image 1 — left side, slightly rotated */}
-        <Image
-          source={{ uri: resolveImageUrl(style.imgs[0]) }}
-          style={[catCardStyles.img, {
-            width: imgW,
-            height: imgH,
-            bottom: -4,
-            left: -6,
-            transform: [{ rotate: "-12deg" }],
-            zIndex: 1,
-          }]}
-          resizeMode="contain"
-        />
-        {/* Image 2 — right side, slightly rotated other way */}
-        {style.imgs[1] && (
+        {style.imgs.length === 1 ? (
+          /* Single image — centered, no rotation */
           <Image
-            source={{ uri: resolveImageUrl(style.imgs[1]) }}
+            source={{ uri: resolveImageUrl(style.imgs[0]) }}
             style={[catCardStyles.img, {
-              width: imgW,
-              height: imgH,
-              bottom: -4,
-              right: -6,
-              transform: [{ rotate: "10deg" }],
-              zIndex: 2,
+              width: CARD_W * 0.96,
+              height: CARD_H * 0.72,
+              bottom: -2,
+              left: CARD_W * 0.02,
+              zIndex: 1,
             }]}
             resizeMode="contain"
           />
+        ) : (
+          <>
+            {/* Image 1 — left side, slightly rotated */}
+            <Image
+              source={{ uri: resolveImageUrl(style.imgs[0]) }}
+              style={[catCardStyles.img, {
+                width: imgW,
+                height: imgH,
+                bottom: -4,
+                left: -6,
+                transform: [{ rotate: "-12deg" }],
+                zIndex: 1,
+              }]}
+              resizeMode="contain"
+            />
+            {/* Image 2 — right side, slightly rotated other way */}
+            {style.imgs[1] && (
+              <Image
+                source={{ uri: resolveImageUrl(style.imgs[1]) }}
+                style={[catCardStyles.img, {
+                  width: imgW,
+                  height: imgH,
+                  bottom: -4,
+                  right: -6,
+                  transform: [{ rotate: "10deg" }],
+                  zIndex: 2,
+                }]}
+                resizeMode="contain"
+              />
+            )}
+          </>
         )}
       </Pressable>
     </Animated.View>
