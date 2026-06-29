@@ -41,7 +41,7 @@ import { useTranslation } from "@/lib/I18nProvider";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 48) / 2;
-const CARD_H = 118;
+const CARD_H = 136;
 
 // ── Logo palette: green (buildings) + red (cart) only ────────────────────
 // Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
@@ -253,7 +253,7 @@ const circleStyles = StyleSheet.create({
   },
 });
 
-// Yandex Go card: solid color bg | text left | product photo right
+// Yandex Go style card: solid bg | text top-left | big round food photo bottom-right
 function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress }: {
   category: any; productCount: number; itemsLabel: string; index: number; onPress: () => void;
 }) {
@@ -269,111 +269,93 @@ function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress 
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
+        onPressIn={() => { scale.value = withSpring(0.96, { damping: 15 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        {/* Darker shade in bottom-right corner for depth */}
-        <View style={[catCardStyles.shade, { backgroundColor: style.shade }]} />
+        {/* TOP-LEFT: category name */}
+        <Text style={catCardStyles.catName} numberOfLines={2}>{category.name}</Text>
 
-        {/* LEFT: text */}
-        <View style={catCardStyles.textSide}>
-          <Text style={catCardStyles.catName} numberOfLines={2}>{category.name}</Text>
-          <View style={catCardStyles.countPill}>
-            <Text style={catCardStyles.countText}>{productCount}</Text>
-          </View>
+        {/* BOTTOM-LEFT: item count pill */}
+        <View style={catCardStyles.countPill}>
+          <Text style={catCardStyles.countText}>{productCount} ta</Text>
         </View>
 
-        {/* RIGHT: food photo */}
-        <View style={catCardStyles.imgSide}>
+        {/* BOTTOM-RIGHT: round food photo floating out of card */}
+        <View style={catCardStyles.imgWrap}>
           <Image
             source={{ uri: style.img }}
             style={catCardStyles.img}
             resizeMode="cover"
           />
-          {/* Soft left-edge fade so image blends into bg */}
-          <LinearGradient
-            colors={[style.bg, "transparent"]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 0.45, y: 0.5 }}
-            style={catCardStyles.imgFade}
-          />
+          {/* subtle inner glow at edges */}
+          <View style={[catCardStyles.imgInnerShadow, { shadowColor: style.shade }]} />
         </View>
       </Pressable>
     </Animated.View>
   );
 }
 
+const IMG_SIZE = CARD_H * 0.82;
+
 const catCardStyles = StyleSheet.create({
   wrapper: { marginBottom: 12 },
   card: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 22,
     overflow: "hidden",
-    flexDirection: "row",
+    padding: 14,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  shade: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: "55%",
-    height: "55%",
-    borderTopLeftRadius: 60,
-    opacity: 0.35,
-  },
-  textSide: {
-    flex: 1,
-    paddingLeft: 14,
-    paddingTop: 16,
-    paddingBottom: 14,
-    paddingRight: 4,
-    justifyContent: "space-between",
-    zIndex: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 6,
   },
   catName: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 13,
+    fontSize: 14,
     color: "#fff",
-    lineHeight: 18,
-    letterSpacing: -0.1,
+    lineHeight: 20,
+    letterSpacing: -0.2,
+    maxWidth: "60%",
   },
   countPill: {
-    backgroundColor: "rgba(255,255,255,0.22)",
-    alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    position: "absolute",
+    bottom: 14,
+    left: 14,
+    backgroundColor: "rgba(0,0,0,0.18)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   countText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 10,
-    color: "#fff",
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.92)",
   },
-  imgSide: {
-    width: CARD_W * 0.52,
-    position: "relative",
+  imgWrap: {
+    position: "absolute",
+    right: -10,
+    bottom: -10,
+    width: IMG_SIZE,
+    height: IMG_SIZE,
+    borderRadius: IMG_SIZE / 2,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: -4, height: -4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   img: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
+    width: "100%",
+    height: "100%",
   },
-  imgFade: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: "60%",
-    zIndex: 1,
+  imgInnerShadow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: IMG_SIZE / 2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
 });
 
@@ -703,7 +685,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
-      <LocationPermissionModal visible={showLocationModal} onClose={() => setShowLocationModal(false)} />
+      <LocationPermissionModal visible={showLocationModal} onDismiss={() => setShowLocationModal(false)} />
     </View>
   );
 }
