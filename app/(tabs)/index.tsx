@@ -15,6 +15,7 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -253,18 +254,20 @@ const circleStyles = StyleSheet.create({
   },
 });
 
-// Yandex Go style card: solid bg | text top-left | big round food photo bottom-right
+// Glass card: food image as bg → BlurView → color tint → text + clear round photo
 function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress }: {
   category: any; productCount: number; itemsLabel: string; index: number; onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const style = getCatStyle(category.name, category.id, index);
+  const isGreen = index % 2 === 0 || style.bg.startsWith("#1") || style.bg.startsWith("#2") || style.bg.startsWith("#3") || style.bg.startsWith("#4");
+  const tint = isGreen ? "rgba(34,120,58,0.28)" : "rgba(180,30,30,0.28)";
 
   return (
-    <Animated.View style={[catCardStyles.wrapper, { width: CARD_W, height: CARD_H }, anim]}>
+    <Animated.View style={[catCardStyles.outerShadow, { width: CARD_W, height: CARD_H }, anim]}>
       <Pressable
-        style={[catCardStyles.card, { backgroundColor: style.bg }]}
+        style={catCardStyles.pressable}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
@@ -272,90 +275,131 @@ function CategoryPhotoCard({ category, productCount, itemsLabel, index, onPress 
         onPressIn={() => { scale.value = withSpring(0.96, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
+        {/* Layer 1: Full blurred food image as background */}
+        <Image
+          source={{ uri: style.img }}
+          style={catCardStyles.bgImg}
+          resizeMode="cover"
+          blurRadius={Platform.OS === "android" ? 8 : 0}
+        />
+
+        {/* Layer 2: Frosted blur (iOS) */}
+        {Platform.OS === "ios" && (
+          <BlurView intensity={72} tint="light" style={StyleSheet.absoluteFillObject} />
+        )}
+
+        {/* Layer 3: Web / Android fallback — white frost */}
+        {Platform.OS !== "ios" && (
+          <View style={catCardStyles.webFrost} />
+        )}
+
+        {/* Layer 4: Subtle color tint so cards are distinguishable */}
+        <View style={[catCardStyles.colorTint, { backgroundColor: tint }]} />
+
+        {/* Layer 5: White glass border shine */}
+        <View style={catCardStyles.glassBorder} />
+
         {/* TOP-LEFT: category name */}
         <Text style={catCardStyles.catName} numberOfLines={2}>{category.name}</Text>
 
-        {/* BOTTOM-LEFT: item count pill */}
+        {/* BOTTOM-LEFT: item count */}
         <View style={catCardStyles.countPill}>
           <Text style={catCardStyles.countText}>{productCount} ta</Text>
         </View>
 
-        {/* BOTTOM-RIGHT: round food photo floating out of card */}
+        {/* BOTTOM-RIGHT: sharp round food photo (not blurred) */}
         <View style={catCardStyles.imgWrap}>
           <Image
             source={{ uri: style.img }}
             style={catCardStyles.img}
             resizeMode="cover"
           />
-          {/* subtle inner glow at edges */}
-          <View style={[catCardStyles.imgInnerShadow, { shadowColor: style.shade }]} />
+          {/* ring around the circle */}
+          <View style={catCardStyles.imgRing} />
         </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-const IMG_SIZE = CARD_H * 0.82;
+const IMG_SIZE = CARD_H * 0.84;
 
 const catCardStyles = StyleSheet.create({
-  wrapper: { marginBottom: 12 },
-  card: {
+  outerShadow: {
+    marginBottom: 12,
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.13,
+    shadowRadius: 14,
+    elevation: 7,
+  },
+  pressable: {
     flex: 1,
     borderRadius: 22,
     overflow: "hidden",
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 6,
+  },
+  bgImg: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  webFrost: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.72)",
+  },
+  colorTint: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  glassBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.55)",
   },
   catName: {
+    position: "absolute",
+    top: 14,
+    left: 14,
     fontFamily: "Poppins_700Bold",
-    fontSize: 14,
-    color: "#fff",
-    lineHeight: 20,
+    fontSize: 13.5,
+    color: "#1a1a1a",
+    lineHeight: 19,
     letterSpacing: -0.2,
-    maxWidth: "60%",
+    maxWidth: "58%",
   },
   countPill: {
     position: "absolute",
-    bottom: 14,
+    bottom: 12,
     left: 14,
-    backgroundColor: "rgba(0,0,0,0.18)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.55)",
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.7)",
   },
   countText: {
     fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.92)",
+    fontSize: 10.5,
+    color: "#1a1a1a",
   },
   imgWrap: {
     position: "absolute",
-    right: -10,
-    bottom: -10,
+    right: -8,
+    bottom: -8,
     width: IMG_SIZE,
     height: IMG_SIZE,
     borderRadius: IMG_SIZE / 2,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: -4, height: -4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
   },
   img: {
     width: "100%",
     height: "100%",
   },
-  imgInnerShadow: {
+  imgRing: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: IMG_SIZE / 2,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.45)",
   },
 });
 
