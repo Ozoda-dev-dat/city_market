@@ -749,24 +749,6 @@ export default function HomeScreen() {
           {BANNERS.map((_, i) => <BannerDot key={i} isActive={i === activeBanner} />)}
         </View>
 
-        {/* ── Category circles ── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("categories")}</Text>
-        </View>
-        <FlatList
-          horizontal
-          data={categories}
-          keyExtractor={(item) => item.id}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesRow}
-          renderItem={({ item }) => (
-            <CategoryCircle
-              item={item}
-              onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
-            />
-          )}
-        />
-
         {/* ── Filter chips ── */}
         <ScrollView
           horizontal
