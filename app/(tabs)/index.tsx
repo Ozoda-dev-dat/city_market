@@ -64,7 +64,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatlar.png", "/cat-images/shokolatlar2.png"] },
   "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png"] },
   "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png"] },
-  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png", "/cat-images/tagliklar2.png"] },
+  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png"] },
 };
 
 const FALLBACK_PASTELS = [
