@@ -53,7 +53,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png"] },
   "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png", "/cat-images/ketchuplar2.png"] },
   "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", imgs: ["/cat-images/konservalar.png"] },
-  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png", "/cat-images/mayonezlar2.png"] },
+  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png"] },
   "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", imgs: ["/cat-images/fruits.png"] },
   "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", imgs: ["/cat-images/murabbo.png", "/cat-images/murabbo2.png"] },
   "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", imgs: ["/cat-images/bakery.png"] },
@@ -62,7 +62,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", imgs: ["/cat-images/sharbatlar.png"] },
   "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png"] },
   "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatlar.png", "/cat-images/shokolatlar2.png"] },
-  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png", "/cat-images/shokolatli-pastalar2.png"] },
+  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png"] },
   "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png"] },
   "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png", "/cat-images/tagliklar2.png"] },
 };
