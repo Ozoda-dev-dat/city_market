@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, resolveImageUrl } from "@/lib/query-client";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/LocationPermissionModal";
 import { useAuth } from "@/context/AuthContext";
@@ -43,105 +43,45 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 40) / 3;
 const CARD_H = CARD_W * 1.18;
 
-// ── Logo palette: green (buildings) + red (cart) only ────────────────────
-// Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
-// Reds:    #B71C1C → #C62828 → #D32F2F → #E53935 → #C0392B
-// Korzinka Go style: clean product shots on white/light bg, Pexels white-bg photos
-const CAT_STYLES: { keys: string[]; img: string }[] = [
-  { keys: ["fruit", "meva"], img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["vegetab", "sabzavot"], img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["dairy", "sut", "milk"], img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["baker", "bread", "non", "novvoy"], img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["meat", "gosht", "chicken", "tovuq"], img: "https://images.pexels.com/photos/616354/pexels-photo-616354.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["seafood", "fish", "baliq", "dengiz"], img: "https://images.pexels.com/photos/3296434/pexels-photo-3296434.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["beverage", "drink", "ichimlik", "sharbat", "juice"], img: "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["snack", "gazak", "shirinlik", "sweet", "candy", "konfet"], img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["coffee", "qahva", "kofe", "choy", "tea"], img: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["chocolate", "shokolad", "choco"], img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["sauce", "spice", "ziravorlar", "kondiment"], img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["oil", "yog", "butter"], img: "https://images.pexels.com/photos/33783/olive-oil-salad-dressing-food-cooking.jpg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["canned", "konserva"], img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["hygiene", "gigiyena", "beauty", "shampun"], img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["water", "suv", "mineral"], img: "https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["egg", "tuxum"], img: "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400" },
-  { keys: ["cheese", "pishloq"], img: "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=400" },
-];
-
-// ── Pastel Korzinka-Go style: light bg + product image ────────────────────
+// ── Pastel Korzinka-Go style: transparent PNG on pastel bg ────────────────────
 const CAT_BY_ID: Record<string, { bg: string; textColor: string; img: string }> = {
-  "choy": {
-    bg: "#D4EDF0", textColor: "#1a4a4e",
-    img: "https://images.pexels.com/photos/1417945/pexels-photo-1417945.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "coffee": {
-    bg: "#E8D9C8", textColor: "#3d2a14",
-    img: "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "meat": {
-    bg: "#FADADD", textColor: "#5a1a1e",
-    img: "https://images.pexels.com/photos/1927378/pexels-photo-1927378.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "ichimliklar": {
-    bg: "#D4EBF7", textColor: "#1a3a5a",
-    img: "https://images.pexels.com/photos/2983100/pexels-photo-2983100.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "ketchuplar": {
-    bg: "#FADADD", textColor: "#5a1a1e",
-    img: "https://images.pexels.com/photos/4198165/pexels-photo-4198165.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "konservalar-": {
-    bg: "#E8EDD4", textColor: "#2a3a1a",
-    img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "mayonezlar": {
-    bg: "#FEF3D4", textColor: "#4a3a0a",
-    img: "https://images.pexels.com/photos/3945671/pexels-photo-3945671.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "fruits": {
-    bg: "#FADADD", textColor: "#5a1a1e",
-    img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "murabbo-va-djemlar": {
-    bg: "#EDD4F0", textColor: "#3a1a4a",
-    img: "https://images.pexels.com/photos/2909081/pexels-photo-2909081.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "bakery": {
-    bg: "#F7EDDA", textColor: "#4a2e0a",
-    img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "vegetables": {
-    bg: "#D6EDD4", textColor: "#1a3a1e",
-    img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "shampunlar": {
-    bg: "#D4F0EE", textColor: "#1a3a38",
-    img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "sharbatlar": {
-    bg: "#FDE8D4", textColor: "#4a2a0a",
-    img: "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "shokoladlar": {
-    bg: "#F0E0D6", textColor: "#3a1a0a",
-    img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "shokolatlar": {
-    bg: "#F0E0D6", textColor: "#3a1a0a",
-    img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "shokolatli-pastalar": {
-    bg: "#F0E0D6", textColor: "#3a1a0a",
-    img: "https://images.pexels.com/photos/3026804/pexels-photo-3026804.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "dairy": {
-    bg: "#D6E8F5", textColor: "#1a2e4a",
-    img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  "tagliklar": {
-    bg: "#FEF3D4", textColor: "#4a3a0a",
-    img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
+  "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", img: "/cat-images/choy.png" },
+  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", img: "/cat-images/coffee.png" },
+  "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", img: "/cat-images/meat.png" },
+  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", img: "/cat-images/ichimliklar.png" },
+  "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", img: "/cat-images/ketchuplar.png" },
+  "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", img: "/cat-images/konservalar.png" },
+  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", img: "/cat-images/mayonezlar.png" },
+  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", img: "/cat-images/fruits.png" },
+  "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", img: "/cat-images/murabbo.png" },
+  "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", img: "/cat-images/bakery.png" },
+  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", img: "/cat-images/vegetables.png" },
+  "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", img: "/cat-images/shampunlar.png" },
+  "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", img: "/cat-images/sharbatlar.png" },
+  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokoladlar.png" },
+  "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokolatlar.png" },
+  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokolatli-pastalar.png" },
+  "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", img: "/cat-images/dairy.png" },
+  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", img: "/cat-images/tagliklar.png" },
 };
+
+// Fallback for unknown categories
+const CAT_STYLES: { keys: string[]; img: string }[] = [
+  { keys: ["fruit", "meva"],                   img: "/cat-images/fruits.png" },
+  { keys: ["vegetab", "sabzavot"],              img: "/cat-images/vegetables.png" },
+  { keys: ["dairy", "sut", "milk"],             img: "/cat-images/dairy.png" },
+  { keys: ["baker", "bread", "non"],            img: "/cat-images/bakery.png" },
+  { keys: ["meat", "gosht", "chicken"],         img: "/cat-images/meat.png" },
+  { keys: ["ichimlik", "sharbat", "juice"],     img: "/cat-images/sharbatlar.png" },
+  { keys: ["coffee", "qahva", "kofe"],          img: "/cat-images/coffee.png" },
+  { keys: ["choy", "tea"],                      img: "/cat-images/choy.png" },
+  { keys: ["chocolate", "shokolad"],            img: "/cat-images/shokoladlar.png" },
+  { keys: ["ketchup"],                          img: "/cat-images/ketchuplar.png" },
+  { keys: ["mayo"],                             img: "/cat-images/mayonezlar.png" },
+  { keys: ["canned", "konserva"],               img: "/cat-images/konservalar.png" },
+  { keys: ["shampun", "hygiene", "beauty"],     img: "/cat-images/shampunlar.png" },
+  { keys: ["sauce", "taglik"],                  img: "/cat-images/tagliklar.png" },
+];
 
 // Pastel fallback palette (Korzinka Go style)
 const FALLBACK_PASTELS = [
@@ -155,12 +95,12 @@ const FALLBACK_PASTELS = [
   { bg: "#FDE8D4", textColor: "#4a2a0a" },
 ];
 const FALLBACK_IMGS = [
-  "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
-  "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
-  "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
-  "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
-  "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400",
-  "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "/cat-images/fruits.png",
+  "/cat-images/vegetables.png",
+  "/cat-images/dairy.png",
+  "/cat-images/bakery.png",
+  "/cat-images/sharbatlar.png",
+  "/cat-images/shokoladlar.png",
 ];
 
 function getCatStyle(name: string, id: string, index: number) {
@@ -263,13 +203,13 @@ const circleStyles = StyleSheet.create({
 
 // Glass card: food image as bg → BlurView → color tint → text + clear round photo
 // ── Korzinka Go style CategoryCard (pixel-perfect) ─────────────────────────
-function CategoryPhotoCard({ category, index, productImage, onPress }: {
-  category: any; index: number; productImage?: string; onPress: () => void;
+function CategoryPhotoCard({ category, index, onPress }: {
+  category: any; index: number; onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const style = getCatStyle(category.name, category.id, index);
-  const imgSrc = productImage || style.img;
+  const imgSrc = resolveImageUrl(style.img);
 
   return (
     <Animated.View style={[catCardStyles.card, { width: CARD_W, minHeight: CARD_H, backgroundColor: style.bg }, anim]}>
@@ -282,12 +222,9 @@ function CategoryPhotoCard({ category, index, productImage, onPress }: {
         onPressIn={() => { scale.value = withSpring(0.95, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        {/* Category name — top left (Korzinka Go style) */}
         <Text style={[catCardStyles.catName, { color: style.textColor }]} numberOfLines={2}>
           {category.name}
         </Text>
-
-        {/* Product image — bottom right, large (Korzinka Go style) */}
         <Image
           source={{ uri: imgSrc }}
           style={catCardStyles.img}
@@ -418,17 +355,6 @@ export default function HomeScreen() {
     catRows.push(categories.slice(i, i + 3));
   }
 
-  // First real product image per category (from DB)
-  const catFirstImg = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const p of products) {
-      if (!map[p.category] && p.image &&
-          !p.image.includes('placehold') && !p.image.includes('placeholder')) {
-        map[p.category] = p.image;
-      }
-    }
-    return map;
-  }, [products]);
 
   return (
     <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
@@ -636,7 +562,6 @@ export default function HomeScreen() {
                     key={cat.id}
                     category={cat}
                     index={catIndex}
-                    productImage={catFirstImg[cat.id]}
                     onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
                   />
                 );
