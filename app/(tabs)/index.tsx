@@ -48,7 +48,7 @@ type CatStyle = { bg: string; textColor: string; imgs: string[] };
 
 const CAT_BY_ID: Record<string, CatStyle> = {
   "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", imgs: ["/cat-images/choy.png", "/cat-images/choy2.png"] },
-  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", imgs: ["/cat-images/coffee.png", "/cat-images/coffee2.png"] },
+  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", imgs: ["/cat-images/coffee.png"] },
   "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/meat.png"] },
   "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png"] },
   "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png", "/cat-images/ketchuplar2.png"] },
@@ -60,7 +60,7 @@ const CAT_BY_ID: Record<string, CatStyle> = {
   "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", imgs: ["/cat-images/vegetables.png"] },
   "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", imgs: ["/cat-images/shampunlar.png", "/cat-images/shampunlar2.png"] },
   "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", imgs: ["/cat-images/sharbatlar.png", "/cat-images/sharbatlar2.png"] },
-  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png", "/cat-images/shokoladlar2.png"] },
+  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png"] },
   "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatlar.png", "/cat-images/shokolatlar2.png"] },
   "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png", "/cat-images/shokolatli-pastalar2.png"] },
   "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png"] },
