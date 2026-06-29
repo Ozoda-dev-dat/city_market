@@ -564,7 +564,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View style={styles.catGrid}>
-          {catRows.slice(0, 2).map((row, rowIdx) => (
+          {catRows.map((row, rowIdx) => (
             <View key={rowIdx} style={styles.catRow}>
               {row.map((cat: any, colIdx: number) => {
                 const catIndex = rowIdx * 3 + colIdx;
@@ -585,14 +585,6 @@ export default function HomeScreen() {
             </View>
           ))}
         </View>
-        <Pressable
-          style={{ alignItems: "center", marginTop: 4, marginBottom: 8 }}
-          onPress={() => router.push("/(tabs)/catalog")}
-        >
-          <Text style={{ color: "#16A34A", fontWeight: "600", fontSize: 14 }}>
-            Barcha kataloglar →
-          </Text>
-        </Pressable>
       </ScrollView>
 
       <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
