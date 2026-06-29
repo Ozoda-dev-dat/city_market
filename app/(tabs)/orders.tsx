@@ -77,7 +77,7 @@ export default function CustomerOrdersScreen() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const styles = getStyles(isDarkMode);
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top + (Platform.OS === "web" ? 8 : 0);
   const qc = useQueryClient();
   const [filter, setFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
@@ -249,7 +249,7 @@ export default function CustomerOrdersScreen() {
 
                 <View style={styles.cardBottom}>
                   <Text style={styles.viewDetail}>Batafsil ko'rish</Text>
-                  <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+                  <Ionicons name="chevron-forward" size={16} color={Colors.primary} />
                 </View>
               </Pressable>
             );
@@ -307,12 +307,16 @@ const getStyles = (isDarkMode: boolean) => {
     card: {
       backgroundColor: Colors.card,
       borderRadius: 16,
-      overflow: "hidden",
       borderWidth: 1,
       borderColor: Colors.divider,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: isDarkMode ? 0.3 : 0.06,
+      shadowRadius: 4,
+      elevation: 2,
     },
-    cardCancelled: { opacity: 0.65 },
-    cardTop: { padding: 14 },
+    cardCancelled: { opacity: 0.6 },
+    cardTop: { padding: 14, paddingBottom: 12 },
     orderNumRow: { flexDirection: "row", alignItems: "center", gap: 10 },
     statusIcon: {
       width: 36,
@@ -376,7 +380,7 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: "#E0F2FE",
+      backgroundColor: isDarkMode ? "rgba(8,145,178,0.15)" : "#E0F2FE",
       paddingHorizontal: 14,
       paddingVertical: 10,
     },
@@ -397,7 +401,8 @@ const getStyles = (isDarkMode: boolean) => {
       alignItems: "center",
       gap: 10,
       paddingHorizontal: 14,
-      paddingBottom: 10,
+      paddingTop: 4,
+      paddingBottom: 12,
     },
     progressTrack: {
       flex: 1,
@@ -407,7 +412,7 @@ const getStyles = (isDarkMode: boolean) => {
       overflow: "hidden",
     },
     progressFill: {
-      height: "100%",
+      height: 4,
       backgroundColor: Colors.primary,
       borderRadius: 2,
     },
@@ -415,23 +420,22 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_500Medium",
       fontSize: 11,
       color: Colors.textSecondary,
-      minWidth: 90,
+      flexShrink: 1,
       textAlign: "right",
     },
     cardBottom: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "flex-end",
-      gap: 2,
+      justifyContent: "space-between",
       paddingHorizontal: 14,
-      paddingVertical: 8,
+      paddingVertical: 10,
       borderTopWidth: 1,
       borderTopColor: Colors.divider,
     },
     viewDetail: {
-      fontFamily: "Poppins_500Medium",
-      fontSize: 12,
-      color: Colors.textMuted,
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 13,
+      color: Colors.primary,
     },
     emptyBox: {
       flex: 1,
