@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -41,133 +41,30 @@ import { useTranslation } from "@/lib/I18nProvider";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 40) / 3;
-const CARD_H = CARD_W * 1.08;
+const CARD_H = CARD_W * 1.18;
 
 // ── Logo palette: green (buildings) + red (cart) only ────────────────────
 // Greens:  #1B5E20 → #2E7D32 → #388E3C → #43A047 → #16A34A → #4CAF50
 // Reds:    #B71C1C → #C62828 → #D32F2F → #E53935 → #C0392B
 // Korzinka Go style: clean product shots on white/light bg, Pexels white-bg photos
-const CAT_STYLES: { keys: string[]; bg: string; shade: string; img: string }[] = [
-  {
-    keys: ["fruit", "meva"],
-    bg: "#E53935", shade: "#C62828",
-    img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["vegetab", "sabzavot"],
-    bg: "#2E7D32", shade: "#1B5E20",
-    img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["dairy", "sut", "milk"],
-    bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["baker", "bread", "non", "novvoy"],
-    bg: "#C62828", shade: "#B71C1C",
-    img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["meat", "gosht", "chicken", "tovuq"],
-    bg: "#D32F2F", shade: "#C62828",
-    img: "https://images.pexels.com/photos/616354/pexels-photo-616354.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["seafood", "fish", "baliq", "dengiz"],
-    bg: "#1B5E20", shade: "#154A18",
-    img: "https://images.pexels.com/photos/3296434/pexels-photo-3296434.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["beverage", "drink", "ichimlik", "sharbat", "juice"],
-    bg: "#43A047", shade: "#388E3C",
-    img: "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["snack", "gazak", "shirinlik", "sweet", "candy", "konfet"],
-    bg: "#B71C1C", shade: "#960E0E",
-    img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["frozen", "muzlatilgan", "muzqaymoq"],
-    bg: "#4CAF50", shade: "#43A047",
-    img: "https://images.pexels.com/photos/3735170/pexels-photo-3735170.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["organic", "organik", "eco", "bio"],
-    bg: "#16A34A", shade: "#15803D",
-    img: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["coffee", "qahva", "kofe", "choy", "tea"],
-    bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["chocolate", "shokolad", "choco"],
-    bg: "#C0392B", shade: "#96281B",
-    img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["pasta", "makaroni", "noodle", "макарон"],
-    bg: "#E53935", shade: "#C62828",
-    img: "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["sauce", "spice", "ziravorlar", "kondiment", "зирав"],
-    bg: "#D32F2F", shade: "#B71C1C",
-    img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["cereal", "granola", "ботқа"],
-    bg: "#2E7D32", shade: "#1B5E20",
-    img: "https://images.pexels.com/photos/2067438/pexels-photo-2067438.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["oil", "yog", "butter", "масло"],
-    bg: "#43A047", shade: "#388E3C",
-    img: "https://images.pexels.com/photos/33783/olive-oil-salad-dressing-food-cooking.jpg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["canned", "konserva", "консерв"],
-    bg: "#C62828", shade: "#B71C1C",
-    img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["hygiene", "gigiyena", "tozalik", "косметик", "beauty"],
-    bg: "#1B5E20", shade: "#154A18",
-    img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["baby", "bola", "child", "kids", "бола"],
-    bg: "#16A34A", shade: "#15803D",
-    img: "https://images.pexels.com/photos/35537/child-children-girl-happy.jpg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["pet", "hayvon", "cat", "dog"],
-    bg: "#388E3C", shade: "#2E7D32",
-    img: "https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["water", "suv", "вода", "mineral"],
-    bg: "#2E7D32", shade: "#1B5E20",
-    img: "https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["egg", "tuxum", "яйц"],
-    bg: "#E53935", shade: "#C62828",
-    img: "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["cheese", "pishloq", "сыр"],
-    bg: "#D32F2F", shade: "#C62828",
-    img: "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    keys: ["clean", "household", "uy", "детерж", "washing"],
-    bg: "#43A047", shade: "#388E3C",
-    img: "https://images.pexels.com/photos/4239091/pexels-photo-4239091.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
+const CAT_STYLES: { keys: string[]; img: string }[] = [
+  { keys: ["fruit", "meva"], img: "https://images.pexels.com/photos/1132047/pexels-photo-1132047.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["vegetab", "sabzavot"], img: "https://images.pexels.com/photos/1458694/pexels-photo-1458694.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["dairy", "sut", "milk"], img: "https://images.pexels.com/photos/236010/pexels-photo-236010.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["baker", "bread", "non", "novvoy"], img: "https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["meat", "gosht", "chicken", "tovuq"], img: "https://images.pexels.com/photos/616354/pexels-photo-616354.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["seafood", "fish", "baliq", "dengiz"], img: "https://images.pexels.com/photos/3296434/pexels-photo-3296434.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["beverage", "drink", "ichimlik", "sharbat", "juice"], img: "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["snack", "gazak", "shirinlik", "sweet", "candy", "konfet"], img: "https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["coffee", "qahva", "kofe", "choy", "tea"], img: "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["chocolate", "shokolad", "choco"], img: "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["sauce", "spice", "ziravorlar", "kondiment"], img: "https://images.pexels.com/photos/4199119/pexels-photo-4199119.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["oil", "yog", "butter"], img: "https://images.pexels.com/photos/33783/olive-oil-salad-dressing-food-cooking.jpg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["canned", "konserva"], img: "https://images.pexels.com/photos/4397899/pexels-photo-4397899.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["hygiene", "gigiyena", "beauty", "shampun"], img: "https://images.pexels.com/photos/3735657/pexels-photo-3735657.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["water", "suv", "mineral"], img: "https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["egg", "tuxum"], img: "https://images.pexels.com/photos/162712/egg-white-food-protein-162712.jpeg?auto=compress&cs=tinysrgb&w=400" },
+  { keys: ["cheese", "pishloq"], img: "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=400" },
 ];
 
 // ── Pastel Korzinka-Go style: light bg + product image ────────────────────
@@ -365,16 +262,17 @@ const circleStyles = StyleSheet.create({
 });
 
 // Glass card: food image as bg → BlurView → color tint → text + clear round photo
-// ── Korzinka Go style CategoryCard ─────────────────────────────────────────
-function CategoryPhotoCard({ category, index, onPress }: {
-  category: any; productCount?: number; itemsLabel?: string; index: number; onPress: () => void;
+// ── Korzinka Go style CategoryCard (pixel-perfect) ─────────────────────────
+function CategoryPhotoCard({ category, index, productImage, onPress }: {
+  category: any; index: number; productImage?: string; onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const style = getCatStyle(category.name, category.id, index);
+  const imgSrc = productImage || style.img;
 
   return (
-    <Animated.View style={[catCardStyles.card, { width: CARD_W, height: CARD_H, backgroundColor: style.bg }, anim]}>
+    <Animated.View style={[catCardStyles.card, { width: CARD_W, minHeight: CARD_H, backgroundColor: style.bg }, anim]}>
       <Pressable
         style={catCardStyles.pressable}
         onPress={() => {
@@ -384,14 +282,14 @@ function CategoryPhotoCard({ category, index, onPress }: {
         onPressIn={() => { scale.value = withSpring(0.95, { damping: 15 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
       >
-        {/* Category name — top left */}
+        {/* Category name — top left (Korzinka Go style) */}
         <Text style={[catCardStyles.catName, { color: style.textColor }]} numberOfLines={2}>
           {category.name}
         </Text>
 
-        {/* Product image — bottom, fills card */}
+        {/* Product image — bottom right, large (Korzinka Go style) */}
         <Image
-          source={{ uri: style.img }}
+          source={{ uri: imgSrc }}
           style={catCardStyles.img}
           resizeMode="contain"
         />
@@ -405,30 +303,30 @@ const catCardStyles = StyleSheet.create({
     borderRadius: 14,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
   pressable: {
-    flex: 1,
+    height: CARD_H,
   },
   catName: {
     position: "absolute",
     top: 10,
     left: 10,
-    right: 10,
+    right: 8,
     fontFamily: "Poppins_700Bold",
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11.5,
+    lineHeight: 15,
     zIndex: 2,
   },
   img: {
     position: "absolute",
     bottom: 0,
-    right: -4,
-    width: CARD_W * 0.78,
-    height: CARD_H * 0.72,
+    right: 0,
+    left: 0,
+    height: CARD_H * 0.68,
   },
 });
 
@@ -519,6 +417,18 @@ export default function HomeScreen() {
   for (let i = 0; i < categories.length; i += 3) {
     catRows.push(categories.slice(i, i + 3));
   }
+
+  // First real product image per category (from DB)
+  const catFirstImg = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const p of products) {
+      if (!map[p.category] && p.image &&
+          !p.image.includes('placehold') && !p.image.includes('placeholder')) {
+        map[p.category] = p.image;
+      }
+    }
+    return map;
+  }, [products]);
 
   return (
     <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
@@ -726,6 +636,7 @@ export default function HomeScreen() {
                     key={cat.id}
                     category={cat}
                     index={catIndex}
+                    productImage={catFirstImg[cat.id]}
                     onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
                   />
                 );
