@@ -43,47 +43,30 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const CARD_W = (SCREEN_W - 40) / 3;
 const CARD_H = CARD_W * 1.18;
 
-// ── Pastel Korzinka-Go style: transparent PNG on pastel bg ────────────────────
-const CAT_BY_ID: Record<string, { bg: string; textColor: string; img: string }> = {
-  "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", img: "/cat-images/choy.png" },
-  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", img: "/cat-images/coffee.png" },
-  "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", img: "/cat-images/meat.png" },
-  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", img: "/cat-images/ichimliklar.png" },
-  "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", img: "/cat-images/ketchuplar.png" },
-  "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", img: "/cat-images/konservalar.png" },
-  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", img: "/cat-images/mayonezlar.png" },
-  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", img: "/cat-images/fruits.png" },
-  "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", img: "/cat-images/murabbo.png" },
-  "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", img: "/cat-images/bakery.png" },
-  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", img: "/cat-images/vegetables.png" },
-  "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", img: "/cat-images/shampunlar.png" },
-  "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", img: "/cat-images/sharbatlar.png" },
-  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokoladlar.png" },
-  "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokolatlar.png" },
-  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", img: "/cat-images/shokolatli-pastalar.png" },
-  "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", img: "/cat-images/dairy.png" },
-  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", img: "/cat-images/tagliklar.png" },
+// ── Pastel Korzinka-Go style: 2 transparent PNGs on pastel bg ────────────────────
+type CatStyle = { bg: string; textColor: string; imgs: string[] };
+
+const CAT_BY_ID: Record<string, CatStyle> = {
+  "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", imgs: ["/cat-images/choy.png", "/cat-images/choy2.png"] },
+  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", imgs: ["/cat-images/coffee.png", "/cat-images/coffee2.png"] },
+  "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/meat.png", "/cat-images/meat2.png"] },
+  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png", "/cat-images/ichimliklar2.png"] },
+  "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png", "/cat-images/ketchuplar2.png"] },
+  "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", imgs: ["/cat-images/konservalar.png", "/cat-images/konservalar2.png"] },
+  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png", "/cat-images/mayonezlar2.png"] },
+  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", imgs: ["/cat-images/fruits.png", "/cat-images/fruits2.png"] },
+  "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", imgs: ["/cat-images/murabbo.png", "/cat-images/murabbo2.png"] },
+  "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", imgs: ["/cat-images/bakery.png", "/cat-images/bakery2.png"] },
+  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", imgs: ["/cat-images/vegetables.png", "/cat-images/vegetables2.png"] },
+  "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", imgs: ["/cat-images/shampunlar.png", "/cat-images/shampunlar2.png"] },
+  "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", imgs: ["/cat-images/sharbatlar.png", "/cat-images/sharbatlar2.png"] },
+  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png", "/cat-images/shokoladlar2.png"] },
+  "shokolatlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatlar.png", "/cat-images/shokolatlar2.png"] },
+  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png", "/cat-images/shokolatli-pastalar2.png"] },
+  "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png", "/cat-images/dairy2.png"] },
+  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png", "/cat-images/tagliklar2.png"] },
 };
 
-// Fallback for unknown categories
-const CAT_STYLES: { keys: string[]; img: string }[] = [
-  { keys: ["fruit", "meva"],                   img: "/cat-images/fruits.png" },
-  { keys: ["vegetab", "sabzavot"],              img: "/cat-images/vegetables.png" },
-  { keys: ["dairy", "sut", "milk"],             img: "/cat-images/dairy.png" },
-  { keys: ["baker", "bread", "non"],            img: "/cat-images/bakery.png" },
-  { keys: ["meat", "gosht", "chicken"],         img: "/cat-images/meat.png" },
-  { keys: ["ichimlik", "sharbat", "juice"],     img: "/cat-images/sharbatlar.png" },
-  { keys: ["coffee", "qahva", "kofe"],          img: "/cat-images/coffee.png" },
-  { keys: ["choy", "tea"],                      img: "/cat-images/choy.png" },
-  { keys: ["chocolate", "shokolad"],            img: "/cat-images/shokoladlar.png" },
-  { keys: ["ketchup"],                          img: "/cat-images/ketchuplar.png" },
-  { keys: ["mayo"],                             img: "/cat-images/mayonezlar.png" },
-  { keys: ["canned", "konserva"],               img: "/cat-images/konservalar.png" },
-  { keys: ["shampun", "hygiene", "beauty"],     img: "/cat-images/shampunlar.png" },
-  { keys: ["sauce", "taglik"],                  img: "/cat-images/tagliklar.png" },
-];
-
-// Pastel fallback palette (Korzinka Go style)
 const FALLBACK_PASTELS = [
   { bg: "#D6E8F5", textColor: "#1a2e4a" },
   { bg: "#FADADD", textColor: "#5a1a1e" },
@@ -94,26 +77,11 @@ const FALLBACK_PASTELS = [
   { bg: "#EDD4F0", textColor: "#3a1a4a" },
   { bg: "#FDE8D4", textColor: "#4a2a0a" },
 ];
-const FALLBACK_IMGS = [
-  "/cat-images/fruits.png",
-  "/cat-images/vegetables.png",
-  "/cat-images/dairy.png",
-  "/cat-images/bakery.png",
-  "/cat-images/sharbatlar.png",
-  "/cat-images/shokoladlar.png",
-];
 
-function getCatStyle(name: string, id: string, index: number) {
+function getCatStyle(name: string, id: string, index: number): CatStyle {
   if (id && CAT_BY_ID[id]) return CAT_BY_ID[id];
-  const str = ((name || "") + " " + (id || "")).toLowerCase();
-  for (const style of CAT_STYLES) {
-    if (style.keys.some((k) => str.includes(k))) {
-      const p = FALLBACK_PASTELS[index % FALLBACK_PASTELS.length];
-      return { bg: p.bg, textColor: p.textColor, img: style.img };
-    }
-  }
   const p = FALLBACK_PASTELS[index % FALLBACK_PASTELS.length];
-  return { bg: p.bg, textColor: p.textColor, img: FALLBACK_IMGS[index % FALLBACK_IMGS.length] };
+  return { bg: p.bg, textColor: p.textColor, imgs: ["/cat-images/fruits.png", "/cat-images/vegetables.png"] };
 }
 
 function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
@@ -209,10 +177,11 @@ function CategoryPhotoCard({ category, index, onPress }: {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const style = getCatStyle(category.name, category.id, index);
-  const imgSrc = resolveImageUrl(style.img);
+  const imgH = CARD_H * 0.72;
+  const imgW = CARD_W * 0.62;
 
   return (
-    <Animated.View style={[catCardStyles.card, { width: CARD_W, minHeight: CARD_H, backgroundColor: style.bg }, anim]}>
+    <Animated.View style={[catCardStyles.card, { width: CARD_W, height: CARD_H, backgroundColor: style.bg }, anim]}>
       <Pressable
         style={catCardStyles.pressable}
         onPress={() => {
@@ -225,11 +194,35 @@ function CategoryPhotoCard({ category, index, onPress }: {
         <Text style={[catCardStyles.catName, { color: style.textColor }]} numberOfLines={2}>
           {category.name}
         </Text>
+
+        {/* Image 1 — left side, slightly rotated */}
         <Image
-          source={{ uri: imgSrc }}
-          style={catCardStyles.img}
+          source={{ uri: resolveImageUrl(style.imgs[0]) }}
+          style={[catCardStyles.img, {
+            width: imgW,
+            height: imgH,
+            bottom: -4,
+            left: -6,
+            transform: [{ rotate: "-12deg" }],
+            zIndex: 1,
+          }]}
           resizeMode="contain"
         />
+        {/* Image 2 — right side, slightly rotated other way */}
+        {style.imgs[1] && (
+          <Image
+            source={{ uri: resolveImageUrl(style.imgs[1]) }}
+            style={[catCardStyles.img, {
+              width: imgW,
+              height: imgH,
+              bottom: -4,
+              right: -6,
+              transform: [{ rotate: "10deg" }],
+              zIndex: 2,
+            }]}
+            resizeMode="contain"
+          />
+        )}
       </Pressable>
     </Animated.View>
   );
@@ -241,29 +234,25 @@ const catCardStyles = StyleSheet.create({
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
   },
   pressable: {
-    height: CARD_H,
+    flex: 1,
   },
   catName: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    right: 8,
+    top: 9,
+    left: 9,
+    right: 6,
     fontFamily: "Poppins_700Bold",
-    fontSize: 11.5,
-    lineHeight: 15,
-    zIndex: 2,
+    fontSize: 11,
+    lineHeight: 14,
+    zIndex: 3,
   },
   img: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    left: 0,
-    height: CARD_H * 0.68,
   },
 });
 
