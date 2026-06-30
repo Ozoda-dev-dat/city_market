@@ -368,10 +368,17 @@ export default function HomeScreen() {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }}>
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={isDarkMode
+          ? ["#071524", "#0d1e33", "#0C0C0E"]
+          : ["#e8fdf2", "#f2fcf7", "#F5F6F5"]}
+        locations={[0, 0.45, 1]}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 40 : 110 }}
+        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 100 : 130 }}
       >
         {/* ── Header ── */}
         <View style={[styles.header, { paddingTop: topPadding + 14 }]}>
@@ -537,7 +544,10 @@ export default function HomeScreen() {
 
         {/* ── Popular Today ── */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("popular_today")}</Text>
+          <View style={styles.sectionTitleRow}>
+            <View style={styles.sectionAccent} />
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("popular_today")}</Text>
+          </View>
           <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
             <Text style={styles.countBadgeText}>{allPopular.length} {t("items_unit")}</Text>
           </View>
@@ -558,7 +568,10 @@ export default function HomeScreen() {
 
         {/* ── All Categories Grid (Korzinka Go style) ── */}
         <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
+          <View style={styles.sectionTitleRow}>
+            <View style={styles.sectionAccent} />
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
+          </View>
           <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
             <Text style={styles.countBadgeText}>{categories.length} ta</Text>
           </View>
@@ -653,15 +666,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginHorizontal: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 18,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.88)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
   },
   searchPlaceholder: {
     flex: 1,
@@ -685,8 +700,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingVertical: 11,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.85)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
   },
   pillTitle: {
     fontFamily: "Poppins_600SemiBold",
@@ -783,6 +805,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     marginBottom: 14,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  sectionAccent: {
+    width: 4,
+    height: 22,
+    borderRadius: 2,
+    backgroundColor: "#16A34A",
   },
   sectionTitle: {
     fontFamily: "Poppins_700Bold",

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import getColors from "@/constants/colors";
@@ -107,14 +108,21 @@ export default function CustomerOrdersScreen() {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: topPad }]}>
+    <View style={{ flex: 1, paddingTop: topPad }}>
+      <LinearGradient
+        colors={isDarkMode
+          ? ["#071524", "#0d1e33", "#0C0C0E"]
+          : ["#e8fdf2", "#f0fcf7", "#F5F6F5"]}
+        locations={[0, 0.4, 1]}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={styles.header}>
-        <Text style={styles.title}>Buyurtmalarim</Text>
-        <Pressable
-          style={styles.refreshBtn}
-          onPress={onRefresh}
-        >
-          <Ionicons name="refresh" size={20} color={Colors.primary} />
+        <View style={styles.titleRow}>
+          <View style={styles.titleAccent} />
+          <Text style={styles.title}>Buyurtmalarim</Text>
+        </View>
+        <Pressable style={styles.refreshBtn} onPress={onRefresh}>
+          <Ionicons name="refresh" size={18} color={Colors.primary} />
         </Pressable>
       </View>
 
@@ -262,71 +270,94 @@ export default function CustomerOrdersScreen() {
 
 const getStyles = (isDarkMode: boolean) => {
   const Colors = getColors(isDarkMode);
+  const glassCard = {
+    backgroundColor: isDarkMode ? "rgba(14,26,44,0.72)" : "rgba(255,255,255,0.76)",
+    borderWidth: 1,
+    borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.95)",
+    shadowColor: isDarkMode ? "#000" : "#16A34A",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: isDarkMode ? 0.5 : 0.09,
+    shadowRadius: 20,
+    elevation: 8,
+  } as const;
+
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: Colors.background },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: 20,
-      paddingBottom: 10,
+      paddingBottom: 12,
+      paddingTop: 6,
+    },
+    titleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    titleAccent: {
+      width: 4,
+      height: 28,
+      borderRadius: 2,
+      backgroundColor: "#16A34A",
     },
     title: {
       fontFamily: "Poppins_700Bold",
-      fontSize: 28,
+      fontSize: 26,
       color: Colors.text,
     },
     refreshBtn: {
       width: 40,
       height: 40,
-      borderRadius: 12,
-      backgroundColor: Colors.primaryLight,
+      borderRadius: 14,
+      backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.12)",
+      borderWidth: 1,
+      borderColor: isDarkMode ? "rgba(22,163,74,0.25)" : "rgba(22,163,74,0.2)",
       alignItems: "center",
       justifyContent: "center",
     },
-    filterRow: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
+    filterRow: { paddingHorizontal: 16, paddingBottom: 14, gap: 8 },
     filterTab: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      backgroundColor: Colors.card,
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderRadius: 22,
+      backgroundColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.72)",
       borderWidth: 1,
-      borderColor: Colors.divider,
+      borderColor: isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.9)",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 2,
     },
     filterTabActive: {
-      backgroundColor: Colors.primary,
-      borderColor: Colors.primary,
+      backgroundColor: "#16A34A",
+      borderColor: "#16A34A",
+      shadowColor: "#16A34A",
+      shadowOpacity: 0.35,
     },
     filterText: {
-      fontFamily: "Poppins_500Medium",
+      fontFamily: "Poppins_600SemiBold",
       fontSize: 13,
       color: Colors.textSecondary,
     },
     filterTextActive: { color: "#fff" },
-    list: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
+    list: { paddingHorizontal: 16, paddingBottom: 130, gap: 14 },
     card: {
-      backgroundColor: Colors.card,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: Colors.divider,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: isDarkMode ? 0.3 : 0.06,
-      shadowRadius: 4,
-      elevation: 2,
+      ...glassCard,
+      borderRadius: 22,
+      overflow: "hidden",
     },
-    cardCancelled: { opacity: 0.6 },
-    cardTop: { padding: 14, paddingBottom: 12 },
-    orderNumRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    cardCancelled: { opacity: 0.55 },
+    cardTop: { padding: 16, paddingBottom: 12 },
+    orderNumRow: { flexDirection: "row", alignItems: "center", gap: 12 },
     statusIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
+      width: 40,
+      height: 40,
+      borderRadius: 13,
       alignItems: "center",
       justifyContent: "center",
+      borderWidth: 1,
+      borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
     },
     orderNum: {
-      fontFamily: "Poppins_600SemiBold",
+      fontFamily: "Poppins_700Bold",
       fontSize: 14,
       color: Colors.text,
     },
@@ -334,27 +365,29 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_400Regular",
       fontSize: 12,
       color: Colors.textMuted,
-      marginTop: 1,
+      marginTop: 2,
     },
     livePill: {
       flexDirection: "row",
       alignItems: "center",
       gap: 5,
-      backgroundColor: "#E0F2FE",
-      paddingHorizontal: 8,
-      paddingVertical: 5,
-      borderRadius: 10,
+      backgroundColor: isDarkMode ? "rgba(8,145,178,0.25)" : "#E0F2FE",
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDarkMode ? "rgba(8,145,178,0.3)" : "rgba(8,145,178,0.15)",
     },
     liveText: {
       fontFamily: "Poppins_700Bold",
       fontSize: 10,
       color: "#0891B2",
-      letterSpacing: 0.5,
+      letterSpacing: 1,
     },
     statusBadge: {
       paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 8,
+      paddingVertical: 5,
+      borderRadius: 10,
     },
     statusText: {
       fontFamily: "Poppins_600SemiBold",
@@ -362,17 +395,17 @@ const getStyles = (isDarkMode: boolean) => {
     },
     divider: {
       height: 1,
-      backgroundColor: Colors.divider,
+      backgroundColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
     },
     cardMeta: {
       flexDirection: "row",
       gap: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 11,
     },
-    metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+    metaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
     metaText: {
-      fontFamily: "Poppins_400Regular",
+      fontFamily: "Poppins_500Medium",
       fontSize: 12,
       color: Colors.textSecondary,
     },
@@ -380,13 +413,13 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: isDarkMode ? "rgba(8,145,178,0.15)" : "#E0F2FE",
-      paddingHorizontal: 14,
-      paddingVertical: 10,
+      backgroundColor: isDarkMode ? "rgba(8,145,178,0.15)" : "rgba(8,145,178,0.08)",
+      paddingHorizontal: 16,
+      paddingVertical: 11,
     },
     trackInfo: { flexDirection: "row", alignItems: "center", gap: 6 },
     trackInfoText: {
-      fontFamily: "Poppins_500Medium",
+      fontFamily: "Poppins_600SemiBold",
       fontSize: 13,
       color: "#0891B2",
     },
@@ -400,26 +433,26 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
-      paddingHorizontal: 14,
+      paddingHorizontal: 16,
       paddingTop: 4,
-      paddingBottom: 12,
+      paddingBottom: 13,
     },
     progressTrack: {
       flex: 1,
-      height: 4,
-      backgroundColor: Colors.divider,
-      borderRadius: 2,
+      height: 5,
+      backgroundColor: isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+      borderRadius: 3,
       overflow: "hidden",
     },
     progressFill: {
-      height: 4,
+      height: 5,
       backgroundColor: Colors.primary,
-      borderRadius: 2,
+      borderRadius: 3,
     },
     progressLabel: {
-      fontFamily: "Poppins_500Medium",
+      fontFamily: "Poppins_600SemiBold",
       fontSize: 11,
-      color: Colors.textSecondary,
+      color: Colors.primary,
       flexShrink: 1,
       textAlign: "right",
     },
@@ -427,10 +460,10 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      paddingHorizontal: 14,
-      paddingVertical: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
       borderTopWidth: 1,
-      borderTopColor: Colors.divider,
+      borderTopColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
     },
     viewDetail: {
       fontFamily: "Poppins_600SemiBold",
@@ -454,20 +487,27 @@ const getStyles = (isDarkMode: boolean) => {
       fontFamily: "Poppins_400Regular",
       fontSize: 14,
       color: Colors.textSecondary,
+      textAlign: "center",
+      paddingHorizontal: 32,
     },
     shopBtn: {
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
       backgroundColor: Colors.primary,
-      paddingHorizontal: 24,
-      paddingVertical: 12,
-      borderRadius: 14,
+      paddingHorizontal: 28,
+      paddingVertical: 14,
+      borderRadius: 18,
       marginTop: 8,
+      shadowColor: "#16A34A",
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
+      elevation: 8,
     },
     shopBtnText: {
-      fontFamily: "Poppins_600SemiBold",
-      fontSize: 14,
+      fontFamily: "Poppins_700Bold",
+      fontSize: 15,
       color: "#fff",
     },
   });

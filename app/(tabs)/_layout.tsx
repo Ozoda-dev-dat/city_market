@@ -1,13 +1,39 @@
 import { Tabs, Redirect } from "expo-router";
-import { Platform } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "@/lib/I18nProvider";
+
+function GlassTabBar({ isDarkMode }: { isDarkMode: boolean }) {
+  if (Platform.OS === "web") {
+    return (
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: isDarkMode
+              ? "rgba(18,24,36,0.94)"
+              : "rgba(255,255,255,0.93)",
+            borderRadius: 32,
+          },
+        ]}
+      />
+    );
+  }
+  return (
+    <BlurView
+      intensity={isDarkMode ? 60 : 72}
+      tint={isDarkMode ? "dark" : "light"}
+      style={[StyleSheet.absoluteFill, { borderRadius: 32, overflow: "hidden" }]}
+    />
+  );
+}
 
 function ClassicTabLayout() {
   const { totalItems } = useCart();
@@ -17,7 +43,8 @@ function ClassicTabLayout() {
   const isWeb = Platform.OS === "web";
   const { t } = useTranslation();
 
-  const tabBarHeight = isWeb ? 64 : 60 + insets.bottom;
+  const tabBottom = isWeb ? 16 : Math.max(insets.bottom, 6) + 12;
+  const tabHeight = 62;
 
   return (
     <Tabs
@@ -25,28 +52,35 @@ function ClassicTabLayout() {
         headerShown: false,
         tabBarShowLabel: true,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarInactiveTintColor: isDarkMode ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)",
         tabBarLabelStyle: {
           fontFamily: "Poppins_600SemiBold",
           fontSize: 10,
           marginTop: -2,
         },
         tabBarItemStyle: {
-          paddingVertical: 4,
+          paddingVertical: 6,
         },
         tabBarStyle: {
-          height: tabBarHeight,
-          paddingBottom: isWeb ? 8 : insets.bottom + 4,
-          paddingTop: 6,
-          backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
-          borderTopWidth: 1,
-          borderTopColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: isDarkMode ? 0.3 : 0.08,
-          shadowRadius: 16,
-          elevation: 12,
+          position: "absolute",
+          bottom: tabBottom,
+          left: 16,
+          right: 16,
+          height: tabHeight,
+          borderRadius: 32,
+          borderTopWidth: 0,
+          borderWidth: 1,
+          borderColor: isDarkMode
+            ? "rgba(255,255,255,0.1)"
+            : "rgba(255,255,255,0.92)",
+          backgroundColor: "transparent",
+          shadowColor: isDarkMode ? "#000" : "#16A34A",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: isDarkMode ? 0.45 : 0.14,
+          shadowRadius: 28,
+          elevation: 24,
         },
+        tabBarBackground: () => <GlassTabBar isDarkMode={isDarkMode} />,
       }}
     >
       <Tabs.Screen

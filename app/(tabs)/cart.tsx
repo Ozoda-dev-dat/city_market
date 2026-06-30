@@ -290,14 +290,14 @@ export default function CartScreen() {
     }
   };
 
-  const bgColors: [string, string, string] = isDarkMode
-    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
-    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
+  const glassGradient: [string, string, string] = isDarkMode
+    ? ["#071524", "#0d1e33", "#0C0C0E"]
+    : ["#e8fdf2", "#f0fcf7", "#F5F6F5"];
 
   if (items.length === 0) {
     return (
       <View style={{ flex: 1 }}>
-        <LinearGradient colors={bgColors} locations={[0, 0.3, 1]} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={glassGradient} locations={[0, 0.4, 1]} style={StyleSheet.absoluteFill} />
         <View style={[styles.emptyContainer, { paddingTop: topPad }]}>
           <View style={[
             styles.emptyIconWrap,
@@ -326,7 +326,13 @@ export default function CartScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient colors={bgColors} locations={[0, 0.25, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        colors={isDarkMode
+          ? ["#071524", "#0d1e33", "#0C0C0E"]
+          : ["#e8fdf2", "#f0fcf7", "#F5F6F5"]}
+        locations={[0, 0.4, 1]}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={[
         styles.blobTR,
         { backgroundColor: isDarkMode ? "rgba(22,163,74,0.07)" : "rgba(22,163,74,0.11)" }
