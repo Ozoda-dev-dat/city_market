@@ -8,6 +8,7 @@ import {
   Platform,
   Image,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, {
@@ -119,17 +120,26 @@ export default function ProductDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View style={[styles.hero, { paddingTop: topPad + 60 }]}>
+        <View style={[styles.hero, { paddingTop: 0 }]}>
           <Image
             source={{ uri: resolveImageUrl(product.image || "") }}
             style={styles.heroImage}
             resizeMode="cover"
+          />
+          <LinearGradient
+            colors={["rgba(0,0,0,0.28)", "transparent", "rgba(0,0,0,0.52)"]}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
           />
           {badgeCfg && (
             <View style={[styles.heroBadge, { backgroundColor: badgeCfg.color }]}>
               <Text style={styles.heroBadgeText}>{badgeCfg.label}</Text>
             </View>
           )}
+          <View style={[styles.heroMeta, { paddingBottom: 20 }]}>
+            <Text style={styles.heroProductName} numberOfLines={2}>{product.name}</Text>
+            <Text style={styles.heroProductPrice}>{formatPrice(product.price)} / {product.unit}</Text>
+          </View>
         </View>
 
         <View style={styles.infoCard}>
@@ -342,25 +352,44 @@ const getStyles = (isDarkMode: boolean) => {
       backgroundColor: Colors.background,
     },
     hero: {
-      alignItems: "center",
-      justifyContent: "center",
-      paddingBottom: 40,
-      paddingHorizontal: 16,
-      backgroundColor: Colors.card,
       position: "relative",
-    },
-    heroEmoji: {
-      fontSize: 100,
+      width: "100%",
+      height: 320,
+      overflow: "hidden",
     },
     heroImage: {
       width: "100%",
-      height: 200,
-      borderRadius: 16,
+      height: "100%",
+    },
+    heroMeta: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 20,
+      gap: 4,
+    },
+    heroProductName: {
+      fontFamily: "Poppins_700Bold",
+      fontSize: 22,
+      color: "#fff",
+      lineHeight: 28,
+      textShadowColor: "rgba(0,0,0,0.4)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
+    },
+    heroProductPrice: {
+      fontFamily: "Poppins_600SemiBold",
+      fontSize: 16,
+      color: "rgba(255,255,255,0.9)",
+      textShadowColor: "rgba(0,0,0,0.3)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 3,
     },
     heroBadge: {
       position: "absolute",
-      right: 24,
-      bottom: 24,
+      right: 20,
+      top: 20,
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 20,

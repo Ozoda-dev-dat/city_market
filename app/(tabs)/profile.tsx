@@ -471,7 +471,7 @@ export default function ProfileScreen() {
               </View>
               <View style={styles.statDivider} />
               <Pressable style={styles.statItem} onPress={() => setShowWishlist(true)}>
-                <Text style={styles.statNumber}>❤️</Text>
+                <Ionicons name="heart" size={22} color="#fff" />
                 <Text style={styles.statLabel}>{t("wishlist")}</Text>
               </Pressable>
             </View>

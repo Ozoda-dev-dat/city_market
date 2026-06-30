@@ -566,38 +566,22 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* ── All Categories Grid (Korzinka Go style) ── */}
-        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-          <View style={styles.sectionTitleRow}>
-            <View style={styles.sectionAccent} />
-            <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
-          </View>
-          <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
-            <Text style={styles.countBadgeText}>{categories.length} ta</Text>
-          </View>
-        </View>
-        <View style={styles.catGrid}>
-          {catRows.map((row, rowIdx) => (
-            <View key={rowIdx} style={styles.catRow}>
-              {row.map((cat: any, colIdx: number) => {
-                const catIndex = rowIdx * 3 + colIdx;
-                return (
-                  <CategoryPhotoCard
-                    key={cat.id}
-                    category={cat}
-                    index={catIndex}
-                    onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
-                  />
-                );
-              })}
-              {row.length === 2 && <View style={{ width: CARD_W }} />}
-              {row.length === 1 && <>
-                <View style={{ width: CARD_W }} />
-                <View style={{ width: CARD_W }} />
-              </>}
+        {/* ── Browse All CTA ── */}
+        <Pressable
+          style={[styles.browseAllBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#F0FDF4", borderColor: isDarkMode ? "rgba(22,163,74,0.3)" : "#BBF7D0" }]}
+          onPress={() => router.push("/(tabs)/catalog")}
+        >
+          <View style={styles.browseAllLeft}>
+            <View style={[styles.browseAllIcon, { backgroundColor: "#16A34A" }]}>
+              <Ionicons name="grid" size={18} color="#fff" />
             </View>
-          ))}
-        </View>
+            <View>
+              <Text style={[styles.browseAllTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
+              <Text style={[styles.browseAllSub, { color: Colors.textMuted }]}>{categories.length} ta kategoriya</Text>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#16A34A" />
+        </Pressable>
       </ScrollView>
 
       <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
@@ -864,5 +848,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     marginBottom: 8,
+  },
+  browseAllBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 8,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1.5,
+  },
+  browseAllLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  browseAllIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  browseAllTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+  },
+  browseAllSub: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
   },
 });

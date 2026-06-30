@@ -33,6 +33,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     tab_home: "Bosh sahifa",
     tab_browse: "Katalog",
     tab_cart: "Savat",
+    tab_orders: "Buyurtmalar",
     tab_profile: "Profil",
 
     // ── Home screen ──────────────────────────────────────────────────────
@@ -221,6 +222,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     // ── Tabs ─────────────────────────────────────────────────────────────
     tab_home: "Главная",
     tab_browse: "Каталог",
+    tab_orders: "Заказы",
     tab_cart: "Корзина",
     tab_profile: "Профиль",
 
