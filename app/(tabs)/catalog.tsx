@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,10 @@ import {
   TextInput,
   Pressable,
   FlatList,
-  SectionList,
   Platform,
   LayoutAnimation,
   UIManager,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,38 +22,41 @@ import { useProducts } from "@/context/ProductsContext";
 import { useApp } from "@/context/ProductsContext";
 import { Product } from "@/constants/data";
 import { useTranslation } from "@/lib/I18nProvider";
+import { resolveImageUrl } from "@/lib/query-client";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  fruits: "nutrition-outline",
-  vegetables: "leaf-outline",
-  ichimliklar: "water-outline",
-  dairy: "cafe-outline",
-  bakery: "pizza-outline",
-  "konservalar-": "cube-outline",
-  meat: "restaurant-outline",
-  shokoladlar: "gift-outline",
-  coffee: "cafe-outline",
-  choy: "cafe-outline",
-  sharbatlar: "wine-outline",
-  mayonezlar: "flask-outline",
-  "murabbo-va-djemlar": "color-fill-outline",
-  ketchuplar: "color-fill-outline",
-  shampunlar: "sparkles-outline",
-  tagliklar: "layers-outline",
-  "shokolatli-pastalar": "ice-cream-outline",
-  "makaron-un-yormalar": "grid-outline",
-  "yog-va-souslar": "water-outline",
-  "bolalar-ovqatlar": "happy-outline",
-  oyinchoqlar: "game-controller-outline",
-  "yongok-va-sneklar": "leaf-outline",
+const CAT_IMAGES: Record<string, any> = {
+  fruits:                require("@/public/cat-images/fruits.png"),
+  vegetables:            require("@/public/cat-images/vegetables.png"),
+  ichimliklar:           require("@/public/cat-images/ichimliklar.png"),
+  dairy:                 require("@/public/cat-images/dairy.png"),
+  bakery:                require("@/public/cat-images/bakery.png"),
+  "konservalar-":        require("@/public/cat-images/konservalar.png"),
+  meat:                  require("@/public/cat-images/meat.png"),
+  shokoladlar:           require("@/public/cat-images/shokoladlar.png"),
+  coffee:                require("@/public/cat-images/coffee.png"),
+  choy:                  require("@/public/cat-images/choy.png"),
+  sharbatlar:            require("@/public/cat-images/sharbatlar.png"),
+  mayonezlar:            require("@/public/cat-images/mayonezlar.png"),
+  "murabbo-va-djemlar":  require("@/public/cat-images/murabbo.png"),
+  ketchuplar:            require("@/public/cat-images/ketchuplar.png"),
+  shampunlar:            require("@/public/cat-images/shampunlar.png"),
+  tagliklar:             require("@/public/cat-images/tagliklar.png"),
+  "shokolatli-pastalar": require("@/public/cat-images/shokolatli-pastalar.png"),
+  "makaron-un-yormalar": require("@/public/cat-images/makaron-un-yormalar.png"),
+  "yog-va-souslar":      require("@/public/cat-images/yog-va-souslar.png"),
+  "bolalar-ovqatlar":    require("@/public/cat-images/bolalar-ovqatlar.png"),
+  oyinchoqlar:           require("@/public/cat-images/oyinchoqlar.png"),
+  "yongok-va-sneklar":   require("@/public/cat-images/yongok-va-sneklar.png"),
 };
 
-function getCatIcon(id: string): string {
-  return CATEGORY_ICONS[id] ?? "grid-outline";
+const FALLBACK = require("@/public/cat-images/fruits.png");
+
+function getCatImage(id: string) {
+  return CAT_IMAGES[id] ?? FALLBACK;
 }
 
 export default function BrowseScreen() {
@@ -94,9 +97,9 @@ export default function BrowseScreen() {
   const isSearching = search.trim().length > 0;
 
   const bg = isDarkMode ? "#111" : "#fff";
-  const separatorColor = isDarkMode ? "rgba(255,255,255,0.07)" : "#EBEBEB";
+  const separatorColor = isDarkMode ? "rgba(255,255,255,0.06)" : "#EEEEEE";
   const rowBg = isDarkMode ? "#1A1A1A" : "#fff";
-  const subBg = isDarkMode ? "#141414" : "#FAFAFA";
+  const subBg = isDarkMode ? "#141414" : "#fff";
 
   function toggleCategory(id: string) {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -127,9 +130,6 @@ export default function BrowseScreen() {
         for (const sub of subs) {
           rows.push({ type: "subcategory", sub, catId: cat.id });
         }
-        if (subs.length === 0) {
-          rows.push({ type: "empty", catId: cat.id });
-        }
       }
     }
     return rows;
@@ -137,36 +137,35 @@ export default function BrowseScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: bg }]}>
+      {/* Search header */}
+      <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: bg }]}>
         <View style={[styles.searchRow, {
-          backgroundColor: isDarkMode ? "#222" : "#F2F2F2",
-          borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "transparent",
+          backgroundColor: isDarkMode ? "#252525" : "#F4F4F4",
         }]}>
-          <Ionicons name="search-outline" size={18} color={isDarkMode ? "#888" : "#999"} />
+          <Ionicons name="search-outline" size={17} color={isDarkMode ? "#777" : "#AAA"} />
           <TextInput
             style={[styles.searchInput, { color: Colors.text }]}
             placeholder={t("search_products")}
-            placeholderTextColor={isDarkMode ? "#666" : "#ADADAD"}
+            placeholderTextColor={isDarkMode ? "#666" : "#BABABA"}
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
           />
           {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")} hitSlop={8}>
-              <Ionicons name="close-circle" size={18} color={isDarkMode ? "#666" : "#ADADAD"} />
+            <Pressable onPress={() => setSearch("")} hitSlop={10}>
+              <Ionicons name="close-circle" size={18} color={isDarkMode ? "#666" : "#C0C0C0"} />
             </Pressable>
           )}
         </View>
       </View>
 
-      <View style={[styles.divider, { backgroundColor: separatorColor }]} />
+      <View style={[styles.hairline, { backgroundColor: separatorColor }]} />
 
       {/* Search results */}
       {isSearching ? (
         filteredProducts.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="search-outline" size={48} color={Colors.textMuted} />
+            <Ionicons name="search-outline" size={52} color={Colors.textMuted} />
             <Text style={[styles.emptyTitle, { color: Colors.text }]}>{t("no_products_found")}</Text>
             <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>{t("try_different_search")}</Text>
           </View>
@@ -175,7 +174,7 @@ export default function BrowseScreen() {
             data={filteredProducts}
             keyExtractor={(item) => item.id}
             numColumns={2}
-            columnWrapperStyle={styles.row}
+            columnWrapperStyle={styles.gridRow}
             contentContainerStyle={[styles.productGrid, { paddingBottom: Platform.OS === "web" ? 100 : 120 }]}
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={
@@ -192,70 +191,94 @@ export default function BrowseScreen() {
           />
         )
       ) : (
-        /* Accordion category list */
+        /* Accordion list */
         <FlatList
           data={listData}
           keyExtractor={(item, idx) =>
-            item.type === "category" ? `cat-${item.cat.id}` :
-            item.type === "subcategory" ? `sub-${item.sub.id}` :
-            `empty-${item.catId}-${idx}`
+            item.type === "category"
+              ? `cat-${item.cat.id}`
+              : `sub-${item.sub.id}-${idx}`
           }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 100 : 120 }}
-          renderItem={({ item, index }) => {
+          renderItem={({ item }) => {
+            /* ── Category row ── */
             if (item.type === "category") {
               const isExpanded = expandedIds.has(item.cat.id);
-              const iconName = getCatIcon(item.cat.id) as any;
               return (
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.catRow,
-                    { backgroundColor: pressed ? (isDarkMode ? "#252525" : "#F5F5F5") : rowBg },
-                  ]}
-                  onPress={() => toggleCategory(item.cat.id)}
-                >
-                  <View style={[styles.iconWrap, { backgroundColor: isDarkMode ? "#2A2A2A" : "#F0F0F0" }]}>
-                    <Ionicons name={iconName} size={20} color={isDarkMode ? "#aaa" : "#555"} />
-                  </View>
-                  <Text style={[styles.catName, { color: Colors.text }]} numberOfLines={1}>
-                    {item.cat.name}
-                  </Text>
-                  <Ionicons
-                    name={isExpanded ? "chevron-up" : "chevron-down"}
-                    size={18}
-                    color={isDarkMode ? "#666" : "#ADADAD"}
-                  />
-                </Pressable>
+                <>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.catRow,
+                      {
+                        backgroundColor: pressed
+                          ? isDarkMode ? "#232323" : "#F7F7F7"
+                          : rowBg,
+                      },
+                    ]}
+                    onPress={() => toggleCategory(item.cat.id)}
+                  >
+                    <Image
+                      source={getCatImage(item.cat.id)}
+                      style={styles.catThumb}
+                      resizeMode="cover"
+                    />
+                    <Text
+                      style={[styles.catName, { color: Colors.text }]}
+                      numberOfLines={1}
+                    >
+                      {item.cat.name}
+                    </Text>
+                    <Ionicons
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={18}
+                      color={isDarkMode ? "#555" : "#C0C0C0"}
+                    />
+                  </Pressable>
+                  <View style={[styles.hairline, { backgroundColor: separatorColor }]} />
+                </>
               );
             }
 
+            /* ── Subcategory row ── */
             if (item.type === "subcategory") {
               return (
                 <>
                   <Pressable
                     style={({ pressed }) => [
                       styles.subRow,
-                      { backgroundColor: pressed ? (isDarkMode ? "#202020" : "#EFEFEF") : subBg },
+                      {
+                        backgroundColor: pressed
+                          ? isDarkMode ? "#1E1E1E" : "#F5F5F5"
+                          : subBg,
+                      },
                     ]}
-                    onPress={() => router.push({ pathname: "/subcategory/[id]", params: { id: item.sub.id } })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/subcategory/[id]",
+                        params: { id: item.sub.id },
+                      })
+                    }
                   >
-                    <View style={styles.subDot} />
-                    <Text style={[styles.subName, { color: Colors.textSecondary }]} numberOfLines={1}>
+                    <Text
+                      style={[styles.subName, { color: isDarkMode ? "#AAA" : "#444" }]}
+                      numberOfLines={1}
+                    >
                       {item.sub.name}
                     </Text>
                   </Pressable>
-                  <View style={[styles.subDivider, { backgroundColor: separatorColor }]} />
+                  <View
+                    style={[
+                      styles.subHairline,
+                      { backgroundColor: separatorColor },
+                    ]}
+                  />
                 </>
               );
             }
 
             return null;
           }}
-          ItemSeparatorComponent={({ leadingItem }) =>
-            leadingItem?.type === "category" ? (
-              <View style={[styles.divider, { backgroundColor: separatorColor }]} />
-            ) : null
-          }
         />
       )}
     </View>
@@ -264,18 +287,19 @@ export default function BrowseScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  /* Header */
   header: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingHorizontal: 14,
+    paddingBottom: 10,
   },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: 13,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   searchInput: {
     flex: 1,
@@ -283,55 +307,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 0,
   },
-  divider: {
-    height: 1,
-  },
+
+  /* Separators */
+  hairline: { height: 1 },
+  subHairline: { height: 1, marginLeft: 68 },
+
+  /* Category row */
   catRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     gap: 14,
+    minHeight: 60,
   },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+  catThumb: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: "#F0F0F0",
   },
   catName: {
     flex: 1,
     fontFamily: "Poppins_500Medium",
-    fontSize: 15,
+    fontSize: 15.5,
+    letterSpacing: 0.1,
   },
+
+  /* Subcategory row */
   subRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingLeft: 70,
+    paddingLeft: 72,
     paddingRight: 20,
-    gap: 10,
-  },
-  subDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: "#ADADAD",
+    paddingVertical: 14,
+    justifyContent: "center",
+    minHeight: 48,
   },
   subName: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 14,
+    fontSize: 14.5,
   },
-  subDivider: {
-    height: 1,
-    marginLeft: 70,
-  },
+
+  /* Search results grid */
   productGrid: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 14,
+    paddingTop: 10,
   },
-  row: {
+  gridRow: {
     gap: 12,
     marginBottom: 12,
   },
@@ -340,6 +361,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 12,
   },
+
+  /* Empty state */
   emptyState: {
     flex: 1,
     alignItems: "center",
@@ -354,5 +377,7 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
+    textAlign: "center",
+    paddingHorizontal: 32,
   },
 });
