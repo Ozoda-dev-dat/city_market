@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,13 @@ import {
   TextInput,
   Pressable,
   FlatList,
+  SectionList,
   Platform,
-  Image,
-  Dimensions,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
@@ -28,113 +23,50 @@ import { useApp } from "@/context/ProductsContext";
 import { Product } from "@/constants/data";
 import { useTranslation } from "@/lib/I18nProvider";
 
-const { width: SCREEN_W } = Dimensions.get("window");
-const CARD_W = (SCREEN_W - 48) / 2;
-const CARD_H = CARD_W * 0.75;
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
-const CAT_IMAGES: Record<string, string> = {
-  "choy":                "/cat-images/choy.png",
-  "coffee":              "/cat-images/coffee.png",
-  "meat":                "/cat-images/meat.png",
-  "ichimliklar":         "/cat-images/ichimliklar.png",
-  "ketchuplar":          "/cat-images/ketchuplar.png",
-  "konservalar-":        "/cat-images/konservalar.png",
-  "mayonezlar":          "/cat-images/mayonezlar.png",
-  "fruits":              "/cat-images/fruits.png",
-  "murabbo-va-djemlar":  "/cat-images/murabbo.png",
-  "bakery":              "/cat-images/bakery.png",
-  "vegetables":          "/cat-images/vegetables.png",
-  "shampunlar":          "/cat-images/shampunlar.png",
-  "sharbatlar":          "/cat-images/sharbatlar.png",
-  "shokoladlar":         "/cat-images/shokoladlar.png",
-  "shokolatli-pastalar": "/cat-images/shokolatli-pastalar.png",
-  "dairy":               "/cat-images/dairy.png",
-  "tagliklar":           "/cat-images/tagliklar.png",
-  "makaron-un-yormalar": "/cat-images/makaron-un-yormalar.png",
-  "yog-va-souslar":      "/cat-images/yog-va-souslar.png",
-  "bolalar-ovqatlar":    "/cat-images/bolalar-ovqatlar.png",
-  "oyinchoqlar":         "/cat-images/oyinchoqlar.png",
-  "yongok-va-sneklar":   "/cat-images/yongok-va-sneklar.png",
+const CATEGORY_ICONS: Record<string, string> = {
+  fruits: "nutrition-outline",
+  vegetables: "leaf-outline",
+  ichimliklar: "water-outline",
+  dairy: "cafe-outline",
+  bakery: "pizza-outline",
+  "konservalar-": "cube-outline",
+  meat: "restaurant-outline",
+  shokoladlar: "gift-outline",
+  coffee: "cafe-outline",
+  choy: "cafe-outline",
+  sharbatlar: "wine-outline",
+  mayonezlar: "flask-outline",
+  "murabbo-va-djemlar": "color-fill-outline",
+  ketchuplar: "color-fill-outline",
+  shampunlar: "sparkles-outline",
+  tagliklar: "layers-outline",
+  "shokolatli-pastalar": "ice-cream-outline",
+  "makaron-un-yormalar": "grid-outline",
+  "yog-va-souslar": "water-outline",
+  "bolalar-ovqatlar": "happy-outline",
+  oyinchoqlar: "game-controller-outline",
+  "yongok-va-sneklar": "leaf-outline",
 };
 
-function getCategoryImage(_name: string, id: string): string {
-  return CAT_IMAGES[id] ?? "/cat-images/fruits.png";
+function getCatIcon(id: string): string {
+  return CATEGORY_ICONS[id] ?? "grid-outline";
 }
-
-function CategoryPhotoCard({ category, productCount, itemsLabel, onPress }: {
-  category: any;
-  productCount: number;
-  itemsLabel: string;
-  onPress: () => void;
-}) {
-  const scale = useSharedValue(1);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const img = getCategoryImage(category.name, category.id);
-
-  return (
-    <Animated.View style={[{ width: CARD_W, height: CARD_H, marginBottom: 12 }, anim]}>
-      <Pressable
-        style={{ flex: 1, borderRadius: 20, overflow: "hidden" }}
-        onPress={() => {
-          if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onPress();
-        }}
-        onPressIn={() => { scale.value = withSpring(0.95, { damping: 12 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
-      >
-        <Image
-          source={{ uri: img }}
-          style={StyleSheet.absoluteFillObject as any}
-          resizeMode="cover"
-        />
-        <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.68)"]}
-          start={{ x: 0, y: 0.3 }}
-          end={{ x: 0, y: 1 }}
-          style={StyleSheet.absoluteFillObject as any}
-        />
-        <View style={photoCardStyles.content}>
-          <Text style={photoCardStyles.name} numberOfLines={2}>{category.name}</Text>
-          <Text style={photoCardStyles.count}>{productCount} {itemsLabel}</Text>
-        </View>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-const photoCardStyles = StyleSheet.create({
-  content: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 12,
-  },
-  name: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 15,
-    color: "#fff",
-    lineHeight: 20,
-  },
-  count: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.78)",
-    marginTop: 2,
-  },
-});
 
 export default function BrowseScreen() {
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState("");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const { products: allProducts } = useProducts();
-  const { categories } = useApp();
+  const { categories, subcategories } = useApp();
   const { t } = useTranslation();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const totalProductCount = allProducts.length;
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) return [];
@@ -161,34 +93,76 @@ export default function BrowseScreen() {
 
   const isSearching = search.trim().length > 0;
 
-  return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? "#0C0C0E" : "#F5F6F5" }]}>
-      <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-        <Text style={[styles.title, { color: Colors.text }]}>{t("all_categories")}</Text>
-        <Text style={[styles.subtitle, { color: Colors.textSecondary }]}>
-          {categories.length} {t("tab_browse").toLowerCase()} · {totalProductCount}+ {t("items_unit")}
-        </Text>
+  const bg = isDarkMode ? "#111" : "#fff";
+  const separatorColor = isDarkMode ? "rgba(255,255,255,0.07)" : "#EBEBEB";
+  const rowBg = isDarkMode ? "#1A1A1A" : "#fff";
+  const subBg = isDarkMode ? "#141414" : "#FAFAFA";
 
-        <View style={[styles.searchBar, {
-          backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
-          borderColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+  function toggleCategory(id: string) {
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const subcatMap = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    for (const s of subcategories) {
+      if (!map[s.categoryId]) map[s.categoryId] = [];
+      map[s.categoryId].push(s);
+    }
+    return map;
+  }, [subcategories]);
+
+  const listData = useMemo(() => {
+    const rows: any[] = [];
+    for (const cat of categories) {
+      rows.push({ type: "category", cat });
+      if (expandedIds.has(cat.id)) {
+        const subs = subcatMap[cat.id] ?? [];
+        for (const sub of subs) {
+          rows.push({ type: "subcategory", sub, catId: cat.id });
+        }
+        if (subs.length === 0) {
+          rows.push({ type: "empty", catId: cat.id });
+        }
+      }
+    }
+    return rows;
+  }, [categories, expandedIds, subcatMap]);
+
+  return (
+    <View style={[styles.container, { backgroundColor: bg }]}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: bg }]}>
+        <View style={[styles.searchRow, {
+          backgroundColor: isDarkMode ? "#222" : "#F2F2F2",
+          borderColor: isDarkMode ? "rgba(255,255,255,0.06)" : "transparent",
         }]}>
-          <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
+          <Ionicons name="search-outline" size={18} color={isDarkMode ? "#888" : "#999"} />
           <TextInput
             style={[styles.searchInput, { color: Colors.text }]}
             placeholder={t("search_products")}
-            placeholderTextColor={Colors.textMuted}
+            placeholderTextColor={isDarkMode ? "#666" : "#ADADAD"}
             value={search}
             onChangeText={setSearch}
+            returnKeyType="search"
           />
           {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+            <Pressable onPress={() => setSearch("")} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={isDarkMode ? "#666" : "#ADADAD"} />
             </Pressable>
           )}
         </View>
       </View>
 
+      <View style={[styles.divider, { backgroundColor: separatorColor }]} />
+
+      {/* Search results */}
       {isSearching ? (
         filteredProducts.length === 0 ? (
           <View style={styles.emptyState}>
@@ -218,24 +192,70 @@ export default function BrowseScreen() {
           />
         )
       ) : (
+        /* Accordion category list */
         <FlatList
-          data={categories}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={[styles.catGrid, { paddingBottom: Platform.OS === "web" ? 100 : 120 }]}
+          data={listData}
+          keyExtractor={(item, idx) =>
+            item.type === "category" ? `cat-${item.cat.id}` :
+            item.type === "subcategory" ? `sub-${item.sub.id}` :
+            `empty-${item.catId}-${idx}`
+          }
           showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => {
-            const count = allProducts.filter((p) => p.category === item.id).length;
-            return (
-              <CategoryPhotoCard
-                category={item}
-                productCount={count}
-                itemsLabel={t("items_unit")}
-                onPress={() => router.push({ pathname: "/category/[id]", params: { id: item.id } })}
-              />
-            );
+          contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 100 : 120 }}
+          renderItem={({ item, index }) => {
+            if (item.type === "category") {
+              const isExpanded = expandedIds.has(item.cat.id);
+              const iconName = getCatIcon(item.cat.id) as any;
+              return (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.catRow,
+                    { backgroundColor: pressed ? (isDarkMode ? "#252525" : "#F5F5F5") : rowBg },
+                  ]}
+                  onPress={() => toggleCategory(item.cat.id)}
+                >
+                  <View style={[styles.iconWrap, { backgroundColor: isDarkMode ? "#2A2A2A" : "#F0F0F0" }]}>
+                    <Ionicons name={iconName} size={20} color={isDarkMode ? "#aaa" : "#555"} />
+                  </View>
+                  <Text style={[styles.catName, { color: Colors.text }]} numberOfLines={1}>
+                    {item.cat.name}
+                  </Text>
+                  <Ionicons
+                    name={isExpanded ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color={isDarkMode ? "#666" : "#ADADAD"}
+                  />
+                </Pressable>
+              );
+            }
+
+            if (item.type === "subcategory") {
+              return (
+                <>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.subRow,
+                      { backgroundColor: pressed ? (isDarkMode ? "#202020" : "#EFEFEF") : subBg },
+                    ]}
+                    onPress={() => router.push({ pathname: "/subcategory/[id]", params: { id: item.sub.id } })}
+                  >
+                    <View style={styles.subDot} />
+                    <Text style={[styles.subName, { color: Colors.textSecondary }]} numberOfLines={1}>
+                      {item.sub.name}
+                    </Text>
+                  </Pressable>
+                  <View style={[styles.subDivider, { backgroundColor: separatorColor }]} />
+                </>
+              );
+            }
+
+            return null;
           }}
+          ItemSeparatorComponent={({ leadingItem }) =>
+            leadingItem?.type === "category" ? (
+              <View style={[styles.divider, { backgroundColor: separatorColor }]} />
+            ) : null
+          }
         />
       )}
     </View>
@@ -246,40 +266,66 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
-  title: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 26,
-    marginBottom: 2,
-  },
-  subtitle: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-    marginBottom: 16,
-  },
-  searchBar: {
+  searchRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 16,
+    paddingVertical: 11,
+    borderRadius: 12,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
   },
   searchInput: {
     flex: 1,
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
+    paddingVertical: 0,
   },
-  catGrid: {
+  divider: {
+    height: 1,
+  },
+  catRow: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 4,
+    paddingVertical: 14,
+    gap: 14,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  catName: {
+    flex: 1,
+    fontFamily: "Poppins_500Medium",
+    fontSize: 15,
+  },
+  subRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingLeft: 70,
+    paddingRight: 20,
+    gap: 10,
+  },
+  subDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#ADADAD",
+  },
+  subName: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+  },
+  subDivider: {
+    height: 1,
+    marginLeft: 70,
   },
   productGrid: {
     paddingHorizontal: 16,
@@ -287,7 +333,7 @@ const styles = StyleSheet.create({
   },
   row: {
     gap: 12,
-    marginBottom: 0,
+    marginBottom: 12,
   },
   resultsLabel: {
     fontFamily: "Poppins_500Medium",
