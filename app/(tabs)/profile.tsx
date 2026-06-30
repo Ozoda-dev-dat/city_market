@@ -11,6 +11,10 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
+  FlatList,
+  Image,
+  Linking,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -21,6 +25,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import getColors from "@/constants/colors";
 import { useCart } from "@/context/CartContext";
 import { useApp } from "@/context/ProductsContext";
@@ -28,8 +33,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useLocation } from "@/context/LocationContext";
 import { LocationPicker } from "@/components/LocationPicker";
+import { NotificationsModal } from "@/components/NotificationsModal";
 import { useTranslation } from "@/lib/I18nProvider";
 import { apiRequest } from "@/lib/query-client";
+import { formatPrice } from "@/constants/data";
 
 function MenuItem({ icon, label, sub, color, bg, onPress, toggle, toggleValue, onToggle, isDarkMode }: {
   icon: string; label: string; sub?: string; color: string; bg: string;
@@ -70,6 +77,275 @@ function MenuItem({ icon, label, sub, color, bg, onPress, toggle, toggleValue, o
   );
 }
 
+// ── Wishlist Modal ────────────────────────────────────────────────────────────
+function WishlistModal({ visible, onClose, isDarkMode }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
+  const Colors = getColors(isDarkMode);
+  const qc = useQueryClient();
+  const { data: items = [], isLoading, isError, refetch } = useQuery<any[]>({
+    queryKey: ["/api/wishlist"],
+    queryFn: () => apiRequest("GET", "/api/wishlist").then(r => r.json()),
+    enabled: visible,
+    retry: 1,
+  });
+  const removeMut = useMutation({
+    mutationFn: (productId: string) => apiRequest("DELETE", `/api/wishlist/${productId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/wishlist"] }),
+    onError: () => Alert.alert("Xatolik", "O'chirishda xatolik yuz berdi"),
+  });
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff", paddingBottom: 40 }]}>
+          <View style={styles.modalHandle} />
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>❤️ Sevimlilar</Text>
+            <Pressable onPress={onClose}>
+              <Ionicons name="close" size={24} color={Colors.textMuted} />
+            </Pressable>
+          </View>
+          {isLoading ? (
+            <ActivityIndicator color="#16A34A" style={{ marginTop: 40 }} />
+          ) : isError ? (
+            <View style={{ alignItems: "center", paddingVertical: 40, gap: 12 }}>
+              <Ionicons name="cloud-offline-outline" size={52} color="#EF4444" />
+              <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 15, color: Colors.text }}>Yuklashda xatolik</Text>
+              <Pressable style={styles.greenBtn} onPress={() => refetch()}>
+                <Text style={styles.greenBtnText}>Qayta urinish</Text>
+              </Pressable>
+            </View>
+          ) : items.length === 0 ? (
+            <View style={{ alignItems: "center", paddingVertical: 40, gap: 12 }}>
+              <Ionicons name="heart-outline" size={56} color={Colors.textMuted} />
+              <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 16, color: Colors.text }}>Sevimlilar bo'sh</Text>
+              <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary, textAlign: "center" }}>
+                Mahsulot sahifasida ❤️ bosib saqlang
+              </Text>
+              <Pressable style={styles.greenBtn} onPress={() => { onClose(); router.push("/(tabs)/catalog"); }}>
+                <Text style={styles.greenBtnText}>Katalogga o'tish</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <FlatList
+              data={items}
+              keyExtractor={i => i.id}
+              showsVerticalScrollIndicator={false}
+              style={{ maxHeight: 420 }}
+              renderItem={({ item }) => (
+                <View style={[styles.wishRow, { borderBottomColor: Colors.divider }]}>
+                  <Pressable
+                    style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 12 }}
+                    onPress={() => { onClose(); router.push({ pathname: "/product/[id]", params: { id: item.productId } }); }}
+                  >
+                    {item.image ? (
+                      <Image source={{ uri: item.image }} style={styles.wishImg} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.wishImg, { backgroundColor: Colors.card, alignItems: "center", justifyContent: "center" }]}>
+                        <Ionicons name="image-outline" size={22} color={Colors.textMuted} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 13, color: Colors.text }} numberOfLines={2}>{item.name}</Text>
+                      <Text style={{ fontFamily: "Poppins_700Bold", fontSize: 14, color: "#16A34A", marginTop: 2 }}>
+                        {formatPrice(item.price)}
+                      </Text>
+                    </View>
+                  </Pressable>
+                  <Pressable onPress={() => removeMut.mutate(item.productId)} style={{ padding: 8 }}>
+                    <Ionicons name="heart" size={22} color="#EF4444" />
+                  </Pressable>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ── Promo Code Modal ──────────────────────────────────────────────────────────
+function PromoModal({ visible, onClose, isDarkMode }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
+  const Colors = getColors(isDarkMode);
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState("");
+
+  const handleCheck = async () => {
+    if (!code.trim()) return;
+    setLoading(true); setResult(null); setError("");
+    try {
+      const res = await apiRequest("GET", `/api/promo-codes/${code.trim().toUpperCase()}`);
+      const data = await res.json();
+      setResult(data);
+    } catch (err: any) {
+      const msg = err?.message || "";
+      if (msg.startsWith("404") || msg.startsWith("400")) {
+        setError("Promo kod topilmadi yoki faol emas");
+      } else {
+        setError("Xatolik yuz berdi. Qayta urinib ko'ring.");
+      }
+    } finally { setLoading(false); }
+  };
+
+  const handleClose = () => { setCode(""); setResult(null); setError(""); onClose(); };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={handleClose} />
+          <View style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff" }]}>
+            <View style={styles.modalHandle} />
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>🏷️ Promo kodlar</Text>
+              <Pressable onPress={handleClose}><Ionicons name="close" size={24} color={Colors.textMuted} /></Pressable>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TextInput
+                style={[styles.modalInput, { flex: 1, color: isDarkMode ? "#fff" : "#111827", backgroundColor: isDarkMode ? "#2C2C2E" : "#F5F5F5", letterSpacing: 2 }]}
+                value={code}
+                onChangeText={t => { setCode(t.toUpperCase()); setResult(null); setError(""); }}
+                placeholder="PROMO KOD"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="characters"
+                autoCorrect={false}
+              />
+              <Pressable
+                style={[styles.greenBtn, { paddingHorizontal: 18, opacity: loading ? 0.6 : 1 }]}
+                onPress={handleCheck} disabled={loading}
+              >
+                {loading ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.greenBtnText}>Tekshir</Text>}
+              </Pressable>
+            </View>
+
+            {error ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14, backgroundColor: "#FEF2F2", borderRadius: 12, padding: 12 }}>
+                <Ionicons name="close-circle" size={20} color="#EF4444" />
+                <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 13, color: "#EF4444", flex: 1 }}>{error}</Text>
+              </View>
+            ) : null}
+
+            {result ? (
+              <View style={{ marginTop: 14, backgroundColor: "#F0FDF4", borderRadius: 16, padding: 16, gap: 8 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Ionicons name="checkmark-circle" size={24} color="#16A34A" />
+                  <Text style={{ fontFamily: "Poppins_700Bold", fontSize: 16, color: "#16A34A" }}>Kod faol!</Text>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
+                  <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 13, color: "#374151" }}>Chegirma:</Text>
+                  <Text style={{ fontFamily: "Poppins_700Bold", fontSize: 16, color: "#16A34A" }}>{result.discountPercent}%</Text>
+                </View>
+                {result.minAmount > 0 && (
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 12, color: "#6B7280" }}>Minimum buyurtma:</Text>
+                    <Text style={{ fontFamily: "Poppins_500Medium", fontSize: 12, color: "#374151" }}>{formatPrice(result.minAmount)}</Text>
+                  </View>
+                )}
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: "#6B7280", marginTop: 4 }}>
+                  Bu kodni savat sahifasida buyurtma berishda ishlating.
+                </Text>
+              </View>
+            ) : null}
+
+            <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted, marginTop: 16, lineHeight: 18 }}>
+              Promo kodlar bildirishnomalar va maxsus aksiyalar orqali beriladi. Kodni savat sahifasida ham kiritish mumkin.
+            </Text>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+// ── Payment Modal ─────────────────────────────────────────────────────────────
+function PaymentModal({ visible, onClose, isDarkMode }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
+  const Colors = getColors(isDarkMode);
+  const methods = [
+    { icon: "cash-outline", color: "#16A34A", bg: "#F0FDF4", title: "Naqd pul", sub: "Yetkazib berishda to'lang", active: true },
+    { icon: "card-outline", color: "#3B82F6", bg: "#EFF6FF", title: "Karta (Uzcard/Humo)", sub: "Tez orada", active: false },
+    { icon: "phone-portrait-outline", color: "#8B5CF6", bg: "#F5F3FF", title: "Click / Payme", sub: "Tez orada", active: false },
+  ];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
+        <View style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff" }]}>
+          <View style={styles.modalHandle} />
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>💳 To'lov usullari</Text>
+            <Pressable onPress={onClose}><Ionicons name="close" size={24} color={Colors.textMuted} /></Pressable>
+          </View>
+          {methods.map((m, i) => (
+            <View key={i} style={[styles.payRow, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : m.bg, opacity: m.active ? 1 : 0.5, marginBottom: 10 }]}>
+              <View style={[styles.menuIconCircle, { backgroundColor: isDarkMode ? m.color + "33" : m.bg }]}>
+                <Ionicons name={m.icon as any} size={22} color={m.color} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 14, color: Colors.text }}>{m.title}</Text>
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted }}>{m.sub}</Text>
+              </View>
+              {m.active && <Ionicons name="checkmark-circle" size={22} color="#16A34A" />}
+              {!m.active && <View style={{ backgroundColor: "#F59E0B", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}>
+                <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 10, color: "#fff" }}>BRZO</Text>
+              </View>}
+            </View>
+          ))}
+          <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted, marginTop: 8, lineHeight: 18 }}>
+            Hozirda faqat naqd to'lov qabul qilinadi. Karta va online to'lov tez orada qo'shiladi.
+          </Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ── Help Modal ────────────────────────────────────────────────────────────────
+function HelpModal({ visible, onClose, isDarkMode }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
+  const Colors = getColors(isDarkMode);
+  const contacts = [
+    { icon: "call-outline", color: "#16A34A", bg: "#F0FDF4", label: "Qo'ng'iroq qilish", value: "+998 71 000 00 00", action: () => Linking.openURL("tel:+998710000000") },
+    { icon: "logo-whatsapp", color: "#25D366", bg: "#F0FDF4", label: "WhatsApp", value: "+998 71 000 00 00", action: () => Linking.openURL("https://wa.me/998710000000") },
+    { icon: "paper-plane-outline", color: "#2AABEE", bg: "#EFF6FF", label: "Telegram", value: "@citymarket_uz", action: () => Linking.openURL("https://t.me/citymarket_uz") },
+    { icon: "mail-outline", color: "#6366F1", bg: "#EEF2FF", label: "Email", value: "support@citymarket.uz", action: () => Linking.openURL("mailto:support@citymarket.uz") },
+  ];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <Pressable style={StyleSheet.absoluteFillObject} onPress={onClose} />
+        <View style={[styles.modalSheet, { backgroundColor: isDarkMode ? "#1C1C1E" : "#fff" }]}>
+          <View style={styles.modalHandle} />
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <Text style={[styles.modalTitle, { color: isDarkMode ? "#fff" : "#111827" }]}>🤝 Yordam</Text>
+            <Pressable onPress={onClose}><Ionicons name="close" size={24} color={Colors.textMuted} /></Pressable>
+          </View>
+          <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 13, color: Colors.textSecondary, marginBottom: 16, lineHeight: 20 }}>
+            Savollaringiz bo'lsa, quyidagi kanallar orqali biz bilan bog'laning:
+          </Text>
+          {contacts.map((c, i) => (
+            <Pressable key={i} style={[styles.payRow, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : c.bg, marginBottom: 10 }]} onPress={c.action}>
+              <View style={[styles.menuIconCircle, { backgroundColor: isDarkMode ? c.color + "33" : c.bg }]}>
+                <Ionicons name={c.icon as any} size={20} color={c.color} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Poppins_600SemiBold", fontSize: 14, color: Colors.text }}>{c.label}</Text>
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 12, color: Colors.textMuted }}>{c.value}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />
+            </Pressable>
+          ))}
+          <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.textMuted, marginTop: 8, textAlign: "center" }}>
+            Ish vaqti: Dushanba–Shanba, 09:00–20:00
+          </Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ── Main Screen ───────────────────────────────────────────────────────────────
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, updateProfile } = useAuth();
@@ -90,6 +366,13 @@ export default function ProfileScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Feature modals
+  const [showWishlist, setShowWishlist] = useState(false);
+  const [showPromo, setShowPromo] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -187,10 +470,10 @@ export default function ProfileScreen() {
                 <Text style={styles.statLabel}>{t("in_cart_stat")}</Text>
               </View>
               <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statNumber}>0</Text>
-                <Text style={styles.statLabel}>{t("reviews_stat")}</Text>
-              </View>
+              <Pressable style={styles.statItem} onPress={() => setShowWishlist(true)}>
+                <Text style={styles.statNumber}>❤️</Text>
+                <Text style={styles.statLabel}>{t("wishlist")}</Text>
+              </Pressable>
             </View>
           </LinearGradient>
 
@@ -221,7 +504,7 @@ export default function ProfileScreen() {
               </Pressable>
               <Pressable
                 style={[styles.quickCard, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
-                onPress={() => Alert.alert(t("wishlist"), t("coming_soon"))}
+                onPress={() => setShowWishlist(true)}
               >
                 <View style={[styles.quickIcon, { backgroundColor: "#FEF2F2" }]}>
                   <Ionicons name="heart-outline" size={20} color="#EF4444" />
@@ -264,17 +547,17 @@ export default function ProfileScreen() {
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
               <MenuItem icon="location-outline" label={t("addresses")} sub={location?.address ? location.address.slice(0, 25) + "…" : t("no_address")} color="#3B82F6" bg="#EFF6FF" onPress={() => setShowLocationPicker(true)} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="heart-outline" label={t("wishlist")} sub={t("saved_items")} color="#EF4444" bg="#FEF2F2" onPress={() => Alert.alert(t("wishlist"), t("coming_soon"))} isDarkMode={isDarkMode} />
+              <MenuItem icon="heart-outline" label={t("wishlist")} sub={t("saved_items")} color="#EF4444" bg="#FEF2F2" onPress={() => setShowWishlist(true)} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="pricetag-outline" label={t("promo_codes")} sub={t("active_coupons")} color="#8B5CF6" bg="#F5F3FF" onPress={() => Alert.alert(t("promo_codes"), t("coming_soon"))} isDarkMode={isDarkMode} />
+              <MenuItem icon="pricetag-outline" label={t("promo_codes")} sub={t("active_coupons")} color="#8B5CF6" bg="#F5F3FF" onPress={() => setShowPromo(true)} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="card-outline" label={t("payment")} sub={t("cash_on_delivery")} color="#06B6D4" bg="#ECFEFF" onPress={() => Alert.alert(t("payment"), t("cash_on_delivery"))} isDarkMode={isDarkMode} />
+              <MenuItem icon="card-outline" label={t("payment")} sub={t("cash_on_delivery")} color="#06B6D4" bg="#ECFEFF" onPress={() => setShowPayment(true)} isDarkMode={isDarkMode} />
             </View>
 
             {/* Preferences menu */}
             <Text style={[styles.sectionTitle, { color: Colors.textSecondary }]}>{t("section_preferences")}</Text>
             <View style={styles.menuGroup}>
-              <MenuItem icon="notifications-outline" label={t("notifications")} sub={t("push_notifications")} color="#F97316" bg="#FFF7ED" toggle toggleValue={notifications} onToggle={setNotifications} isDarkMode={isDarkMode} />
+              <MenuItem icon="notifications-outline" label={t("notifications")} sub={t("push_notifications")} color="#F97316" bg="#FFF7ED" onPress={() => setShowNotifications(true)} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
               <MenuItem icon="moon-outline" label={t("dark_mode")} sub={t("toggle_theme")} color="#6366F1" bg="#EEF2FF" toggle toggleValue={isDarkMode} onToggle={toggleDarkMode} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
@@ -286,7 +569,7 @@ export default function ProfileScreen() {
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
               <MenuItem icon="shield-checkmark-outline" label={t("change_password")} sub={t("update_password")} color="#EF4444" bg="#FEF2F2" onPress={() => { setOldPassword(""); setNewPassword(""); setConfirmPassword(""); setShowPasswordModal(true); }} isDarkMode={isDarkMode} />
               <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F3F4F6" }]} />
-              <MenuItem icon="help-circle-outline" label={t("help_support")} sub={t("contact_us")} color="#6B7280" bg="#F9FAFB" onPress={() => Alert.alert(t("help_support"), "+998 71 000 00 00\nsupport@citymarket.uz")} isDarkMode={isDarkMode} />
+              <MenuItem icon="help-circle-outline" label={t("help_support")} sub={t("contact_us")} color="#6B7280" bg="#F9FAFB" onPress={() => setShowHelp(true)} isDarkMode={isDarkMode} />
             </View>
 
             <Pressable style={styles.signOutBtn} onPress={handleLogout}>
@@ -300,6 +583,11 @@ export default function ProfileScreen() {
       </View>
 
       <LocationPicker visible={showLocationPicker} onClose={() => setShowLocationPicker(false)} />
+      <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
+      <WishlistModal visible={showWishlist} onClose={() => setShowWishlist(false)} isDarkMode={isDarkMode} />
+      <PromoModal visible={showPromo} onClose={() => setShowPromo(false)} isDarkMode={isDarkMode} />
+      <PaymentModal visible={showPayment} onClose={() => setShowPayment(false)} isDarkMode={isDarkMode} />
+      <HelpModal visible={showHelp} onClose={() => setShowHelp(false)} isDarkMode={isDarkMode} />
 
       {/* Edit Name Modal */}
       <Modal visible={showEditModal} transparent animationType="slide" onRequestClose={() => setShowEditModal(false)}>
@@ -429,4 +717,11 @@ const styles = StyleSheet.create({
   modalCancelText: { fontFamily: "Poppins_600SemiBold", fontSize: 15 },
   modalSaveBtn: { flex: 1, backgroundColor: "#16A34A", borderRadius: 14, paddingVertical: 14, alignItems: "center" },
   modalSaveText: { fontFamily: "Poppins_700Bold", fontSize: 15, color: "#fff" },
+  // Wishlist
+  wishRow: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, gap: 4 },
+  wishImg: { width: 60, height: 60, borderRadius: 12 },
+  // Shared
+  greenBtn: { backgroundColor: "#16A34A", borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, alignItems: "center", justifyContent: "center" },
+  greenBtnText: { fontFamily: "Poppins_600SemiBold", fontSize: 14, color: "#fff" },
+  payRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 14 },
 });
