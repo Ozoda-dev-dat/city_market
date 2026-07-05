@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { eq, and, isNull } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "../shared/schema";
+import { sendSms } from "./sms-service";
 
 export interface LoginCredentials {
   phoneNumber: string;
@@ -129,6 +130,14 @@ export class AuthService {
       await this.logUserAction('register', user.id, {
         phoneNumber: userData.phoneNumber,
         role: userData.role || 'customer'
+      });
+
+      // Send the account password via SMS so the user has a copy of it
+      sendSms(
+        userData.phoneNumber,
+        `City Market: sizning hisobingiz yaratildi. Telefon: ${userData.phoneNumber}, parol: ${userData.password}`
+      ).catch((err) => {
+        console.error('Failed to send registration SMS:', err);
       });
 
       return {
