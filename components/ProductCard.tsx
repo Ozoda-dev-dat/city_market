@@ -98,9 +98,9 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
 
   if (horizontal) {
     return (
-      <Animated.View style={animStyle}>
+      <Animated.View style={[styles.hCard, glassCard, animStyle]}>
         <Pressable
-          style={[styles.hCard, glassCard]}
+          style={styles.hCardInner}
           onPress={onPress}
           onPressIn={() => { scale.value = withSpring(0.97, { damping: 14 }); }}
           onPressOut={() => { scale.value = withSpring(1, { damping: 14 }); }}
@@ -110,52 +110,71 @@ export function ProductCard({ product, onPress, horizontal, storeName }: Product
               <Image source={{ uri: resolvedImage }} style={styles.hImage} resizeMode="cover" />
             ) : (
               <View style={[styles.hImage, styles.imageFallback]}>
-                <Text style={styles.fallbackText}>{product.name.charAt(0).toUpperCase()}</Text>
+                <Text style={styles.fallbackTextSm}>{product.name.charAt(0).toUpperCase()}</Text>
               </View>
             )}
             {product.badge && (
-              <View style={[styles.badge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
+              <View style={[styles.hBadge, { backgroundColor: BADGE_COLORS[product.badge] }]}>
                 <Text style={styles.badgeText}>{BADGE_LABELS[product.badge]}</Text>
               </View>
             )}
           </View>
           <View style={styles.hInfo}>
             <Text style={[styles.hName, { color: Colors.text }]} numberOfLines={2}>{product.name}</Text>
-            <Text style={[styles.hUnit, { color: Colors.textMuted }]}>{product.brand ?? product.unit}</Text>
-            <View style={styles.hBottom}>
-              <View>
-                <Text style={[styles.hPrice, { color: Colors.text }]}>{formatPrice(product.price)}</Text>
-                {product.originalPrice && (
-                  <Text style={[styles.hOriginal, { color: Colors.textMuted }]}>{formatPrice(product.originalPrice)}</Text>
-                )}
+            {storeName ? (
+              <View style={styles.storeBadge}>
+                <Ionicons name="storefront" size={9} color="#16A34A" />
+                <Text style={styles.storeBadgeText} numberOfLines={1}>{storeName}</Text>
               </View>
-              {inCart ? (
-                <View style={[styles.qtyRow, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.08)" }]}>
-                  <Pressable
-                    style={styles.qtyBtn}
-                    onPress={() => {
-                      if (cartItem.quantity === 1) removeFromCart(product.id);
-                      else updateQuantity(product.id, cartItem.quantity - 1);
-                    }}
-                  >
-                    <Ionicons name="remove" size={14} color="#16A34A" />
-                  </Pressable>
-                  <Text style={styles.qtyText}>{cartItem.quantity}</Text>
-                  <Pressable
-                    style={styles.qtyBtn}
-                    onPress={() => updateQuantity(product.id, cartItem.quantity + 1)}
-                  >
-                    <Ionicons name="add" size={14} color="#16A34A" />
-                  </Pressable>
-                </View>
-              ) : (
-                <Animated.View style={btnAnimStyle}>
-                  <Pressable style={styles.addBtnSm} onPress={handleAdd}>
-                    <Ionicons name="add" size={18} color="#fff" />
-                  </Pressable>
-                </Animated.View>
-              )}
-            </View>
+            ) : (
+              <Text style={[styles.hUnit, { color: Colors.textMuted }]}>{product.brand ?? product.unit}</Text>
+            )}
+            <Text style={styles.hPrice}>{formatPrice(product.price)}</Text>
+          </View>
+          <View style={[
+            styles.qtyRow,
+            { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.09)" }
+          ]}>
+            {inCart ? (
+              <>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={() => {
+                    if (cartItem.quantity === 1) removeFromCart(product.id);
+                    else updateQuantity(product.id, cartItem.quantity - 1);
+                  }}
+                >
+                  <Ionicons
+                    name={cartItem.quantity === 1 ? "trash-outline" : "remove"}
+                    size={16}
+                    color="#16A34A"
+                  />
+                </Pressable>
+                <Text style={styles.qtyText}>{cartItem.quantity}</Text>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={() => {
+                    if (product.stockQuantity && cartItem.quantity >= product.stockQuantity) {
+                      Alert.alert("Xatolik", "Omborda yetarli mahsulot yo'q");
+                      return;
+                    }
+                    updateQuantity(product.id, cartItem.quantity + 1);
+                  }}
+                >
+                  <Ionicons name="add" size={16} color="#16A34A" />
+                </Pressable>
+              </>
+            ) : (
+              <Animated.View style={btnAnimStyle}>
+                <Pressable
+                  style={styles.qtyBtn}
+                  onPress={handleAdd}
+                  disabled={!product.inStock}
+                >
+                  <Ionicons name="add" size={16} color={product.inStock ? "#16A34A" : Colors.textMuted} />
+                </Pressable>
+              </Animated.View>
+            )}
           </View>
         </Pressable>
       </Animated.View>
@@ -389,66 +408,61 @@ const styles = StyleSheet.create({
   },
   hCard: {
     borderRadius: 20,
-    flexDirection: "row",
-    marginBottom: 12,
-    overflow: "hidden",
     borderWidth: 1,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.07,
-    shadowRadius: 12,
+    shadowRadius: 10,
     elevation: 3,
   },
+  hCardInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    gap: 12,
+  },
   hImageBox: {
-    width: 100,
-    height: 100,
-    backgroundColor: "#F0F7F2",
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#E8F5E9",
     position: "relative",
   },
   hImage: {
     width: "100%",
     height: "100%",
   },
+  hBadge: {
+    position: "absolute",
+    top: 4,
+    left: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  fallbackTextSm: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 22,
+    color: "#16A34A",
+  },
   hInfo: {
     flex: 1,
-    padding: 14,
-    gap: 3,
+    gap: 4,
   },
   hName: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
   },
   hUnit: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 12,
-  },
-  hBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 6,
+    fontSize: 11,
   },
   hPrice: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 15,
-  },
-  hOriginal: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 11,
-    textDecorationLine: "line-through",
-  },
-  addBtnSm: {
-    width: 32,
-    height: 32,
-    backgroundColor: "#16A34A",
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#16A34A",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
+    fontSize: 14,
+    color: "#16A34A",
   },
 });

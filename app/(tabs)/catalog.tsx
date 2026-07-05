@@ -416,8 +416,6 @@ export default function CatalogScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
           contentContainerStyle={[
             styles.grid,
             { paddingBottom: Platform.OS === "web" ? 100 : 120 },
@@ -426,6 +424,7 @@ export default function CatalogScreen() {
           scrollEnabled={!!filtered.length}
           renderItem={({ item }) => (
             <ProductCard
+              horizontal
               product={convertToProduct(item)}
               storeName={(item as any).storeId ? storeMap[(item as any).storeId] : undefined}
               onPress={() =>
