@@ -352,7 +352,7 @@ export default function CustomerOrderTracking() {
               </Text>
               <Pressable
                 style={{ backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
-                onPress={() => router.push("/(tabs)/catalog" as any)}
+                onPress={() => router.push("/(tabs)" as any)}
               >
                 <Text style={{ color: "#fff", fontFamily: "Poppins_600SemiBold" }}>Qayta buyurtma berish</Text>
               </Pressable>

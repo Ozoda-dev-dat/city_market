@@ -310,13 +310,13 @@ export default function CartScreen() {
           </View>
           <Text style={[styles.emptyTitle, { color: Colors.text }]}>Savat bo&apos;sh</Text>
           <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
-            Mahsulotlarni katalogdan qo&apos;shing
+            Mahsulotlarni bosh sahifadan qo&apos;shing
           </Text>
           <Pressable
             style={styles.shopBtn}
-            onPress={() => router.push("/(tabs)/catalog")}
+            onPress={() => router.push("/(tabs)")}
           >
-            <Text style={styles.shopBtnText}>Katalogga o&apos;tish</Text>
+            <Text style={styles.shopBtnText}>Bosh sahifaga o&apos;tish</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" />
           </Pressable>
         </View>

@@ -74,14 +74,6 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="catalog"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="cart"
         options={{
           tabBarBadge: totalItems > 0 ? totalItems : undefined,

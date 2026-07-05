@@ -521,7 +521,7 @@ export default function HomeScreen() {
               borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
             }
           ]}
-          onPress={() => router.push("/(tabs)/catalog")}
+          onPress={() => {}}
         >
           <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
             <Ionicons name="search" size={16} color="#16A34A" />
@@ -569,7 +569,7 @@ export default function HomeScreen() {
             <Banner
               item={item}
               bannerWidth={BANNER_W}
-              onPress={() => router.push("/(tabs)/catalog")}
+              onPress={() => {}}
             />
           )}
           style={styles.bannerList}
@@ -585,9 +585,6 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
-          <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-            <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
-          </Pressable>
         </View>
 
         <View style={styles.catGrid}>
@@ -647,9 +644,6 @@ export default function HomeScreen() {
           <>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: Colors.text }]}>Barcha mahsulotlar</Text>
-              <Pressable onPress={() => router.push("/(tabs)/catalog")}>
-                <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
-              </Pressable>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
               {products.slice(0, 8).map((product) => (

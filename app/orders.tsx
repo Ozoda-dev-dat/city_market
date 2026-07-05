@@ -233,7 +233,7 @@ export default function UserOrdersScreen() {
             {activeTab === 'all' && (
               <Pressable 
                 style={styles.shopButton}
-                onPress={() => router.push('/(tabs)/catalog')}
+                onPress={() => router.push('/(tabs)')}
               >
                 <Text style={styles.shopButtonText}>Xarid qilish</Text>
               </Pressable>

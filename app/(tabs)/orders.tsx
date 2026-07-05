@@ -145,7 +145,7 @@ export default function CustomerOrdersScreen() {
           <Text style={styles.emptySub}>Buyurtmalaringiz shu yerda ko'rinadi</Text>
           <Pressable
             style={styles.shopBtn}
-            onPress={() => router.push("/(tabs)/catalog")}
+            onPress={() => router.push("/(tabs)")}
           >
             <Ionicons name="basket-outline" size={18} color="#fff" />
             <Text style={styles.shopBtnText}>Xaridga o'tish</Text>
