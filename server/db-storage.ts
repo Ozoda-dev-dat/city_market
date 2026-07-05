@@ -90,7 +90,8 @@ export class DbStorage implements IStorage {
       throw new Error("DATABASE_URL or PG* environment variables are not set");
     }
 
-    const client = postgres(connectionString, { ssl: 'require' });
+    const disableSsl = /sslmode=disable/i.test(connectionString);
+    const client = postgres(connectionString, { ssl: disableSsl ? false : 'require' });
     this.db = drizzle(client, { schema });
     
     this.initMockData();

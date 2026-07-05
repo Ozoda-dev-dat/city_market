@@ -1,0 +1,2 @@
+- [npm supply-chain firewall blocks](npm-firewall-blocks.md) — some packages (e.g. shell-quote) are blocked at ALL versions by Replit's package firewall; version bumps won't help, vendor a local replacement instead.
+- [Replit Postgres SSL](replit-postgres-ssl.md) — Replit's built-in Postgres uses `sslmode=disable`; hardcoded `ssl: 'require'` in db clients breaks connections migrated from Neon/other hosted DBs.
