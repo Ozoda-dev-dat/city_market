@@ -67,11 +67,6 @@ export interface IStorage {
   getProductCountByStore(storeId: string): Promise<number>;
   getOrdersByStore(storeId: string): Promise<Order[]>;
   notifyStoresForOrder(order: Order): Promise<string[]>;
-
-  getWishlist(userId: string): Promise<any[]>;
-  addToWishlist(userId: string, productId: string): Promise<void>;
-  removeFromWishlist(userId: string, productId: string): Promise<void>;
-  isInWishlist(userId: string, productId: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -95,8 +90,7 @@ export class DbStorage implements IStorage {
       throw new Error("DATABASE_URL or PG* environment variables are not set");
     }
 
-    const sslEnabled = connectionString.includes('sslmode=require') || connectionString.includes('neon.tech') || connectionString.includes('supabase');
-    const client = postgres(connectionString, sslEnabled ? { ssl: 'require' } : {});
+    const client = postgres(connectionString, { ssl: 'require' });
     this.db = drizzle(client, { schema });
     
     this.initMockData();
@@ -744,46 +738,6 @@ export class DbStorage implements IStorage {
     }
 
     return affectedOwnerIds;
-  }
-
-  async getWishlist(userId: string): Promise<any[]> {
-    const rows = await this.db
-      .select({
-        id: schema.wishlists.id,
-        productId: schema.wishlists.productId,
-        createdAt: schema.wishlists.createdAt,
-        name: schema.products.name,
-        price: schema.products.price,
-        image: schema.products.image,
-        unit: schema.products.unit,
-        inStock: schema.products.inStock,
-        category: schema.products.category,
-      })
-      .from(schema.wishlists)
-      .leftJoin(schema.products, eq(schema.wishlists.productId, schema.products.id))
-      .where(eq(schema.wishlists.userId, userId));
-    return rows;
-  }
-
-  async addToWishlist(userId: string, productId: string): Promise<void> {
-    await this.db
-      .insert(schema.wishlists)
-      .values({ userId, productId })
-      .onConflictDoNothing();
-  }
-
-  async removeFromWishlist(userId: string, productId: string): Promise<void> {
-    await this.db
-      .delete(schema.wishlists)
-      .where(and(eq(schema.wishlists.userId, userId), eq(schema.wishlists.productId, productId)));
-  }
-
-  async isInWishlist(userId: string, productId: string): Promise<boolean> {
-    const rows = await this.db
-      .select({ id: schema.wishlists.id })
-      .from(schema.wishlists)
-      .where(and(eq(schema.wishlists.userId, userId), eq(schema.wishlists.productId, productId)));
-    return rows.length > 0;
   }
 
   async seedNotificationsForUser(userId: string): Promise<void> {

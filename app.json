@@ -3,7 +3,7 @@
     "name": "City Market",
     "scheme": "citymarket",
     "slug": "citymarket",
-    "version": "1.0.3",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -49,7 +49,12 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiDomain": "city-market.onrender.com"
-    }
+      "apiDomain": "city-market.onrender.com",
+      "router": {},
+      "eas": {
+        "projectId": "10de4a8c-0e24-4c74-8d01-e66f7662d837"
+      }
+    },
+    "owner": "ozoda"
   }
 }

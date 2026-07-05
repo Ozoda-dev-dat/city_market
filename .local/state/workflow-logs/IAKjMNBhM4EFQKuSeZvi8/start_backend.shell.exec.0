@@ -1,0 +1,23 @@
+
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K/home/runner/workspace/server/db-storage.ts:77
+      throw new Error("DATABASE_URL is not set");
+            ^
+
+
+Error: DATABASE_URL is not set
+    at new DbStorage [90m(/home/runner/workspace/[39mserver/db-storage.ts:77:13[90m)[39m
+    at postgres [90m(/home/runner/workspace/[39mserver/db-storage.ts:786:24[90m)[39m
+    at Object.<anonymous> [90m(/home/runner/workspace/[39mserver/db-storage.ts:786:28[90m)[39m
+[90m    at Module._compile (node:internal/modules/cjs/loader:1521:14)[39m
+    at Object.transformer [90m(/home/runner/workspace/[39mnode_modules/[4mtsx[24m/dist/register-D46fvsV_.cjs:3:1104[90m)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1266:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1091:12)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1289:19)[39m
+[90m    at require (node:internal/modules/helpers:182:18)[39m
+    at <anonymous> [90m(/home/runner/workspace/[39mserver/routes.ts:3:25[90m)[39m
+
+Node.js v20.20.0
+[1G[0K⠙[1G[0K

@@ -19,28 +19,10 @@ Use `externalApi__x` in `code_execution`.
 
 Authorization is handled automatically by Replit. Do not pass an `Authorization` header.
 
-## Skill
+## Quickstart
 
-## X (Twitter) quickstart
-
-Read-only X API v2 access through passthrough billing. Use
-concrete request paths (e.g. `/2/tweets/search/recent`) — never
-send the route patterns literally. Put URL params in `query`.
-
-```javascript
-const result = await externalApi__x({
-  path: '/2/tweets/search/recent',
-  method: 'GET',
-  query: {query: 'replit', max_results: '10'},
-})
-
-for (const tweet of result.body.data ?? []) {
-  console.log(tweet.id, tweet.text)
-}
-```
-
-Authorization is managed by passthrough billing. Do not set an
-`Authorization` header manually.
+1. Call the callback with a supported `path` and `method`.
+2. Put URL params in `query` and inspect `result.body`.
 
 ## Example
 

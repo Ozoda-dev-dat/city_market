@@ -1120,37 +1120,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // ── Wishlist routes ──────────────────────────────────────────────────────
-  app.get("/api/wishlist", authenticateToken, async (req, res) => {
-    try {
-      const items = await storage.getWishlist(req.user!.userId);
-      res.json(items);
-    } catch (e) { res.status(500).json({ error: "Failed to fetch wishlist" }); }
-  });
-
-  app.post("/api/wishlist/:productId", authenticateToken, async (req, res) => {
-    try {
-      const product = await storage.getProduct(req.params.productId);
-      if (!product) return res.status(404).json({ error: "Product not found" });
-      await storage.addToWishlist(req.user!.userId, req.params.productId);
-      res.json({ ok: true });
-    } catch (e) { res.status(500).json({ error: "Failed to add to wishlist" }); }
-  });
-
-  app.delete("/api/wishlist/:productId", authenticateToken, async (req, res) => {
-    try {
-      await storage.removeFromWishlist(req.user!.userId, req.params.productId);
-      res.json({ ok: true });
-    } catch (e) { res.status(500).json({ error: "Failed to remove from wishlist" }); }
-  });
-
-  app.get("/api/wishlist/:productId/check", authenticateToken, async (req, res) => {
-    try {
-      const inList = await storage.isInWishlist(req.user!.userId, req.params.productId);
-      res.json({ inWishlist: inList });
-    } catch (e) { res.status(500).json({ error: "Failed to check wishlist" }); }
-  });
-
   // ── Store owner routes (/api/store/*) ────────────────────────────────────
   // Get own store profile
   app.get("/api/store/profile",

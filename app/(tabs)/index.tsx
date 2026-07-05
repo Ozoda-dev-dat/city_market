@@ -10,91 +10,37 @@ import {
   Platform,
   Alert,
   Image,
-  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
-import { BANNERS } from "@/constants/data";
+import { BANNERS, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest, resolveImageUrl } from "@/lib/query-client";
+import { apiRequest } from "@/lib/query-client";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/LocationPermissionModal";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
-import { useTranslation } from "@/lib/I18nProvider";
 
-const { width: SCREEN_W } = Dimensions.get("window");
-const CARD_W = (SCREEN_W - 40) / 3;
-const CARD_H = CARD_W * 1.18;
-
-// ── Pastel Korzinka-Go style: 2 transparent PNGs on pastel bg ────────────────────
-type CatStyle = { bg: string; textColor: string; imgs: string[] };
-
-const CAT_BY_ID: Record<string, CatStyle> = {
-  "choy":                 { bg: "#D4EDF0", textColor: "#1a4a4e", imgs: ["/cat-images/choy.png"] },
-  "coffee":               { bg: "#E8D9C8", textColor: "#3d2a14", imgs: ["/cat-images/coffee.png"] },
-  "meat":                 { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/meat.png"] },
-  "ichimliklar":          { bg: "#D4EBF7", textColor: "#1a3a5a", imgs: ["/cat-images/ichimliklar.png"] },
-  "ketchuplar":           { bg: "#FADADD", textColor: "#5a1a1e", imgs: ["/cat-images/ketchuplar.png"] },
-  "konservalar-":         { bg: "#E8EDD4", textColor: "#2a3a1a", imgs: ["/cat-images/konservalar.png"] },
-  "mayonezlar":           { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/mayonezlar.png"] },
-  "fruits":               { bg: "#FFF0F3", textColor: "#5a1a1e", imgs: ["/cat-images/fruits.png"] },
-  "murabbo-va-djemlar":   { bg: "#EDD4F0", textColor: "#3a1a4a", imgs: ["/cat-images/murabbo.png"] },
-  "bakery":               { bg: "#F7EDDA", textColor: "#4a2e0a", imgs: ["/cat-images/bakery.png"] },
-  "vegetables":           { bg: "#D6EDD4", textColor: "#1a3a1e", imgs: ["/cat-images/vegetables.png"] },
-  "shampunlar":           { bg: "#D4F0EE", textColor: "#1a3a38", imgs: ["/cat-images/shampunlar.png"] },
-  "sharbatlar":           { bg: "#FDE8D4", textColor: "#4a2a0a", imgs: ["/cat-images/sharbatlar.png"] },
-  "shokoladlar":          { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokoladlar.png"] },
-
-  "shokolatli-pastalar":  { bg: "#F0E0D6", textColor: "#3a1a0a", imgs: ["/cat-images/shokolatli-pastalar.png"] },
-  "makaron-un-yormalar":  { bg: "#F5F0E8", textColor: "#3a2e1a", imgs: ["/cat-images/makaron-un-yormalar.png"] },
-  "yog-va-souslar":       { bg: "#FEF9EC", textColor: "#4a3a0a", imgs: ["/cat-images/yog-va-souslar.png"] },
-  "bolalar-ovqatlar":     { bg: "#FFF5EC", textColor: "#4a2e0a", imgs: ["/cat-images/bolalar-ovqatlar.png"] },
-  "oyinchoqlar":          { bg: "#F0FFF0", textColor: "#1a4a1a", imgs: ["/cat-images/oyinchoqlar.png"] },
-  "yongok-va-sneklar":    { bg: "#FEF8E7", textColor: "#4a3a0a", imgs: ["/cat-images/yongok-va-sneklar.png"] },
-  "dairy":                { bg: "#D6E8F5", textColor: "#1a2e4a", imgs: ["/cat-images/dairy.png"] },
-  "tagliklar":            { bg: "#FEF3D4", textColor: "#4a3a0a", imgs: ["/cat-images/tagliklar.png"] },
-};
-
-const FALLBACK_PASTELS = [
-  { bg: "#D6E8F5", textColor: "#1a2e4a" },
-  { bg: "#FADADD", textColor: "#5a1a1e" },
-  { bg: "#D6EDD4", textColor: "#1a3a1e" },
-  { bg: "#F7EDDA", textColor: "#4a2e0a" },
-  { bg: "#D4EBF7", textColor: "#1a3a5a" },
-  { bg: "#F0E0D6", textColor: "#3a1a0a" },
-  { bg: "#EDD4F0", textColor: "#3a1a4a" },
-  { bg: "#FDE8D4", textColor: "#4a2a0a" },
-];
-
-function getCatStyle(name: string, id: string, index: number): CatStyle {
-  if (id && CAT_BY_ID[id]) return CAT_BY_ID[id];
-  const p = FALLBACK_PASTELS[index % FALLBACK_PASTELS.length];
-  return { bg: p.bg, textColor: p.textColor, imgs: ["/cat-images/fruits.png", "/cat-images/vegetables.png"] };
-}
-
-function getGreetingKey(): "greeting_morning" | "greeting_afternoon" | "greeting_evening" {
-  const h = new Date().getHours();
-  if (h < 12) return "greeting_morning";
-  if (h < 17) return "greeting_afternoon";
-  return "greeting_evening";
-}
 
 const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
   id: schemaProduct.id,
@@ -113,168 +59,283 @@ const convertToProduct = (schemaProduct: SchemaProduct): Product => ({
   stockQuantity: schemaProduct.stockQuantity,
 });
 
-function BannerDot({ isActive }: { isActive: boolean }) {
-  const w = useSharedValue(isActive ? 20 : 6);
-  const op = useSharedValue(isActive ? 1 : 0.4);
+function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: boolean }) {
+  const w = useSharedValue(isActive ? 22 : 7);
+  const op = useSharedValue(isActive ? 1 : 0.35);
+
   useEffect(() => {
-    w.value = withSpring(isActive ? 20 : 6, { damping: 14, stiffness: 140 });
-    op.value = withTiming(isActive ? 1 : 0.4, { duration: 200 });
+    w.value = withSpring(isActive ? 22 : 7, { damping: 14, stiffness: 140 });
+    op.value = withTiming(isActive ? 1 : 0.35, { duration: 220 });
   }, [isActive]);
+
   const style = useAnimatedStyle(() => ({ width: w.value, opacity: op.value }));
-  return <Animated.View style={[{ height: 6, borderRadius: 3, backgroundColor: "#16A34A" }, style]} />;
+  return <Animated.View style={[styles.dot, { backgroundColor: "#16A34A" }, style]} />;
 }
 
-function CategoryCircle({ item, onPress }: { item: any; onPress: () => void }) {
+function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const img = getCatStyle(item.name, item.id, 0).img;
 
   return (
-    <Animated.View style={[circleStyles.wrapper, anim]}>
+    <Animated.View style={[bannerStyles.card, { width: bannerWidth }, anim]}>
       <Pressable
-        onPress={() => {
-          if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onPress();
-        }}
-        onPressIn={() => { scale.value = withSpring(0.9, { damping: 12 }); }}
+        style={{ flex: 1 }}
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.975, { damping: 14 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
-        style={{ alignItems: "center", gap: 6 }}
       >
-        <View style={circleStyles.circle}>
-          <Image source={{ uri: img }} style={circleStyles.circleImg} resizeMode="cover" />
-          <View style={circleStyles.circleOverlay} />
+        <Image
+          source={{ uri: (item as any).image }}
+          style={bannerStyles.image}
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={[(item as any).overlayStart, (item as any).overlayEnd]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.4, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={bannerStyles.shimmer} />
+
+        <View style={bannerStyles.topRow}>
+          <View style={[bannerStyles.tagBadge, { backgroundColor: (item as any).tagColor }]}>
+            <Ionicons name="pricetag" size={10} color="#fff" />
+            <Text style={bannerStyles.tagText}>{(item as any).tag}</Text>
+          </View>
+          <View style={bannerStyles.deliveryPill}>
+            <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
+            <Text style={bannerStyles.deliveryText}>30 daqiqa</Text>
+          </View>
         </View>
-        <Text style={circleStyles.label} numberOfLines={1}>{item.name}</Text>
+
+        <View style={bannerStyles.bottomContent}>
+          <Text style={bannerStyles.bannerSubtitle}>{item.subtitle}</Text>
+          <Text style={bannerStyles.bannerTitle}>{item.title}</Text>
+          <View style={bannerStyles.ctaRow}>
+            <View style={bannerStyles.ctaBtn}>
+              <Text style={bannerStyles.ctaText}>{(item as any).cta}</Text>
+              <Ionicons name="arrow-forward" size={13} color="#fff" />
+            </View>
+          </View>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-const circleStyles = StyleSheet.create({
-  wrapper: { width: 78, alignItems: "center" },
-  circle: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
+const BANNER_H = 210;
+
+const bannerStyles = StyleSheet.create({
+  card: {
+    height: BANNER_H,
+    borderRadius: 26,
+    marginHorizontal: 16,
     overflow: "hidden",
-    borderWidth: 2.5,
-    borderColor: "rgba(22,163,74,0.25)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
+    elevation: 12,
   },
-  circleImg: { width: "100%", height: "100%" },
-  circleOverlay: {
+  image: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.06)",
+    width: "100%",
+    height: "100%",
   },
-  label: {
+  shimmer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.04)",
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    paddingTop: 18,
+  },
+  tagBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  tagText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 10,
-    color: "#374151",
-    textAlign: "center",
-    maxWidth: 72,
+    fontSize: 11,
+    color: "#fff",
+  },
+  deliveryPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  deliveryText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.92)",
+  },
+  bottomContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 14,
+    gap: 3,
+  },
+  bannerSubtitle: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.78)",
+  },
+  bannerTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 21,
+    color: "#fff",
+    lineHeight: 27,
+  },
+  ctaRow: {
+    marginTop: 10,
+  },
+  ctaBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  ctaText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#fff",
   },
 });
 
-// Glass card: food image as bg → BlurView → color tint → text + clear round photo
-// ── Korzinka Go style CategoryCard (pixel-perfect) ─────────────────────────
-function CategoryPhotoCard({ category, index, onPress }: {
-  category: any; index: number; onPress: () => void;
+function CategoryCard({ item, onPress, isDarkMode, productCount }: {
+  item: any;
+  onPress: () => void;
+  isDarkMode: boolean;
+  productCount: number;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const style = getCatStyle(category.name, category.id, index);
-  const imgH = CARD_H * 0.72;
-  const imgW = CARD_W * 0.62;
+  const accentColor: string = item.color ?? "#16A34A";
+
+  const gradStart = accentColor + (isDarkMode ? "40" : "22");
+  const gradEnd = accentColor + (isDarkMode ? "10" : "06");
 
   return (
-    <Animated.View style={[catCardStyles.card, { width: CARD_W, height: CARD_H, backgroundColor: style.bg }, anim]}>
+    <Animated.View style={[catStyles.card, anim]}>
       <Pressable
-        style={catCardStyles.pressable}
+        style={{ flex: 1 }}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.95, { damping: 15 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
+        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
+        onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
-        <Text style={[catCardStyles.catName, { color: style.textColor }]} numberOfLines={2}>
-          {category.name}
-        </Text>
-
-        {style.imgs.length === 1 ? (
-          /* Single image — centered, no rotation */
-          <Image
-            source={{ uri: resolveImageUrl(style.imgs[0]) }}
-            style={[catCardStyles.img, {
-              width: CARD_W * 0.96,
-              height: CARD_H * 0.72,
-              bottom: -2,
-              left: CARD_W * 0.02,
-              zIndex: 1,
-            }]}
-            resizeMode="contain"
+        <View style={[
+          catStyles.inner,
+          {
+            backgroundColor: isDarkMode ? "rgba(28,28,30,0.88)" : "#fff",
+            borderColor: isDarkMode ? accentColor + "30" : accentColor + "25",
+          }
+        ]}>
+          <LinearGradient
+            colors={[gradStart, gradEnd]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+            borderRadius={22}
           />
-        ) : (
-          <>
-            {/* Image 1 — left side, slightly rotated */}
-            <Image
-              source={{ uri: resolveImageUrl(style.imgs[0]) }}
-              style={[catCardStyles.img, {
-                width: imgW,
-                height: imgH,
-                bottom: -4,
-                left: -6,
-                transform: [{ rotate: "-12deg" }],
-                zIndex: 1,
-              }]}
-              resizeMode="contain"
-            />
-            {/* Image 2 — right side, slightly rotated other way */}
-            {style.imgs[1] && (
-              <Image
-                source={{ uri: resolveImageUrl(style.imgs[1]) }}
-                style={[catCardStyles.img, {
-                  width: imgW,
-                  height: imgH,
-                  bottom: -4,
-                  right: -6,
-                  transform: [{ rotate: "10deg" }],
-                  zIndex: 2,
-                }]}
-                resizeMode="contain"
-              />
-            )}
-          </>
-        )}
+          <View style={[catStyles.iconCircle, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
+            <Ionicons name={item.icon as any} size={32} color={accentColor} />
+          </View>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
+              {item.name}
+            </Text>
+            <View style={[catStyles.countPill, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
+              <Ionicons name="cube-outline" size={11} color={accentColor} />
+              <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta mahsulot</Text>
+            </View>
+          </View>
+          <View style={[catStyles.arrow, { backgroundColor: accentColor + (isDarkMode ? "25" : "15") }]}>
+            <Ionicons name="chevron-forward" size={14} color={accentColor} />
+          </View>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
-const catCardStyles = StyleSheet.create({
+const catStyles = StyleSheet.create({
   card: {
-    borderRadius: 14,
-    overflow: "hidden",
+    width: "48.5%" as any,
+    marginBottom: 12,
+  },
+  inner: {
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 14,
+    gap: 10,
+    borderWidth: 1.5,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 5,
+    minHeight: 140,
+    overflow: "hidden",
   },
-  pressable: {
-    flex: 1,
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  catName: {
-    position: "absolute",
-    top: 9,
-    left: 9,
-    right: 6,
+  label: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 11,
-    lineHeight: 14,
-    zIndex: 3,
+    fontSize: 14,
+    lineHeight: 20,
   },
-  img: {
-    position: "absolute",
+  countPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    alignSelf: "flex-start" as const,
+  },
+  countText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 11,
+  },
+  arrow: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    alignSelf: "flex-end" as const,
   },
 });
 
@@ -284,16 +345,16 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<FlatList>(null);
   const [activeBanner, setActiveBanner] = useState(0);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
+
   const { products, categories } = useApp();
   const { addToCart } = useCart();
+
   const { user } = useAuth();
   const { location, isLoading: locationLoading } = useLocation();
-  const { t } = useTranslation();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (user?.role !== "customer") return;
@@ -315,31 +376,43 @@ export default function HomeScreen() {
   });
   const unreadCount = unreadData?.count ?? 0;
 
+  const notifScale = useSharedValue(1);
+  const notifAnim = useAnimatedStyle(() => ({ transform: [{ scale: notifScale.value }] }));
+
   const handleAddToCart = (product: any) => {
     if (!product.inStock) {
-      Alert.alert(t("error"), t("out_of_stock"));
+      Alert.alert("Xatolik", "Ushbu mahsulot vaqtincha tugagan");
       return;
     }
-    const p: SchemaProduct = {
-      id: product.id, name: product.name, category: product.category,
-      price: product.price, originalPrice: product.originalPrice || null,
-      unit: product.unit, image: product.image, badge: product.badge || null,
+    const productForCart: SchemaProduct = {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      originalPrice: product.originalPrice || null,
+      unit: product.unit,
+      image: product.image,
+      badge: product.badge || null,
       rating: product.rating != null ? product.rating.toString() : null,
-      description: product.description || null, brand: product.brand || null,
-      weight: product.weight || null, inStock: product.inStock,
-      stockQuantity: product.stockQuantity || 0, isActive: true,
-      deletedAt: null, createdAt: new Date(), updatedAt: new Date(),
+      description: product.description || null,
+      brand: product.brand || null,
+      weight: product.weight || null,
+      inStock: product.inStock,
+      stockQuantity: product.stockQuantity || 0,
+      isActive: true,
+      deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
-    addToCart(p);
+    addToCart(productForCart);
     if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const popularProducts = activeFilter
-    ? products.filter((p) => p.category === activeFilter).slice(0, 12)
-    : products.filter((p) => p.badge === "sale" || p.badge === "hot" || p.badge === "new").slice(0, 12);
-  const allPopular = popularProducts.length === 0 ? products.slice(0, 12) : popularProducts;
+  const featuredProducts = products.filter((p) => p.badge === "hot" || p.badge === "new");
+  const saleProducts = products.filter((p) => p.badge === "sale");
 
   const bannerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const startBannerAutoScroll = useCallback(() => {
     if (bannerIntervalRef.current) clearInterval(bannerIntervalRef.current);
     bannerIntervalRef.current = setInterval(() => {
@@ -348,7 +421,7 @@ export default function HomeScreen() {
         scrollRef.current?.scrollToIndex({ index: next, animated: true });
         return next;
       });
-    }, 3800);
+    }, 3500);
   }, []);
 
   useEffect(() => {
@@ -357,99 +430,130 @@ export default function HomeScreen() {
   }, [startBannerAutoScroll]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
-  const greetingKey = getGreetingKey();
-  const firstName = user?.name ? user.name.split(" ")[0] : "";
-
-  // Build category rows (3 per row) for Korzinka Go grid
-  const catRows: any[][] = [];
-  for (let i = 0; i < categories.length; i += 3) {
-    catRows.push(categories.slice(i, i + 3));
-  }
-
+  const bgColors: [string, string, string] = isDarkMode
+    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
+    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
 
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={isDarkMode
-          ? ["#071524", "#0d1e33", "#0C0C0E"]
-          : ["#e8fdf2", "#f2fcf7", "#F5F6F5"]}
-        locations={[0, 0.45, 1]}
+        colors={bgColors}
+        locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFill}
       />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 100 : 130 }}
-      >
-        {/* ── Header ── */}
-        <View style={[styles.header, { paddingTop: topPadding + 14 }]}>
-          <View style={{ flex: 1 }}>
-            <Pressable style={styles.locationRow} onPress={() => setShowLocationModal(true)}>
-              <Ionicons name="location" size={13} color="#16A34A" />
-              <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
-                {location?.address
-                  ? location.address.length > 28 ? location.address.slice(0, 28) + "…" : location.address
-                  : t("set_location")}
-              </Text>
-              <Ionicons name={locationLoading ? "reload-outline" : "chevron-down"} size={12} color={Colors.textMuted} />
-            </Pressable>
-            <Text style={[styles.greeting, { color: Colors.text }]}>
-              {t(greetingKey)}{firstName ? ", " + firstName : ""}
-            </Text>
-          </View>
+      <View style={[
+        styles.blobTR,
+        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.09)" : "rgba(22,163,74,0.14)" }
+      ]} />
+      <View style={[
+        styles.blobBL,
+        { backgroundColor: isDarkMode ? "rgba(22,163,74,0.04)" : "rgba(22,163,74,0.07)" }
+      ]} />
 
-          <Pressable
-            style={[styles.notifBtn, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
-            onPress={() => {
-              if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setShowNotifications(true);
-            }}
-          >
-            <Ionicons name="notifications-outline" size={20} color={Colors.text} />
-            {unreadCount > 0 && (
-              <View style={styles.notifDot}>
-                <Text style={styles.notifDotText}>{unreadCount > 9 ? "9+" : unreadCount}</Text>
-              </View>
-            )}
-          </Pressable>
+      <ScrollView
+        style={{ backgroundColor: "transparent" }}
+        contentContainerStyle={[styles.content, { paddingTop: topPadding + 12 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.logoBanner}>
+          <Image
+            source={require("@/assets/logo.png")}
+            style={styles.logoBannerImage}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* ── Search bar ── */}
+        <View style={styles.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
+            <Pressable
+              style={styles.locationRow}
+              onPress={() => setShowLocationModal(true)}
+            >
+              <Ionicons name="location" size={14} color="#16A34A" />
+              <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
+                {location?.address
+                  ? location.address.length > 32
+                    ? location.address.slice(0, 32) + "…"
+                    : location.address
+                  : "Joylashuvni aniqlash"}
+              </Text>
+              <Ionicons
+                name={locationLoading ? "reload-outline" : "chevron-down"}
+                size={13}
+                color={Colors.textMuted}
+              />
+            </Pressable>
+          </View>
+          <Animated.View style={notifAnim}>
+            <Pressable
+              style={[
+                styles.notifBtn,
+                {
+                  backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.75)",
+                  borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+                }
+              ]}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowNotifications(true);
+              }}
+              onPressIn={() => { notifScale.value = withSpring(0.88); }}
+              onPressOut={() => { notifScale.value = withSpring(1); }}
+            >
+              <Ionicons name="notifications-outline" size={21} color={Colors.text} />
+              {unreadCount > 0 && (
+                <View style={styles.notifDot}>
+                  {unreadCount <= 9 && (
+                    <Text style={styles.notifDotText}>{unreadCount}</Text>
+                  )}
+                </View>
+              )}
+            </Pressable>
+          </Animated.View>
+        </View>
+
         <Pressable
-          style={[styles.searchBar, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff" }]}
+          style={[
+            styles.searchBar,
+            {
+              backgroundColor: isDarkMode ? "rgba(28,28,30,0.7)" : "rgba(255,255,255,0.82)",
+              borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
+            }
+          ]}
           onPress={() => router.push("/(tabs)/catalog")}
         >
-          <Ionicons name="search-outline" size={18} color={Colors.textMuted} />
+          <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
+            <Ionicons name="search" size={16} color="#16A34A" />
+          </View>
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
-            {t("search_placeholder")}
+            Mahsulot yoki kategoriya...
           </Text>
-          <View style={styles.filterIcon}>
-            <Ionicons name="options-outline" size={17} color="#16A34A" />
+          <View style={[styles.filterBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
+            <Ionicons name="options-outline" size={16} color="#16A34A" />
           </View>
         </Pressable>
 
-        {/* ── Feature pills ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillsRow}
-          style={{ marginBottom: 16 }}
-        >
-          {[
-            { icon: "bicycle-outline", title: t("free_delivery"), sub: t("free_delivery_sub"), color: "#16A34A", bg: "#F0FDF4" },
-            { icon: "time-outline",    title: t("express"),       sub: t("express_sub"),        color: "#F97316", bg: "#FFF7ED" },
-            { icon: "shield-checkmark-outline", title: t("guarantee"), sub: t("guarantee_sub"), color: "#3B82F6", bg: "#EFF6FF" },
-          ].map((pill) => (
-            <View key={pill.title} style={[styles.pill, { backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : pill.bg }]}>
-              <Ionicons name={pill.icon as any} size={18} color={pill.color} />
-              <View style={{ gap: 1 }}>
-                <Text style={[styles.pillTitle, { color: Colors.text }]}>{pill.title}</Text>
-                <Text style={[styles.pillSub, { color: Colors.textSecondary }]}>{pill.sub}</Text>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
+        <View style={[styles.deliveryStrip, {
+          backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.08)",
+          borderColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.18)",
+        }]}>
+          <View style={styles.deliveryItem}>
+            <Ionicons name="bicycle-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>30 daqiqada yetkazish</Text>
+          </View>
+          <View style={styles.deliverySep} />
+          <View style={styles.deliveryItem}>
+            <Ionicons name="shield-checkmark-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Sifat kafolati</Text>
+          </View>
+          <View style={styles.deliverySep} />
+          <View style={styles.deliveryItem}>
+            <Ionicons name="storefront-outline" size={16} color="#16A34A" />
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Yangi mahsulotlar</Text>
+          </View>
+        </View>
 
-        {/* ── Hero Banner ── */}
         <FlatList
           ref={scrollRef}
           data={BANNERS}
@@ -457,428 +561,321 @@ export default function HomeScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
-            const index = Math.round(e.nativeEvent.contentOffset.x / BANNER_W);
+            const index = Math.round(e.nativeEvent.contentOffset.x / width);
             setActiveBanner(index);
             startBannerAutoScroll();
           }}
           renderItem={({ item }) => (
-            <Pressable
-              style={[styles.bannerCard, { width: BANNER_W }]}
+            <Banner
+              item={item}
+              bannerWidth={BANNER_W}
               onPress={() => router.push("/(tabs)/catalog")}
-            >
-              <Image
-                source={{ uri: (item as any).image }}
-                style={StyleSheet.absoluteFillObject as any}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={[(item as any).overlayStart || "rgba(0,60,20,0.7)", (item as any).overlayEnd || "rgba(0,30,10,0.3)"]}
-                start={{ x: 0.1, y: 0 }}
-                end={{ x: 0.7, y: 1 }}
-                style={StyleSheet.absoluteFillObject as any}
-              />
-              <View style={styles.bannerTop}>
-                <View style={[styles.bannerTag, { backgroundColor: (item as any).tagColor || "#16A34A" }]}>
-                  <Text style={styles.bannerTagText}>{(item as any).tag || "SALE"}</Text>
-                </View>
-                <View style={styles.bannerDelivery}>
-                  <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
-                  <Text style={styles.bannerDeliveryText}>{t("express")}</Text>
-                </View>
-              </View>
-              <View style={styles.bannerBottom}>
-                <Text style={styles.bannerSub}>{item.subtitle}</Text>
-                <Text style={styles.bannerTitle}>{item.title}</Text>
-                <View style={styles.bannerCta}>
-                  <Text style={styles.bannerCtaText}>{t("shop_now")}</Text>
-                  <Ionicons name="arrow-forward" size={13} color="#fff" />
-                </View>
-              </View>
-            </Pressable>
+            />
           )}
-          style={{ marginHorizontal: 16, borderRadius: 24, overflow: "hidden" }}
-          snapToInterval={BANNER_W}
+          style={styles.bannerList}
+          snapToInterval={width}
           decelerationRate="fast"
-          contentContainerStyle={{ gap: 0 }}
+          contentContainerStyle={{ paddingHorizontal: 0 }}
         />
         <View style={styles.dotsRow}>
-          {BANNERS.map((_, i) => <BannerDot key={i} isActive={i === activeBanner} />)}
+          {BANNERS.map((_, i) => (
+            <BannerDot key={i} isActive={i === activeBanner} isDarkMode={isDarkMode} />
+          ))}
         </View>
 
-        {/* ── Filter chips ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsRow}
-          style={{ marginBottom: 20 }}
-        >
-          <Pressable
-            style={[styles.chip, {
-              backgroundColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
-              borderColor: !activeFilter ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-            }]}
-            onPress={() => setActiveFilter(null)}
-          >
-            <Text style={[styles.chipText, { color: !activeFilter ? "#fff" : Colors.text }]}>
-              {t("filter_all")}
-            </Text>
-          </Pressable>
-          {categories.slice(0, 6).map((cat: any) => (
-            <Pressable
-              key={cat.id}
-              style={[styles.chip, {
-                backgroundColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
-                borderColor: activeFilter === cat.id ? "#16A34A" : isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-              }]}
-              onPress={() => {
-                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setActiveFilter(activeFilter === cat.id ? null : cat.id);
-              }}
-            >
-              <Text style={[styles.chipText, { color: activeFilter === cat.id ? "#fff" : Colors.text }]}>
-                {cat.name}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        {/* ── Popular Today ── */}
         <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <View style={styles.sectionAccent} />
-            <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("popular_today")}</Text>
-          </View>
-          <View style={[styles.countBadge, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "#F0FDF4" }]}>
-            <Text style={styles.countBadgeText}>{allPopular.length} {t("items_unit")}</Text>
-          </View>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
+          <Pressable onPress={() => router.push("/(tabs)/catalog")}>
+            <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
+          </Pressable>
         </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 12, marginBottom: 0 }}
-        >
-          {allPopular.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={convertToProduct(product)}
-              onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
-            />
-          ))}
-        </ScrollView>
 
-        {/* ── Browse All CTA ── */}
-        <Pressable
-          style={[styles.browseAllBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "#F0FDF4", borderColor: isDarkMode ? "rgba(22,163,74,0.3)" : "#BBF7D0" }]}
-          onPress={() => router.push("/(tabs)/catalog")}
-        >
-          <View style={styles.browseAllLeft}>
-            <View style={[styles.browseAllIcon, { backgroundColor: "#16A34A" }]}>
-              <Ionicons name="grid" size={18} color="#fff" />
+        <View style={styles.catGrid}>
+          {categories.map((cat) => {
+            const count = products.filter((p) => p.category === cat.id).length;
+            return (
+              <CategoryCard
+                key={cat.id}
+                item={cat}
+                isDarkMode={isDarkMode}
+                productCount={count}
+                onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+              />
+            );
+          })}
+        </View>
+
+        {featuredProducts.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Tavsiya etilgan</Text>
             </View>
-            <View>
-              <Text style={[styles.browseAllTitle, { color: Colors.text }]}>{t("all_categories")}</Text>
-              <Text style={[styles.browseAllSub, { color: Colors.textMuted }]}>{categories.length} ta kategoriya</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={convertToProduct(product)}
+                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+                />
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        {saleProducts.length > 0 && (
+          <>
+            <View style={[styles.sectionHeader, { marginTop: 8 }]}>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Chegirmali</Text>
+              <View style={styles.saleBadge}>
+                <Ionicons name="pricetag" size={11} color="#fff" />
+                <Text style={styles.saleBadgeText}>30% gacha</Text>
+              </View>
             </View>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#16A34A" />
-        </Pressable>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
+              {saleProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={convertToProduct(product)}
+                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+                />
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        {featuredProducts.length === 0 && saleProducts.length === 0 && products.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Barcha mahsulotlar</Text>
+              <Pressable onPress={() => router.push("/(tabs)/catalog")}>
+                <Text style={styles.seeAll}>Barchasini ko&apos;rish</Text>
+              </Pressable>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
+              {products.slice(0, 8).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={convertToProduct(product)}
+                  onPress={() => router.push({ pathname: "/product/[id]", params: { id: product.id } })}
+                />
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        <View style={{ height: Platform.OS === "web" ? 34 : 100 }} />
       </ScrollView>
 
-      <NotificationsModal visible={showNotifications} onClose={() => setShowNotifications(false)} />
-      <LocationPermissionModal visible={showLocationModal} onDismiss={() => setShowLocationModal(false)} />
+      <NotificationsModal
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      <LocationPermissionModal
+        visible={showLocationModal}
+        onDismiss={() => setShowLocationModal(false)}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  blobTR: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    top: -90,
+    right: -70,
+  },
+  blobBL: {
+    position: "absolute",
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    bottom: 120,
+    left: -80,
+  },
+  content: {
+    paddingHorizontal: 16,
+  },
+  logoBanner: {
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  logoBannerImage: {
+    width: 180,
+    height: 72,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
   header: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingHorizontal: 16,
-    marginBottom: 14,
-    gap: 12,
+    marginBottom: 16,
+  },
+  greeting: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
   },
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    marginBottom: 4,
+    marginTop: 3,
   },
   locationText: {
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "Poppins_400Regular",
     fontSize: 12,
-  },
-  greeting: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 22,
-    lineHeight: 30,
+    flex: 1,
   },
   notifBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    marginTop: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   notifDot: {
     position: "absolute",
-    top: 7,
-    right: 7,
+    top: 6,
+    right: 6,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     backgroundColor: "#EF4444",
+    borderWidth: 1.5,
+    borderColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 3,
-    borderWidth: 1.5,
-    borderColor: "#fff",
   },
   notifDotText: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 8,
+    fontSize: 9,
     color: "#fff",
+    lineHeight: 12,
+  },
+  deliveryStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+  },
+  deliveryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    flex: 1,
+    justifyContent: "center",
+  },
+  deliveryItemText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 10.5,
+  },
+  deliverySep: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(22,163,74,0.2)",
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginHorizontal: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     borderRadius: 18,
-    marginBottom: 14,
+    marginBottom: 22,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.88)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.07,
     shadowRadius: 14,
-    elevation: 4,
+    elevation: 6,
+  },
+  searchIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   searchPlaceholder: {
     flex: 1,
     fontFamily: "Poppins_400Regular",
     fontSize: 14,
   },
-  filterIcon: {
+  filterBtn: {
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "rgba(22,163,74,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
-  pillsRow: {
-    paddingHorizontal: 16,
-    gap: 10,
-  },
-  pill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.85)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  pillTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-  },
-  pillSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 10,
-  },
-  bannerCard: {
-    height: 200,
-    borderRadius: 24,
-    overflow: "hidden",
-  },
-  bannerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  bannerTag: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  bannerTagText: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 11,
-    color: "#fff",
-  },
-  bannerDelivery: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  bannerDeliveryText: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.92)",
-  },
-  bannerBottom: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 18,
-    gap: 2,
-  },
-  bannerSub: {
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.75)",
-  },
-  bannerTitle: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 20,
-    color: "#fff",
-    lineHeight: 26,
-  },
-  bannerCta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,255,255,0.22)",
-    alignSelf: "flex-start",
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-    marginTop: 8,
-  },
-  bannerCtaText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    color: "#fff",
+  bannerList: {
+    marginHorizontal: -16,
+    overflow: "visible",
   },
   dotsRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 5,
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 14,
+  },
+  dot: {
+    height: 7,
+    borderRadius: 3.5,
+  },
+  catGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 0,
   },
   sectionHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    alignItems: "center",
+    marginTop: 26,
     marginBottom: 14,
   },
-  sectionTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  sectionAccent: {
-    width: 4,
-    height: 22,
-    borderRadius: 2,
-    backgroundColor: "#16A34A",
-  },
   sectionTitle: {
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 18,
   },
   seeAll: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
+    fontFamily: "Poppins_500Medium",
+    fontSize: 14,
     color: "#16A34A",
   },
-  categoriesRow: {
-    paddingHorizontal: 16,
-    gap: 8,
-    paddingBottom: 4,
-    marginBottom: 16,
+  hScroll: {
+    overflow: "visible",
   },
-  chipsRow: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-  },
-  countBadge: {
+  saleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#EF4444",
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 10,
+    borderRadius: 20,
   },
-  countBadgeText: {
+  saleBadgeText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 12,
-    color: "#16A34A",
-  },
-  catGrid: {
-    paddingHorizontal: 12,
-    gap: 0,
-  },
-  catRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 8,
-  },
-  browseAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 8,
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderWidth: 1.5,
-  },
-  browseAllLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  browseAllIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  browseAllTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-  },
-  browseAllSub: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
+    fontSize: 11,
+    color: "#fff",
   },
 });
