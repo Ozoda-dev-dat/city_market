@@ -50,16 +50,16 @@ export class AuthService {
   }
 
   private getJwtSecret() {
-    if (this.getJwtSecret()) return this.getJwtSecret();
+    if (this.jwtSecret) return this.jwtSecret;
     const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || "default-jwt-secret-change-in-prod";
-    this.getJwtSecret() = secret;
+    this.jwtSecret = secret;
     return secret;
   }
 
   private getJwtRefreshSecret() {
-    if (this.getJwtRefreshSecret()) return this.getJwtRefreshSecret();
+    if (this.jwtRefreshSecret) return this.jwtRefreshSecret;
     const secret = process.env.JWT_REFRESH_SECRET || process.env.SESSION_SECRET || "default-refresh-secret-change-in-prod";
-    this.getJwtRefreshSecret() = secret;
+    this.jwtRefreshSecret = secret;
     return secret;
   }
 

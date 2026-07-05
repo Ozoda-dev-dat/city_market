@@ -25,9 +25,9 @@ export class DataProtectionService {
   }
 
   private getEncryptionKey() {
-    if (this.getEncryptionKey()) return this.getEncryptionKey();
-    this.getEncryptionKey() = process.env.ENCRYPTION_KEY || this.generateEncryptionKey();
-    return this.getEncryptionKey();
+    if (this.encryptionKey) return this.encryptionKey;
+    this.encryptionKey = process.env.ENCRYPTION_KEY || this.generateEncryptionKey();
+    return this.encryptionKey;
   }
 
   private generateEncryptionKey(): string {
