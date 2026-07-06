@@ -1,13 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, StyleSheet, Pressable, Platform, Image } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { SUBCATEGORY_IMAGES } from "@/components/subcategoryImages";
 
 type Width = "half" | "third";
 
@@ -37,92 +36,52 @@ function chunkSubcategories<T>(items: T[]): { items: T[]; width: Width }[] {
 
 function SubTile({
   sub,
-  productCount,
-  isDarkMode,
   width,
   onPress,
 }: {
   sub: any;
-  productCount: number;
-  isDarkMode: boolean;
   width: Width;
   onPress: () => void;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const color = sub.color || "#16A34A";
-
-  const gradStart = color + (isDarkMode ? "40" : "22");
-  const gradEnd = color + (isDarkMode ? "08" : "05");
+  const bgColor = sub.bgColor || "#F0FDF4";
   const isHalf = width === "half";
+  const image = SUBCATEGORY_IMAGES[sub.id];
 
   return (
-    <Animated.View
-      style={[
-        tileStyles.card,
-        isHalf ? tileStyles.cardHalf : tileStyles.cardThird,
-        anim,
-      ]}
-    >
+    <Animated.View style={[tileStyles.card, anim]}>
       <Pressable
         style={{ flex: 1 }}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <View
           style={[
             tileStyles.inner,
             isHalf ? tileStyles.innerHalf : tileStyles.innerThird,
-            {
-              backgroundColor: isDarkMode ? "rgba(28,28,30,0.9)" : "#fff",
-              borderColor: isDarkMode ? color + "30" : color + "28",
-            },
+            { backgroundColor: bgColor },
           ]}
         >
-          <LinearGradient
-            colors={[gradStart, gradEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-            borderRadius={18}
-          />
-          <View
-            style={[
-              tileStyles.iconWrap,
-              isHalf ? tileStyles.iconWrapHalf : tileStyles.iconWrapThird,
-              { backgroundColor: color + (isDarkMode ? "28" : "18") },
-            ]}
-          >
-            <Ionicons
-              name={(sub.icon as any) ?? "grid-outline"}
-              size={isHalf ? 26 : 22}
-              color={color}
-            />
-          </View>
           <Text
             style={[
               tileStyles.name,
               isHalf ? tileStyles.nameHalf : tileStyles.nameThird,
-              { color: isDarkMode ? "#F4F4F5" : "#111827" },
             ]}
             numberOfLines={2}
           >
             {sub.name}
           </Text>
-          {isHalf && (
-            <View
-              style={[
-                tileStyles.countBadge,
-                { backgroundColor: color + (isDarkMode ? "28" : "15") },
-              ]}
-            >
-              <Ionicons name="cube-outline" size={10} color={color} />
-              <Text style={[tileStyles.countText, { color }]}>{productCount} ta</Text>
-            </View>
+          {image && (
+            <Image
+              source={image}
+              style={isHalf ? tileStyles.imageHalf : tileStyles.imageThird}
+              resizeMode="contain"
+            />
           )}
         </View>
       </Pressable>
@@ -153,19 +112,14 @@ export function CategorySubcategorySection({
       <Text style={[secStyles.heading, { color: textColor }]}>{category.name}</Text>
       {rows.map((row, idx) => (
         <View key={idx} style={secStyles.row}>
-          {row.items.map((sub: any) => {
-            const count = allProducts.filter((p) => p.subcategoryId === sub.id).length;
-            return (
-              <SubTile
-                key={sub.id}
-                sub={sub}
-                productCount={count}
-                isDarkMode={isDarkMode}
-                width={row.width}
-                onPress={() => onPressSubcategory(sub)}
-              />
-            );
-          })}
+          {row.items.map((sub: any) => (
+            <SubTile
+              key={sub.id}
+              sub={sub}
+              width={row.width}
+              onPress={() => onPressSubcategory(sub)}
+            />
+          ))}
         </View>
       ))}
     </View>
@@ -178,7 +132,7 @@ const secStyles = StyleSheet.create({
   },
   heading: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 18,
+    fontSize: 19,
     marginBottom: 12,
   },
   row: {
@@ -192,61 +146,44 @@ const tileStyles = StyleSheet.create({
   card: {
     flex: 1,
   },
-  cardHalf: {},
-  cardThird: {},
   inner: {
-    borderRadius: 18,
-    borderWidth: 1.5,
+    borderRadius: 20,
     overflow: "hidden",
   },
   innerHalf: {
     padding: 14,
-    gap: 8,
-    minHeight: 130,
+    minHeight: 140,
   },
   innerThird: {
     padding: 10,
-    gap: 6,
-    minHeight: 110,
-    alignItems: "center",
-  },
-  iconWrap: {
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconWrapHalf: {
-    width: 46,
-    height: 46,
-  },
-  iconWrapThird: {
-    width: 42,
-    height: 42,
+    minHeight: 116,
   },
   name: {
     fontFamily: "Poppins_700Bold",
+    color: "#111827",
   },
   nameHalf: {
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 15,
+    lineHeight: 20,
+    maxWidth: "62%",
   },
   nameThird: {
-    fontSize: 11,
-    lineHeight: 15,
-    textAlign: "center",
+    fontSize: 12,
+    lineHeight: 16,
+    maxWidth: "68%",
   },
-  countBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    alignSelf: "flex-start",
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 8,
-    marginTop: "auto",
+  imageHalf: {
+    position: "absolute",
+    bottom: 4,
+    right: 4,
+    width: "58%",
+    height: "62%",
   },
-  countText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 10,
+  imageThird: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: "56%",
+    height: "56%",
   },
 });
