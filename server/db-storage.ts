@@ -127,6 +127,8 @@ export class DbStorage implements IStorage {
           { id: "sub-sabzavotlar", name: "Sabzavotlar",         icon: "leaf",       color: "#1A9B5C", bgColor: "#E8F5EE", categoryId: "vegetables" },
           // Under bakery
           { id: "sub-non",         name: "Non mahsulotlari",    icon: "pizza",      color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "bakery" },
+          // Under konservalar
+          { id: "sub-konserva",    name: "Konservalar",         icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar-" },
           // Under ichimliklar
           { id: "sub-coffee",     name: "Coffee",               icon: "cafe",       color: "#6F4E37", bgColor: "#F5ECE5", categoryId: "ichimliklar" },
           { id: "sub-energetik",  name: "Energetik ichimliklar",icon: "flash",      color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
