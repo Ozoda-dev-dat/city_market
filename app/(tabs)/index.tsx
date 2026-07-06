@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -33,7 +33,7 @@ import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, resolveImageUrl } from "@/lib/query-client";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/LocationPermissionModal";
 import { useAuth } from "@/context/AuthContext";
@@ -226,18 +226,17 @@ const bannerStyles = StyleSheet.create({
   },
 });
 
-function CategoryCard({ item, onPress, isDarkMode, productCount }: {
+function CategoryCard({ item, onPress, imageUrl, wide }: {
   item: any;
   onPress: () => void;
   isDarkMode: boolean;
   productCount: number;
+  imageUrl?: string;
+  wide?: boolean;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const accentColor: string = item.color ?? "#16A34A";
-
-  const gradStart = accentColor + (isDarkMode ? "40" : "22");
-  const gradEnd = accentColor + (isDarkMode ? "10" : "06");
+  const bgColor: string = item.bgColor ?? "#F0FDF4";
 
   return (
     <Animated.View style={[catStyles.card, anim]}>
@@ -247,38 +246,27 @@ function CategoryCard({ item, onPress, isDarkMode, productCount }: {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
         }}
-        onPressIn={() => { scale.value = withSpring(0.93, { damping: 11 }); }}
+        onPressIn={() => { scale.value = withSpring(0.95, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <View style={[
           catStyles.inner,
-          {
-            backgroundColor: isDarkMode ? "rgba(28,28,30,0.88)" : "#fff",
-            borderColor: isDarkMode ? accentColor + "30" : accentColor + "25",
-          }
+          wide ? catStyles.innerWide : catStyles.innerHalf,
+          { backgroundColor: bgColor },
         ]}>
-          <LinearGradient
-            colors={[gradStart, gradEnd]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-            borderRadius={22}
-          />
-          <View style={[catStyles.iconCircle, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
-            <Ionicons name={item.icon as any} size={32} color={accentColor} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={[catStyles.label, { color: isDarkMode ? "#F4F4F5" : "#111827" }]} numberOfLines={2}>
-              {item.name}
-            </Text>
-            <View style={[catStyles.countPill, { backgroundColor: accentColor + (isDarkMode ? "30" : "18") }]}>
-              <Ionicons name="cube-outline" size={11} color={accentColor} />
-              <Text style={[catStyles.countText, { color: accentColor }]}>{productCount} ta mahsulot</Text>
-            </View>
-          </View>
-          <View style={[catStyles.arrow, { backgroundColor: accentColor + (isDarkMode ? "25" : "15") }]}>
-            <Ionicons name="chevron-forward" size={14} color={accentColor} />
-          </View>
+          <Text
+            style={[catStyles.label, wide ? catStyles.labelWide : catStyles.labelHalf]}
+            numberOfLines={2}
+          >
+            {item.name}
+          </Text>
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              style={wide ? catStyles.imageWide : catStyles.imageHalf}
+              resizeMode="contain"
+            />
+          ) : null}
         </View>
       </Pressable>
     </Animated.View>
@@ -287,56 +275,47 @@ function CategoryCard({ item, onPress, isDarkMode, productCount }: {
 
 const catStyles = StyleSheet.create({
   card: {
-    width: "48.5%" as any,
-    marginBottom: 12,
+    flex: 1,
   },
   inner: {
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 14,
-    gap: 10,
-    borderWidth: 1.5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 14,
-    elevation: 5,
-    minHeight: 140,
+    borderRadius: 20,
     overflow: "hidden",
   },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
+  innerHalf: {
+    padding: 14,
+    minHeight: 140,
+  },
+  innerWide: {
+    padding: 16,
+    minHeight: 150,
   },
   label: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 14,
+    color: "#111827",
+  },
+  labelHalf: {
+    fontSize: 15,
     lineHeight: 20,
+    maxWidth: "62%",
   },
-  countPill: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: "flex-start" as const,
+  labelWide: {
+    fontSize: 17,
+    lineHeight: 22,
+    maxWidth: "60%",
   },
-  countText: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 11,
+  imageHalf: {
+    position: "absolute",
+    bottom: 4,
+    right: 4,
+    width: "58%",
+    height: "62%",
   },
-  arrow: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    alignSelf: "flex-end" as const,
+  imageWide: {
+    position: "absolute",
+    bottom: 4,
+    right: 4,
+    width: "50%",
+    height: "70%",
   },
 });
 
@@ -351,6 +330,17 @@ export default function HomeScreen() {
 
   const { products, categories, subcategories } = useApp();
   const { addToCart } = useCart();
+
+  const categoryImageMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const p of products) {
+      if (!p.category || map[p.category]) continue;
+      const img = (p as any).image;
+      if (!img || img.includes("placehold.co")) continue;
+      map[p.category] = resolveImageUrl(img);
+    }
+    return map;
+  }, [products]);
 
   const { user } = useAuth();
   const { location, isLoading: locationLoading } = useLocation();
@@ -588,35 +578,56 @@ export default function HomeScreen() {
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
         </View>
 
-        {categories.map((cat) => {
-          const catSubcategories = subcategories.filter((s: any) => s.categoryId === cat.id);
-          if (catSubcategories.length === 0) {
-            const count = products.filter((p) => p.category === cat.id).length;
-            return (
-              <View key={cat.id} style={styles.catGrid}>
-                <CategoryCard
-                  item={cat}
-                  isDarkMode={isDarkMode}
-                  productCount={count}
-                  onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
-                />
+        {(() => {
+          const blocks: React.ReactNode[] = [];
+          let pendingRow: any[] = [];
+
+          const flushPending = () => {
+            if (pendingRow.length === 0) return;
+            const rowCats = pendingRow;
+            blocks.push(
+              <View key={`catrow-${rowCats.map((c) => c.id).join("-")}`} style={styles.catRow}>
+                {rowCats.map((cat) => (
+                  <CategoryCard
+                    key={cat.id}
+                    item={cat}
+                    isDarkMode={isDarkMode}
+                    productCount={products.filter((p) => p.category === cat.id).length}
+                    imageUrl={categoryImageMap[cat.id]}
+                    onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+                  />
+                ))}
               </View>
             );
-          }
-          return (
-            <CategorySubcategorySection
-              key={cat.id}
-              category={cat}
-              subcategories={catSubcategories}
-              allProducts={products}
-              isDarkMode={isDarkMode}
-              textColor={Colors.text}
-              onPressSubcategory={(sub) =>
-                router.push({ pathname: "/subcategory/[id]", params: { id: sub.id } })
-              }
-            />
-          );
-        })}
+            pendingRow = [];
+          };
+
+          categories.forEach((cat) => {
+            const catSubcategories = subcategories.filter((s: any) => s.categoryId === cat.id);
+            if (catSubcategories.length === 0) {
+              pendingRow.push(cat);
+              if (pendingRow.length === 2) flushPending();
+              return;
+            }
+            flushPending();
+            blocks.push(
+              <CategorySubcategorySection
+                key={cat.id}
+                category={cat}
+                subcategories={catSubcategories}
+                allProducts={products}
+                isDarkMode={isDarkMode}
+                textColor={Colors.text}
+                onPressSubcategory={(sub) =>
+                  router.push({ pathname: "/subcategory/[id]", params: { id: sub.id } })
+                }
+              />
+            );
+          });
+          flushPending();
+
+          return blocks;
+        })()}
 
         {featuredProducts.length > 0 && (
           <>
@@ -849,11 +860,10 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 3.5,
   },
-  catGrid: {
+  catRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 0,
+    gap: 10,
+    marginBottom: 10,
   },
   sectionHeader: {
     flexDirection: "row",
