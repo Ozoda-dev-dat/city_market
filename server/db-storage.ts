@@ -121,6 +121,8 @@ export class DbStorage implements IStorage {
 
         // Create default subcategories
         const subcats = [
+          // Under fruits
+          { id: "sub-mevalar",    name: "Mevalar",              icon: "nutrition",  color: "#FF6B35", bgColor: "#FFF0EB", categoryId: "fruits" },
           // Under ichimliklar
           { id: "sub-coffee",     name: "Coffee",               icon: "cafe",       color: "#6F4E37", bgColor: "#F5ECE5", categoryId: "ichimliklar" },
           { id: "sub-energetik",  name: "Energetik ichimliklar",icon: "flash",      color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
