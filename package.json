@@ -93,6 +93,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.1",
+    "@expo/cli": "^57.0.4",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "^11.4.1",
@@ -151,7 +152,7 @@
     "react-native-worklets": "^0.5.1",
     "react-native-worklets-core": "^1.6.3",
     "redux-persist": "^6.0.0",
-    "tsx": "^4.21.0",
+    "tsx": "^4.23.0",
     "url-parse": "^1.5.10",
     "ws": "^8.20.0",
     "xlsx": "^0.18.5",
