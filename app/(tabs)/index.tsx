@@ -28,6 +28,7 @@ import * as Haptics from "expo-haptics";
 import getColors from "@/constants/colors";
 import { BANNERS, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
+import { CategorySubcategorySection } from "@/components/CategorySubcategorySection";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -348,7 +349,7 @@ export default function HomeScreen() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
 
-  const { products, categories } = useApp();
+  const { products, categories, subcategories } = useApp();
   const { addToCart } = useCart();
 
   const { user } = useAuth();
@@ -587,20 +588,35 @@ export default function HomeScreen() {
           <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
         </View>
 
-        <View style={styles.catGrid}>
-          {categories.map((cat) => {
+        {categories.map((cat) => {
+          const catSubcategories = subcategories.filter((s: any) => s.categoryId === cat.id);
+          if (catSubcategories.length === 0) {
             const count = products.filter((p) => p.category === cat.id).length;
             return (
-              <CategoryCard
-                key={cat.id}
-                item={cat}
-                isDarkMode={isDarkMode}
-                productCount={count}
-                onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
-              />
+              <View key={cat.id} style={styles.catGrid}>
+                <CategoryCard
+                  item={cat}
+                  isDarkMode={isDarkMode}
+                  productCount={count}
+                  onPress={() => router.push({ pathname: "/category/[id]", params: { id: cat.id } })}
+                />
+              </View>
             );
-          })}
-        </View>
+          }
+          return (
+            <CategorySubcategorySection
+              key={cat.id}
+              category={cat}
+              subcategories={catSubcategories}
+              allProducts={products}
+              isDarkMode={isDarkMode}
+              textColor={Colors.text}
+              onPressSubcategory={(sub) =>
+                router.push({ pathname: "/subcategory/[id]", params: { id: sub.id } })
+              }
+            />
+          );
+        })}
 
         {featuredProducts.length > 0 && (
           <>
