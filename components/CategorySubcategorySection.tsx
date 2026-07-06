@@ -109,7 +109,6 @@ export function CategorySubcategorySection({
 
   return (
     <View style={secStyles.section}>
-      <Text style={[secStyles.heading, { color: textColor }]}>{category.name}</Text>
       {rows.map((row, idx) => (
         <View key={idx} style={secStyles.row}>
           {row.items.map((sub: any) => (
@@ -129,11 +128,6 @@ export function CategorySubcategorySection({
 const secStyles = StyleSheet.create({
   section: {
     marginBottom: 8,
-  },
-  heading: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 19,
-    marginBottom: 12,
   },
   row: {
     flexDirection: "row",
