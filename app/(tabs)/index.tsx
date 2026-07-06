@@ -567,6 +567,8 @@ export default function HomeScreen() {
           snapToInterval={width}
           decelerationRate="fast"
           contentContainerStyle={{ paddingHorizontal: 0 }}
+          getItemLayout={(_data, index) => ({ length: BANNER_W, offset: BANNER_W * index, index })}
+          onScrollToIndexFailed={() => {}}
         />
         <View style={styles.dotsRow}>
           {BANNERS.map((_, i) => (
