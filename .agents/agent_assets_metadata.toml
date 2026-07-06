@@ -378,6 +378,66 @@ uri = "file://attached_assets/screenshot_profile_real.png"
 type = "image"
 title = "generated_image"
 
+[[generated]]
+id = "CCEl8WW_7bQgyLwbl4mhT"
+uri = "file://assets/subcategory-images/sub-choy.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "US7ZCUacXkK0o2FhyW5-X"
+uri = "file://assets/subcategory-images/sub-coffee-cat.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "FIjPRlX20yD-43Pyon8Ur"
+uri = "file://assets/subcategory-images/sub-ketchup.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "Vx3U4AIaOijQODUnAutOd"
+uri = "file://assets/subcategory-images/sub-makaron.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "3auv0jwmocWCtmPFWaTvd"
+uri = "file://assets/subcategory-images/sub-mayonez.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "GdEPFQbosud_rDZsbm3lO"
+uri = "file://assets/subcategory-images/sub-sharbat-cat.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "XEPre7d96YHjVRhEM0ROK"
+uri = "file://assets/subcategory-images/sub-shokolad.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "E0c1rhw4whznyCr8casEA"
+uri = "file://assets/subcategory-images/sub-pasta.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "tpoS_BlaA-f9VWfEyX7a9"
+uri = "file://assets/subcategory-images/sub-yog.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "xaogp9zMIQFkzGGM0-Ye2"
+uri = "file://assets/subcategory-images/sub-sneklar.png"
+type = "image"
+title = "generated_image"
+
 [[outputs]]
 id = "QKo1J-CJYApKQXWEUNRkt"
 uri = "file://qr-expo.png"

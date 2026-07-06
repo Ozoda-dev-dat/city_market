@@ -128,9 +128,37 @@ export class DbStorage implements IStorage {
           // Under bakery
           { id: "sub-non",         name: "Non mahsulotlari",    icon: "pizza",      color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "bakery" },
           // Under konservalar
-          { id: "sub-konserva",    name: "Konservalar",         icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar-" },
+          { id: "sub-konserva",       name: "Konservalar",              icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar-" },
           // Under murabbo va djemlar
-          { id: "sub-murabbo",     name: "Murabbo va djemlar",  icon: "heart",        color: "#DB2777", bgColor: "#FDF2F8", categoryId: "murabbo-va-djemlar" },
+          { id: "sub-murabbo",        name: "Murabbo va djemlar",       icon: "heart",        color: "#DB2777", bgColor: "#FDF2F8", categoryId: "murabbo-va-djemlar" },
+          // Under choy
+          { id: "sub-choy",           name: "Choy",                     icon: "cafe",         color: "#6B7280", bgColor: "#F3F4F6", categoryId: "choy" },
+          // Under coffee category
+          { id: "sub-coffee-cat",     name: "Coffee",                   icon: "cafe",         color: "#6F4E37", bgColor: "#F5ECE5", categoryId: "coffee" },
+          // Under ketchuplar
+          { id: "sub-ketchup",        name: "Ketchuplar",               icon: "fast-food",    color: "#DC2626", bgColor: "#FEF2F2", categoryId: "ketchuplar" },
+          // Under makaron
+          { id: "sub-makaron",        name: "Makaron, un va yormalar",  icon: "restaurant",   color: "#D97706", bgColor: "#FFFBEB", categoryId: "makaron-un-yormalar" },
+          // Under mayonezlar
+          { id: "sub-mayonez",        name: "Mayonezlar",               icon: "restaurant",   color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "mayonezlar" },
+          // Under sharbatlar category
+          { id: "sub-sharbat-cat",    name: "Sharbatlar",               icon: "wine",         color: "#F97316", bgColor: "#FFF7ED", categoryId: "sharbatlar" },
+          // Under shokoladlar
+          { id: "sub-shokolad",       name: "Shokoladlar",              icon: "gift-outline", color: "#92400E", bgColor: "#FEF3C7", categoryId: "shokoladlar" },
+          // Under shokolatli-pastalar
+          { id: "sub-pasta",          name: "Shokolatli pastalar",      icon: "cafe",         color: "#78350F", bgColor: "#FEF3C7", categoryId: "shokolatli-pastalar" },
+          // Under yog-va-souslar
+          { id: "sub-yog",            name: "Yog va souslar",           icon: "flask",        color: "#FBBF24", bgColor: "#FFFBEB", categoryId: "yog-va-souslar" },
+          // Under yongok-va-sneklar
+          { id: "sub-sneklar",        name: "Yongok va sneklar",        icon: "pizza",        color: "#D97706", bgColor: "#FEF3C7", categoryId: "yongok-va-sneklar" },
+          // Under bolalar-ovqatlar
+          { id: "sub-bolalar",        name: "Bolalar ovqatlar",         icon: "heart",        color: "#F472B6", bgColor: "#FDF2F8", categoryId: "bolalar-ovqatlar" },
+          // Under oyinchoqlar
+          { id: "sub-oyinchoq",       name: "Oyinchoqlar",              icon: "gift-outline", color: "#8B5CF6", bgColor: "#F5F3FF", categoryId: "oyinchoqlar" },
+          // Under shampunlar
+          { id: "sub-shampun",        name: "Shampunlar",               icon: "water",        color: "#06B6D4", bgColor: "#ECFEFF", categoryId: "shampunlar" },
+          // Under tagliklar
+          { id: "sub-taglik",         name: "Tagliklar",                icon: "cube-outline", color: "#6B7280", bgColor: "#F9FAFB", categoryId: "tagliklar" },
           // Under ichimliklar
           { id: "sub-energetik",  name: "Energetik ichimliklar",icon: "flash",      color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
           // Under meat
