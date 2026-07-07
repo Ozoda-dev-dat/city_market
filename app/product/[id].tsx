@@ -33,13 +33,28 @@ const BADGE_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const CATEGORY_PAIRS: Record<string, string[]> = {
-  ichimliklar: ["shokoladlar", "konservalar"],
-  shokoladlar: ["ichimliklar", "konservalar"],
-  konservalar: ["ichimliklar", "shokoladlar"],
-  fruits: ["dairy", "shokoladlar"],
-  vegetables: ["meat", "konservalar"],
-  meat: ["vegetables", "dairy"],
-  dairy: ["fruits", "konservalar"],
+  fruits:                ["dairy", "yongok-va-sneklar", "shokoladlar"],
+  vegetables:            ["meat", "yog-va-souslar", "ketchuplar"],
+  meat:                  ["vegetables", "dairy", "makaron-un-yormalar", "yog-va-souslar"],
+  dairy:                 ["fruits", "bakery", "murabbo-va-djemlar"],
+  bakery:                ["dairy", "murabbo-va-djemlar", "shokolatli-pastalar", "choy", "coffee"],
+  ichimliklar:           ["shokoladlar", "yongok-va-sneklar"],
+  sharbatlar:            ["shokoladlar", "yongok-va-sneklar"],
+  choy:                  ["bakery", "shokoladlar", "murabbo-va-djemlar"],
+  coffee:                ["bakery", "shokoladlar", "shokolatli-pastalar"],
+  shokoladlar:           ["ichimliklar", "yongok-va-sneklar", "sharbatlar", "choy"],
+  "shokolatli-pastalar": ["bakery", "dairy", "coffee"],
+  "yongok-va-sneklar":   ["ichimliklar", "shokoladlar", "sharbatlar"],
+  "konservalar-":        ["makaron-un-yormalar", "meat", "yog-va-souslar"],
+  ketchuplar:            ["meat", "yog-va-souslar", "mayonezlar"],
+  mayonezlar:            ["ketchuplar", "yog-va-souslar", "meat"],
+  "yog-va-souslar":      ["ketchuplar", "mayonezlar", "meat"],
+  "makaron-un-yormalar": ["meat", "yog-va-souslar", "dairy"],
+  "murabbo-va-djemlar":  ["bakery", "dairy", "choy"],
+  "bolalar-ovqatlar":    ["dairy", "fruits"],
+  tagliklar:             ["meat", "dairy", "yog-va-souslar"],
+  shampunlar:            [],
+  oyinchoqlar:           [],
 };
 
 export default function ProductDetailScreen() {
