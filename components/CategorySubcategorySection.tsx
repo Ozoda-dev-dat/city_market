@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable, Platform, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform, Image, Dimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,51 +8,22 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { SUBCATEGORY_IMAGES } from "@/components/subcategoryImages";
 
-type Width = "half" | "third";
+const { width: SCREEN_W } = Dimensions.get("window");
+const GAP = 10;
+const H_PAD = 16;
+const TILE_W = (SCREEN_W - H_PAD * 2 - GAP) / 2;
+const TILE_H = TILE_W * 0.78;
 
-function chunkSubcategories<T>(items: T[]): { items: T[]; width: Width }[] {
-  const rows: { items: T[]; width: Width }[] = [];
-  if (items.length === 0) return rows;
-  if (items.length <= 2) {
-    rows.push({ items, width: "half" });
-    return rows;
-  }
-  if (items.length === 3) {
-    rows.push({ items, width: "third" });
-    return rows;
-  }
-  if (items.length === 4) {
-    rows.push({ items: items.slice(0, 2), width: "half" });
-    rows.push({ items: items.slice(2, 4), width: "half" });
-    return rows;
-  }
-  rows.push({ items: items.slice(0, 2), width: "half" });
-  const rest = items.slice(2);
-  for (let i = 0; i < rest.length; i += 3) {
-    rows.push({ items: rest.slice(i, i + 3), width: "third" });
-  }
-  return rows;
-}
-
-function SubTile({
-  sub,
-  width,
-  onPress,
-}: {
-  sub: any;
-  width: Width;
-  onPress: () => void;
-}) {
+function SubTile({ sub, onPress }: { sub: any; onPress: () => void }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const bgColor = sub.bgColor || "#F0FDF4";
-  const isHalf = width === "half";
   const image = SUBCATEGORY_IMAGES[sub.id];
 
   return (
-    <Animated.View style={[tileStyles.card, anim]}>
+    <Animated.View style={[styles.tile, anim]}>
       <Pressable
-        style={{ flex: 1 }}
+        style={styles.pressable}
         onPress={() => {
           if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onPress();
@@ -60,26 +31,14 @@ function SubTile({
         onPressIn={() => { scale.value = withSpring(0.95, { damping: 11 }); }}
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
-        <View
-          style={[
-            tileStyles.inner,
-            isHalf ? tileStyles.innerHalf : tileStyles.innerThird,
-            { backgroundColor: bgColor },
-          ]}
-        >
-          <Text
-            style={[
-              tileStyles.name,
-              isHalf ? tileStyles.nameHalf : tileStyles.nameThird,
-            ]}
-            numberOfLines={2}
-          >
+        <View style={[styles.inner, { backgroundColor: bgColor }]}>
+          <Text style={styles.name} numberOfLines={2}>
             {sub.name}
           </Text>
           {image && (
             <Image
               source={image}
-              style={isHalf ? tileStyles.imageHalf : tileStyles.imageThird}
+              style={styles.image}
               resizeMode="contain"
             />
           )}
@@ -105,79 +64,74 @@ export function CategorySubcategorySection({
   onPressSubcategory: (sub: any) => void;
 }) {
   if (subcategories.length === 0) return null;
-  const rows = chunkSubcategories(subcategories);
+
+  const rows: any[][] = [];
+  for (let i = 0; i < subcategories.length; i += 2) {
+    rows.push(subcategories.slice(i, i + 2));
+  }
 
   return (
-    <View style={secStyles.section}>
+    <View style={styles.section}>
       {rows.map((row, idx) => (
-        <View key={idx} style={secStyles.row}>
-          {row.items.map((sub: any) => (
+        <View key={idx} style={styles.row}>
+          {row.map((sub: any) => (
             <SubTile
               key={sub.id}
               sub={sub}
-              width={row.width}
               onPress={() => onPressSubcategory(sub)}
             />
           ))}
+          {row.length === 1 && <View style={styles.tile} />}
         </View>
       ))}
     </View>
   );
 }
 
-const secStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   section: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   row: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 10,
+    gap: GAP,
+    marginBottom: GAP,
+    paddingHorizontal: H_PAD,
   },
-});
-
-const tileStyles = StyleSheet.create({
-  card: {
+  tile: {
+    width: TILE_W,
+    height: TILE_H,
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  pressable: {
     flex: 1,
-  },
-  inner: {
-    borderRadius: 20,
+    borderRadius: 22,
     overflow: "hidden",
   },
-  innerHalf: {
+  inner: {
+    flex: 1,
+    borderRadius: 22,
     padding: 14,
-    minHeight: 140,
-  },
-  innerThird: {
-    padding: 10,
-    minHeight: 116,
+    overflow: "hidden",
   },
   name: {
     fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    lineHeight: 19,
     color: "#111827",
+    maxWidth: "58%",
+    zIndex: 1,
   },
-  nameHalf: {
-    fontSize: 15,
-    lineHeight: 20,
-    maxWidth: "62%",
-  },
-  nameThird: {
-    fontSize: 12,
-    lineHeight: 16,
-    maxWidth: "68%",
-  },
-  imageHalf: {
+  image: {
     position: "absolute",
-    bottom: 4,
-    right: 4,
-    width: "58%",
-    height: "62%",
-  },
-  imageThird: {
-    position: "absolute",
-    bottom: 2,
-    right: 2,
-    width: "56%",
-    height: "56%",
+    bottom: -4,
+    right: -4,
+    width: "68%",
+    height: "86%",
   },
 });
