@@ -231,6 +231,12 @@ export default function AuthScreen() {
                 resetRegister();
               }}
             >
+              <Ionicons
+                name="log-in-outline"
+                size={15}
+                color={isLogin ? "#16A34A" : "#9CA3AF"}
+                style={{ marginBottom: 2 }}
+              />
               <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
             </Pressable>
             <Pressable
@@ -241,7 +247,15 @@ export default function AuthScreen() {
                 resetRegister();
               }}
             >
-              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Ro'yxat</Text>
+              <Ionicons
+                name="person-add-outline"
+                size={15}
+                color={!isLogin ? "#16A34A" : "#9CA3AF"}
+                style={{ marginBottom: 2 }}
+              />
+              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]} numberOfLines={1} adjustsFontSizeToFit>
+                Ro'yhatdan o'tish
+              </Text>
             </Pressable>
           </View>
 
@@ -565,9 +579,12 @@ const getStyles = (isDarkMode: boolean) => {
     },
     tab: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: 8,
       alignItems: "center",
+      justifyContent: "center",
       borderRadius: 11,
+      flexDirection: "column",
+      gap: 1,
     },
     tabActive: {
       backgroundColor: Colors.card,
@@ -579,8 +596,9 @@ const getStyles = (isDarkMode: boolean) => {
     },
     tabText: {
       fontFamily: "Poppins_500Medium",
-      fontSize: 14,
+      fontSize: 12,
       color: Colors.textMuted,
+      textAlign: "center",
     },
     tabTextActive: {
       fontFamily: "Poppins_700Bold",
