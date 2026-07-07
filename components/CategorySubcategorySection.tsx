@@ -12,16 +12,18 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const GAP = 10;
 const H_PAD = 16;
 const TILE_W = (SCREEN_W - H_PAD * 2 - GAP) / 2;
+const TILE_W_FULL = SCREEN_W - H_PAD * 2;
 const TILE_H = TILE_W * 0.78;
+const TILE_H_FULL = TILE_W_FULL * 0.38;
 
-function SubTile({ sub, onPress }: { sub: any; onPress: () => void }) {
+function SubTile({ sub, onPress, full = false }: { sub: any; onPress: () => void; full?: boolean }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const bgColor = sub.bgColor || "#F0FDF4";
   const image = SUBCATEGORY_IMAGES[sub.id];
 
   return (
-    <Animated.View style={[styles.tile, anim]}>
+    <Animated.View style={[full ? styles.tileFull : styles.tile, anim]}>
       <Pressable
         style={styles.pressable}
         onPress={() => {
@@ -32,13 +34,13 @@ function SubTile({ sub, onPress }: { sub: any; onPress: () => void }) {
         onPressOut={() => { scale.value = withSpring(1, { damping: 12 }); }}
       >
         <View style={[styles.inner, { backgroundColor: bgColor }]}>
-          <Text style={styles.name} numberOfLines={2}>
+          <Text style={[styles.name, full && styles.nameFull]} numberOfLines={2}>
             {sub.name}
           </Text>
           {image && (
             <Image
               source={image}
-              style={styles.image}
+              style={full ? styles.imageFull : styles.image}
               resizeMode="contain"
             />
           )}
@@ -72,18 +74,21 @@ export function CategorySubcategorySection({
 
   return (
     <View style={styles.section}>
-      {rows.map((row, idx) => (
-        <View key={idx} style={styles.row}>
-          {row.map((sub: any) => (
-            <SubTile
-              key={sub.id}
-              sub={sub}
-              onPress={() => onPressSubcategory(sub)}
-            />
-          ))}
-          {row.length === 1 && <View style={styles.tile} />}
-        </View>
-      ))}
+      {rows.map((row, idx) => {
+        const isSingle = row.length === 1;
+        return (
+          <View key={idx} style={styles.row}>
+            {row.map((sub: any) => (
+              <SubTile
+                key={sub.id}
+                sub={sub}
+                full={isSingle}
+                onPress={() => onPressSubcategory(sub)}
+              />
+            ))}
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -101,6 +106,16 @@ const styles = StyleSheet.create({
   tile: {
     width: TILE_W,
     height: TILE_H,
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tileFull: {
+    width: TILE_W_FULL,
+    height: TILE_H_FULL,
     borderRadius: 22,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -127,11 +142,23 @@ const styles = StyleSheet.create({
     maxWidth: "58%",
     zIndex: 1,
   },
+  nameFull: {
+    fontSize: 16,
+    lineHeight: 22,
+    maxWidth: "50%",
+  },
   image: {
     position: "absolute",
     bottom: -4,
     right: -4,
     width: "68%",
     height: "86%",
+  },
+  imageFull: {
+    position: "absolute",
+    bottom: -4,
+    right: -4,
+    width: "44%",
+    height: "110%",
   },
 });
