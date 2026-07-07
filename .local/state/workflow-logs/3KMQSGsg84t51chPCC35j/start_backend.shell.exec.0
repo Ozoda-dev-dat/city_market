@@ -1,0 +1,680 @@
+[1G[0K⠙[1G[0K
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K⠙[1G[0K[dotenv@17.3.1] injecting env (0) from .env [2m-- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`[0m
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+✅ Environment validation passed
+📊 Environment: development
+🌐 Port: 5001
+🔐 Log Level: info
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "otp_codes" already exists, skipping'[39m,
+  file: [32m'parse_utilcmd.c'[39m,
+  line: [32m'207'[39m,
+  routine: [32m'transformCreateStmt'[39m
+}
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "idx_otp_phone" already exists, skipping'[39m,
+  file: [32m'index.c'[39m,
+  line: [32m'889'[39m,
+  routine: [32m'index_create'[39m
+}
+[2026-07-07T04:55:24.045Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T04:55:24.050Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 200 in 221ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T04:55:24.265Z] [INFO] GET /api/categories - 200 - 220ms - IP: 127.0.0.1
+[2026-07-07T04:55:24.538Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 200 in 228ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T04:55:24.765Z] [INFO] GET /api/subcategories - 200 - 227ms - IP: 127.0.0.1
+GET /api/products 200 in 2148ms :: [{"id":"prod-1782386007381-s4macf-0","name":…
+[2026-07-07T04:55:26.199Z] [INFO] GET /api/products - 200 - 2149ms - IP: 127.0.0.1
+[2026-07-07T05:00:59.794Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:00:59.804Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:00:59.841Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 2691ms :: [{"id":"fruits","name":"Mevalar","icon":"n…
+[2026-07-07T05:01:02.484Z] [INFO] GET /api/categories - 304 - 2690ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 3021ms :: [{"id":"sub-energetik","name":"Energeti…
+[2026-07-07T05:01:02.825Z] [INFO] GET /api/subcategories - 304 - 3021ms - IP: 127.0.0.1
+GET /api/products 304 in 3206ms :: [{"id":"prod-1782386007381-s4macf-0","name":…
+[2026-07-07T05:01:03.048Z] [INFO] GET /api/products - 304 - 3207ms - IP: 127.0.0.1
+[2026-07-07T05:01:15.538Z] POST /api/auth/login - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[INFO] Login attempt { phoneNumber: [32m'+99****66'[39m }
+Database: Looking for phone: +998773655966
+Database: Found users: [
+  {
+    id: [32m'ae84a191-c7b4-46b0-ada9-e3005d48f06b'[39m,
+    phoneNumber: [32m'+998773655966'[39m,
+    password: [32m'$2b$10$1S0I6HsFbkeiqv6mHIsl0uytV8x5GzE82dKUsQHCehGZHt/0cflEG'[39m,
+    role: [32m'customer'[39m,
+    name: [32m'Ozoda'[39m,
+    address: [1mnull[22m,
+    latitude: [1mnull[22m,
+    longitude: [1mnull[22m,
+    storeId: [1mnull[22m,
+    isActive: [33mtrue[39m,
+    deletedAt: [1mnull[22m,
+    createdAt: [35m2026-06-23T09:04:51.705Z[39m,
+    updatedAt: [35m2026-06-23T09:04:51.705Z[39m
+  }
+]
+Database: Returning first user: {
+  id: [32m'ae84a191-c7b4-46b0-ada9-e3005d48f06b'[39m,
+  phoneNumber: [32m'+998773655966'[39m,
+  password: [32m'$2b$10$1S0I6HsFbkeiqv6mHIsl0uytV8x5GzE82dKUsQHCehGZHt/0cflEG'[39m,
+  role: [32m'customer'[39m,
+  name: [32m'Ozoda'[39m,
+  address: [1mnull[22m,
+  latitude: [1mnull[22m,
+  longitude: [1mnull[22m,
+  storeId: [1mnull[22m,
+  isActive: [33mtrue[39m,
+  deletedAt: [1mnull[22m,
+  createdAt: [35m2026-06-23T09:04:51.705Z[39m,
+  updatedAt: [35m2026-06-23T09:04:51.705Z[39m
+}
+[INFO] Login successful {
+  userId: [32m'ae84a191-c7b4-46b0-ada9-e3005d48f06b'[39m,
+  phoneNumber: [32m'+99****66'[39m,
+  role: [32m'customer'[39m
+}
+POST /api/auth/login 200 in 1018ms :: {"user":{"id":"ae84a191-c7b4-46b0-ada9-e3…
+[2026-07-07T05:01:16.555Z] [INFO] POST /api/auth/login - 200 - 1017ms - IP: 127.0.0.1
+[2026-07-07T05:01:17.267Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 200 in 445ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:01:17.708Z] [INFO] GET /api/orders/my - 200 - 441ms - IP: 127.0.0.1
+[2026-07-07T05:01:17.958Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 200 in 439ms :: {"count":0}
+[2026-07-07T05:01:18.397Z] [INFO] GET /api/notifications/unread-count - 200 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:01:27.974Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 440ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:01:28.414Z] [INFO] GET /api/orders/my - 304 - 440ms - IP: 127.0.0.1
+[2026-07-07T05:01:38.663Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 435ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:01:39.099Z] [INFO] GET /api/orders/my - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:01:47.190Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:01:47.197Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:01:47.198Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:01:47.200Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:01:47.416Z] [INFO] GET /api/subcategories - 304 - 218ms - IP: 127.0.0.1
+GET /api/categories 304 in 225ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:01:47.419Z] [INFO] GET /api/categories - 304 - 222ms - IP: 127.0.0.1
+GET /api/products 304 in 443ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:01:47.632Z] [INFO] GET /api/products - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:01:48.614Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 435ms :: {"count":0}
+[2026-07-07T05:01:49.048Z] [INFO] GET /api/notifications/unread-count - 304 - 434ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 2183ms :: [{"id":"order-1782734124642","customerId":"…
+[2026-07-07T05:01:49.383Z] [INFO] GET /api/orders/my - 304 - 2183ms - IP: 127.0.0.1
+[2026-07-07T05:02:01.047Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:02:01.051Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:02:01.052Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:02:01.053Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 219ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:02:01.271Z] [INFO] GET /api/subcategories - 304 - 219ms - IP: 127.0.0.1
+GET /api/categories 304 in 221ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:02:01.272Z] [INFO] GET /api/categories - 304 - 221ms - IP: 127.0.0.1
+GET /api/products 304 in 445ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:02:01.489Z] [INFO] GET /api/products - 304 - 442ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:02:01.496Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:03:47.266Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:03:47.271Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:03:47.273Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:03:47.275Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:03:47.490Z] [INFO] GET /api/subcategories - 304 - 219ms - IP: 127.0.0.1
+GET /api/categories 304 in 439ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:03:47.706Z] [INFO] GET /api/categories - 304 - 440ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 436ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:03:47.710Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+GET /api/products 304 in 440ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:03:47.715Z] [INFO] GET /api/products - 304 - 440ms - IP: 127.0.0.1
+[2026-07-07T05:03:49.276Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 438ms :: {"count":0}
+[2026-07-07T05:03:49.714Z] [INFO] GET /api/notifications/unread-count - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:03:57.945Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:03:58.383Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:04:08.622Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:04:09.059Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:06:09.778Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:09.818Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:09.824Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:09.831Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 221ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:06:10.039Z] [INFO] GET /api/categories - 304 - 221ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:06:10.044Z] [INFO] GET /api/subcategories - 304 - 220ms - IP: 127.0.0.1
+GET /api/products 304 in 447ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:06:10.225Z] [INFO] GET /api/products - 304 - 447ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 436ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:10.267Z] [INFO] GET /api/orders/my - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:06:19.990Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 442ms :: {"count":0}
+[2026-07-07T05:06:20.432Z] [INFO] GET /api/notifications/unread-count - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:06:20.490Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:20.927Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:06:25.018Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:25.024Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:25.025Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:06:25.029Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 219ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:06:25.248Z] [INFO] GET /api/categories - 304 - 219ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 435ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:06:25.459Z] [INFO] GET /api/subcategories - 304 - 435ms - IP: 127.0.0.1
+GET /api/products 304 in 447ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:06:25.465Z] [INFO] GET /api/products - 304 - 447ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 441ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:25.466Z] [INFO] GET /api/orders/my - 304 - 441ms - IP: 127.0.0.1
+[2026-07-07T05:06:35.825Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:36.262Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:06:46.538Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:46.976Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:06:50.653Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 440ms :: {"count":0}
+[2026-07-07T05:06:51.092Z] [INFO] GET /api/notifications/unread-count - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:06:57.205Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 439ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:06:57.643Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:07:03.187Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:07:03.192Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:07:03.194Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:07:03.197Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:07:03.412Z] [INFO] GET /api/subcategories - 304 - 220ms - IP: 127.0.0.1
+GET /api/categories 304 in 222ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:07:03.416Z] [INFO] GET /api/categories - 304 - 222ms - IP: 127.0.0.1
+GET /api/products 304 in 440ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:07:03.628Z] [INFO] GET /api/products - 304 - 441ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 440ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:07:03.636Z] [INFO] GET /api/orders/my - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:08:06.578Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:08:06.584Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:08:06.588Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:08:06.592Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 226ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:08:06.803Z] [INFO] GET /api/categories - 304 - 225ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:08:06.811Z] [INFO] GET /api/subcategories - 304 - 219ms - IP: 127.0.0.1
+GET /api/products 304 in 438ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:08:07.027Z] [INFO] GET /api/products - 304 - 439ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 444ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:08:07.028Z] [INFO] GET /api/orders/my - 304 - 444ms - IP: 127.0.0.1
+[2026-07-07T05:08:17.351Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 440ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:08:17.788Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:08:21.347Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 439ms :: {"count":0}
+[2026-07-07T05:08:21.786Z] [INFO] GET /api/notifications/unread-count - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:09:03.681Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:09:03.686Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:09:03.688Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:09:03.689Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 225ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:09:03.905Z] [INFO] GET /api/categories - 304 - 224ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 441ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:09:04.127Z] [INFO] GET /api/subcategories - 304 - 439ms - IP: 127.0.0.1
+GET /api/products 304 in 446ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:09:04.130Z] [INFO] GET /api/products - 304 - 444ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:04.131Z] [INFO] GET /api/orders/my - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:09:14.724Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:15.162Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:09:22.055Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 436ms :: {"count":0}
+[2026-07-07T05:09:22.490Z] [INFO] GET /api/notifications/unread-count - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:09:25.440Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:25.881Z] [INFO] GET /api/orders/my - 304 - 441ms - IP: 127.0.0.1
+[2026-07-07T05:09:36.163Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:36.601Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:09:46.892Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 439ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:47.331Z] [INFO] GET /api/orders/my - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:09:52.776Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 437ms :: {"count":0}
+[2026-07-07T05:09:53.213Z] [INFO] GET /api/notifications/unread-count - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:09:57.679Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:09:58.121Z] [INFO] GET /api/orders/my - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:12:24.063Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:24.066Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:24.073Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:24.087Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 220ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:12:24.285Z] [INFO] GET /api/categories - 304 - 219ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:12:24.505Z] [INFO] GET /api/orders/my - 304 - 442ms - IP: 127.0.0.1
+GET /api/products 304 in 441ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:12:24.511Z] [INFO] GET /api/products - 304 - 438ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 434ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:12:24.521Z] [INFO] GET /api/subcategories - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:12:37.130Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:37.135Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:37.136Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:37.272Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:12:37.278Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 219ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:12:37.356Z] [INFO] GET /api/categories - 304 - 220ms - IP: 127.0.0.1
+GET /api/products 304 in 446ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:12:37.578Z] [INFO] GET /api/products - 304 - 448ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 446ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:12:37.581Z] [INFO] GET /api/subcategories - 304 - 446ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 440ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:12:37.712Z] [INFO] GET /api/orders/my - 304 - 440ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 2193ms :: {"count":0}
+[2026-07-07T05:12:39.469Z] [INFO] GET /api/notifications/unread-count - 304 - 2191ms - IP: 127.0.0.1
+[2026-07-07T05:12:48.272Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:12:48.710Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:12:59.010Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 436ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:12:59.446Z] [INFO] GET /api/orders/my - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:13:09.675Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:13:09.824Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 439ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:13:10.113Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 437ms :: {"count":0}
+[2026-07-07T05:13:10.260Z] [INFO] GET /api/notifications/unread-count - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:13:20.328Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:13:20.765Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:13:31.011Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:13:31.448Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:13:38.089Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+[2026-07-07T05:13:38.091Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+[2026-07-07T05:13:38.102Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+GET /api/subcategories 200 in 220ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:13:38.311Z] [INFO] GET /api/subcategories - 200 - 220ms - IP: 127.0.0.1
+GET /api/categories 200 in 219ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:13:38.320Z] [INFO] GET /api/categories - 200 - 218ms - IP: 127.0.0.1
+GET /api/products 200 in 436ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:13:38.526Z] [INFO] GET /api/products - 200 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:14:10.024Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:14:10.027Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:14:10.029Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:14:10.031Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 222ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:14:10.245Z] [INFO] GET /api/categories - 304 - 221ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 222ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:14:10.251Z] [INFO] GET /api/subcategories - 304 - 222ms - IP: 127.0.0.1
+GET /api/products 304 in 435ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:14:10.467Z] [INFO] GET /api/products - 304 - 436ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 441ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:14:10.467Z] [INFO] GET /api/orders/my - 304 - 440ms - IP: 127.0.0.1
+[2026-07-07T05:14:22.578Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 435ms :: {"count":0}
+[2026-07-07T05:14:23.013Z] [INFO] GET /api/notifications/unread-count - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:14:24.083Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+[2026-07-07T05:14:24.085Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+[2026-07-07T05:14:24.087Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0
+GET /api/subcategories 304 in 436ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:14:24.519Z] [INFO] GET /api/subcategories - 304 - 436ms - IP: 127.0.0.1
+GET /api/categories 304 in 433ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:14:24.522Z] [INFO] GET /api/categories - 304 - 435ms - IP: 127.0.0.1
+GET /api/products 304 in 442ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:14:24.527Z] [INFO] GET /api/products - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:21:14.779Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:14.787Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:14.793Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:14.794Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:14.795Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 2648ms :: [{"id":"fruits","name":"Mevalar","icon":"n…
+[2026-07-07T05:21:17.443Z] [INFO] GET /api/categories - 304 - 2648ms - IP: 127.0.0.1
+GET /api/products 304 in 2897ms :: [{"id":"prod-1782386007381-s4macf-0","name":…
+[2026-07-07T05:21:17.675Z] [INFO] GET /api/products - 304 - 2896ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 2884ms :: [{"id":"order-1782734124642","customerId":"…
+[2026-07-07T05:21:17.677Z] [INFO] GET /api/orders/my - 304 - 2884ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 2988ms :: [{"id":"sub-energetik","name":"Energeti…
+[2026-07-07T05:21:17.782Z] [INFO] GET /api/subcategories - 304 - 2988ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 3244ms :: {"count":0}
+[2026-07-07T05:21:18.030Z] [INFO] GET /api/notifications/unread-count - 304 - 3243ms - IP: 127.0.0.1
+[2026-07-07T05:21:26.072Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:26.074Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:26.075Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:26.162Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:21:26.174Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 222ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:21:26.294Z] [INFO] GET /api/subcategories - 304 - 220ms - IP: 127.0.0.1
+GET /api/products 304 in 445ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:21:26.519Z] [INFO] GET /api/products - 304 - 444ms - IP: 127.0.0.1
+GET /api/categories 304 in 455ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:21:26.526Z] [INFO] GET /api/categories - 304 - 454ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:21:26.599Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 452ms :: {"count":0}
+[2026-07-07T05:21:26.626Z] [INFO] GET /api/notifications/unread-count - 304 - 452ms - IP: 127.0.0.1
+[2026-07-07T05:21:37.152Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 440ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:21:37.586Z] [INFO] GET /api/orders/my - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:21:48.140Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:21:48.584Z] [INFO] GET /api/orders/my - 304 - 444ms - IP: 127.0.0.1
+[2026-07-07T05:21:57.978Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 455ms :: {"count":0}
+[2026-07-07T05:21:58.432Z] [INFO] GET /api/notifications/unread-count - 304 - 454ms - IP: 127.0.0.1
+[2026-07-07T05:21:58.848Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:21:59.286Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:22:09.575Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 455ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:22:10.029Z] [INFO] GET /api/orders/my - 304 - 454ms - IP: 127.0.0.1
+[2026-07-07T05:22:20.402Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 469ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:22:20.871Z] [INFO] GET /api/orders/my - 304 - 469ms - IP: 127.0.0.1
+[2026-07-07T05:22:26.512Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 224ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:22:26.736Z] [INFO] GET /api/subcategories - 304 - 224ms - IP: 127.0.0.1
+[2026-07-07T05:22:27.011Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 230ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:22:27.240Z] [INFO] GET /api/categories - 304 - 229ms - IP: 127.0.0.1
+[2026-07-07T05:22:27.328Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 440ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:22:27.767Z] [INFO] GET /api/products - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:22:28.823Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 454ms :: {"count":0}
+[2026-07-07T05:22:29.277Z] [INFO] GET /api/notifications/unread-count - 304 - 454ms - IP: 127.0.0.1
+[2026-07-07T05:22:31.182Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 436ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:22:31.618Z] [INFO] GET /api/orders/my - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:22:42.147Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 445ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:22:42.590Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:22:52.865Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 456ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:22:53.321Z] [INFO] GET /api/orders/my - 304 - 456ms - IP: 127.0.0.1
+[2026-07-07T05:22:59.552Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 438ms :: {"count":0}
+[2026-07-07T05:22:59.990Z] [INFO] GET /api/notifications/unread-count - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:23:03.601Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 453ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:04.054Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:23:14.550Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:14.989Z] [INFO] GET /api/orders/my - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:23:25.546Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:25.984Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:23:27.049Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 231ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:23:27.280Z] [INFO] GET /api/subcategories - 304 - 231ms - IP: 127.0.0.1
+[2026-07-07T05:23:27.522Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 437ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:23:27.959Z] [INFO] GET /api/categories - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:23:28.077Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 464ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:23:28.543Z] [INFO] GET /api/products - 304 - 466ms - IP: 127.0.0.1
+[2026-07-07T05:23:30.237Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 434ms :: {"count":0}
+[2026-07-07T05:23:30.671Z] [INFO] GET /api/notifications/unread-count - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:23:36.224Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 439ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:36.662Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:23:46.961Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 455ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:47.416Z] [INFO] GET /api/orders/my - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:23:57.764Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:23:58.201Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:24:01.000Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 455ms :: {"count":0}
+[2026-07-07T05:24:01.454Z] [INFO] GET /api/notifications/unread-count - 304 - 454ms - IP: 127.0.0.1
+[2026-07-07T05:24:08.498Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 435ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:24:08.932Z] [INFO] GET /api/orders/my - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:24:19.235Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:24:19.672Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:24:27.505Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 454ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:24:27.959Z] [INFO] GET /api/subcategories - 304 - 454ms - IP: 127.0.0.1
+[2026-07-07T05:24:28.412Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 221ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:24:28.632Z] [INFO] GET /api/categories - 304 - 220ms - IP: 127.0.0.1
+[2026-07-07T05:24:29.000Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 454ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:24:29.453Z] [INFO] GET /api/products - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:24:30.020Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 434ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:24:30.455Z] [INFO] GET /api/orders/my - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:24:31.954Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 436ms :: {"count":0}
+[2026-07-07T05:24:32.390Z] [INFO] GET /api/notifications/unread-count - 304 - 436ms - IP: 127.0.0.1
+[2026-07-07T05:24:40.915Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 456ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:24:41.370Z] [INFO] GET /api/orders/my - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:24:51.637Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:24:52.080Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:25:02.362Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:25:02.634Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 459ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:02.820Z] [INFO] GET /api/orders/my - 304 - 458ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 433ms :: {"count":0}
+[2026-07-07T05:25:03.067Z] [INFO] GET /api/notifications/unread-count - 304 - 433ms - IP: 127.0.0.1
+[2026-07-07T05:25:13.072Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 438ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:13.510Z] [INFO] GET /api/orders/my - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:25:23.966Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 455ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:24.421Z] [INFO] GET /api/orders/my - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:25:28.891Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 221ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:25:29.112Z] [INFO] GET /api/categories - 304 - 221ms - IP: 127.0.0.1
+[2026-07-07T05:25:29.488Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:25:29.763Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 453ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:25:29.940Z] [INFO] GET /api/subcategories - 304 - 452ms - IP: 127.0.0.1
+GET /api/products 304 in 435ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:25:30.198Z] [INFO] GET /api/products - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:25:33.529Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 439ms :: {"count":0}
+[2026-07-07T05:25:33.966Z] [INFO] GET /api/notifications/unread-count - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:25:34.661Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 456ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:35.117Z] [INFO] GET /api/orders/my - 304 - 456ms - IP: 127.0.0.1
+[2026-07-07T05:25:45.463Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 437ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:45.900Z] [INFO] GET /api/orders/my - 304 - 437ms - IP: 127.0.0.1
+[2026-07-07T05:25:56.169Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 458ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:25:56.622Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:26:04.209Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 434ms :: {"count":0}
+[2026-07-07T05:26:04.643Z] [INFO] GET /api/notifications/unread-count - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:26:06.865Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 439ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:26:07.304Z] [INFO] GET /api/orders/my - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:26:17.586Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 458ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:26:18.043Z] [INFO] GET /api/orders/my - 304 - 457ms - IP: 127.0.0.1
+[2026-07-07T05:26:28.274Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 442ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:26:28.715Z] [INFO] GET /api/orders/my - 304 - 441ms - IP: 127.0.0.1
+[2026-07-07T05:26:29.463Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 231ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:26:29.694Z] [INFO] GET /api/categories - 304 - 231ms - IP: 127.0.0.1
+[2026-07-07T05:26:30.240Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:26:30.441Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 222ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:26:30.459Z] [INFO] GET /api/subcategories - 304 - 219ms - IP: 127.0.0.1
+GET /api/products 304 in 438ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:26:30.880Z] [INFO] GET /api/products - 304 - 439ms - IP: 127.0.0.1
+[2026-07-07T05:26:34.897Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 455ms :: {"count":0}
+[2026-07-07T05:26:35.352Z] [INFO] GET /api/notifications/unread-count - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:26:38.965Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 442ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:26:39.407Z] [INFO] GET /api/orders/my - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:26:49.652Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 454ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:26:50.105Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:27:00.373Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 435ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:00.807Z] [INFO] GET /api/orders/my - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:27:05.602Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 444ms :: {"count":0}
+[2026-07-07T05:27:06.046Z] [INFO] GET /api/notifications/unread-count - 304 - 444ms - IP: 127.0.0.1
+[2026-07-07T05:27:11.090Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 456ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:11.547Z] [INFO] GET /api/orders/my - 304 - 457ms - IP: 127.0.0.1
+[2026-07-07T05:27:21.843Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 447ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:22.291Z] [INFO] GET /api/orders/my - 304 - 448ms - IP: 127.0.0.1
+[2026-07-07T05:27:29.957Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 238ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:27:30.195Z] [INFO] GET /api/categories - 304 - 238ms - IP: 127.0.0.1
+[2026-07-07T05:27:30.964Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:27:31.115Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 218ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:27:31.183Z] [INFO] GET /api/subcategories - 304 - 219ms - IP: 127.0.0.1
+GET /api/products 304 in 445ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:27:31.559Z] [INFO] GET /api/products - 304 - 444ms - IP: 127.0.0.1
+[2026-07-07T05:27:32.596Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 455ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:33.051Z] [INFO] GET /api/orders/my - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:27:36.368Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 442ms :: {"count":0}
+[2026-07-07T05:27:36.811Z] [INFO] GET /api/notifications/unread-count - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:27:43.314Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 453ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:43.767Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:27:54.025Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 435ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:27:54.460Z] [INFO] GET /api/orders/my - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:28:05.042Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 447ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:05.489Z] [INFO] GET /api/orders/my - 304 - 447ms - IP: 127.0.0.1
+[2026-07-07T05:28:07.042Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 455ms :: {"count":0}
+[2026-07-07T05:28:07.498Z] [INFO] GET /api/notifications/unread-count - 304 - 456ms - IP: 127.0.0.1
+[2026-07-07T05:28:15.920Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 442ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:16.362Z] [INFO] GET /api/orders/my - 304 - 442ms - IP: 127.0.0.1
+[2026-07-07T05:28:26.614Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 459ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:27.073Z] [INFO] GET /api/orders/my - 304 - 459ms - IP: 127.0.0.1
+[2026-07-07T05:28:30.533Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 439ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:28:30.971Z] [INFO] GET /api/categories - 304 - 438ms - IP: 127.0.0.1
+[2026-07-07T05:28:31.482Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:28:31.848Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 446ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:28:31.927Z] [INFO] GET /api/subcategories - 304 - 445ms - IP: 127.0.0.1
+GET /api/products 304 in 455ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:28:32.305Z] [INFO] GET /api/products - 304 - 457ms - IP: 127.0.0.1
+[2026-07-07T05:28:37.446Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:28:37.742Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 444ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:37.890Z] [INFO] GET /api/orders/my - 304 - 444ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 454ms :: {"count":0}
+[2026-07-07T05:28:38.195Z] [INFO] GET /api/notifications/unread-count - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:28:48.872Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 434ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:49.306Z] [INFO] GET /api/orders/my - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:28:59.544Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 445ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:28:59.988Z] [INFO] GET /api/orders/my - 304 - 444ms - IP: 127.0.0.1
+[2026-07-07T05:29:08.898Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 455ms :: {"count":0}
+[2026-07-07T05:29:09.353Z] [INFO] GET /api/notifications/unread-count - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:29:10.404Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:29:10.847Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:29:21.068Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 453ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:29:21.521Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:30:02.037Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:02.040Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 222ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:30:02.263Z] [INFO] GET /api/categories - 304 - 223ms - IP: 127.0.0.1
+GET /api/products 304 in 434ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:30:02.472Z] [INFO] GET /api/products - 304 - 435ms - IP: 127.0.0.1
+[2026-07-07T05:30:02.513Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:02.714Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 454ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:30:02.966Z] [INFO] GET /api/subcategories - 304 - 453ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 443ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:03.157Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:30:09.603Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 454ms :: {"count":0}
+[2026-07-07T05:30:10.056Z] [INFO] GET /api/notifications/unread-count - 304 - 453ms - IP: 127.0.0.1
+[2026-07-07T05:30:15.953Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:15.996Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:15.998Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:16.058Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:30:16.080Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 218ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:30:16.214Z] [INFO] GET /api/categories - 304 - 218ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 227ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:30:16.225Z] [INFO] GET /api/subcategories - 304 - 227ms - IP: 127.0.0.1
+GET /api/products 304 in 445ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:30:16.399Z] [INFO] GET /api/products - 304 - 446ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 442ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:16.501Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 458ms :: {"count":0}
+[2026-07-07T05:30:16.537Z] [INFO] GET /api/notifications/unread-count - 304 - 457ms - IP: 127.0.0.1
+[2026-07-07T05:30:27.073Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 460ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:27.532Z] [INFO] GET /api/orders/my - 304 - 459ms - IP: 127.0.0.1
+[2026-07-07T05:30:37.890Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 457ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:38.347Z] [INFO] GET /api/orders/my - 304 - 457ms - IP: 127.0.0.1
+[2026-07-07T05:30:47.079Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 452ms :: {"count":0}
+[2026-07-07T05:30:47.530Z] [INFO] GET /api/notifications/unread-count - 304 - 451ms - IP: 127.0.0.1
+[2026-07-07T05:30:48.678Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 445ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:49.121Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:30:59.360Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 458ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:30:59.818Z] [INFO] GET /api/orders/my - 304 - 458ms - IP: 127.0.0.1
+[2026-07-07T05:34:24.178Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:34:24.185Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:34:24.187Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:34:24.188Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-07T05:34:24.189Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 222ms :: [{"id":"fruits","name":"Mevalar","icon":"nu…
+[2026-07-07T05:34:24.410Z] [INFO] GET /api/categories - 304 - 222ms - IP: 127.0.0.1
+GET /api/orders/my 304 in 444ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:34:24.630Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 460ms :: [{"id":"sub-energetik","name":"Energetik…
+[2026-07-07T05:34:24.638Z] [INFO] GET /api/subcategories - 304 - 460ms - IP: 127.0.0.1
+GET /api/products 304 in 459ms :: [{"id":"prod-1782386007381-s4macf-0","name":"…
+[2026-07-07T05:34:24.643Z] [INFO] GET /api/products - 304 - 458ms - IP: 127.0.0.1
+GET /api/notifications/unread-count 304 in 456ms :: {"count":0}
+[2026-07-07T05:34:24.645Z] [INFO] GET /api/notifications/unread-count - 304 - 456ms - IP: 127.0.0.1
+[2026-07-07T05:34:34.879Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 442ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:34:35.322Z] [INFO] GET /api/orders/my - 304 - 443ms - IP: 127.0.0.1
+[2026-07-07T05:34:45.950Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 441ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:34:46.390Z] [INFO] GET /api/orders/my - 304 - 440ms - IP: 127.0.0.1
+[2026-07-07T05:34:54.901Z] GET /api/notifications/unread-count - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/notifications/unread-count 304 in 434ms :: {"count":0}
+[2026-07-07T05:34:55.335Z] [INFO] GET /api/notifications/unread-count - 304 - 434ms - IP: 127.0.0.1
+[2026-07-07T05:34:56.723Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 456ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:34:57.178Z] [INFO] GET /api/orders/my - 304 - 455ms - IP: 127.0.0.1
+[2026-07-07T05:35:07.709Z] GET /api/orders/my - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/orders/my 304 in 453ms :: [{"id":"order-1782734124642","customerId":"a…
+[2026-07-07T05:35:08.162Z] [INFO] GET /api/orders/my - 304 - 453ms - IP: 127.0.0.1
