@@ -26,4 +26,5 @@ export const SUBCATEGORY_IMAGES: Record<string, any> = {
   "sub-shampun": require("@/assets/subcategory-images/sub-shampun.png"),
   "sub-taglik": require("@/assets/subcategory-images/sub-taglik.png"),
   "sub-bolalar": require("@/assets/subcategory-images/sub-bolalar.png"),
+  "sub-oyinchoq": require("@/assets/subcategory-images/sub-oyinchoq.png"),
 };
