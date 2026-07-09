@@ -38,13 +38,13 @@ waitForPort = 8080
 name = "Start Backend"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run server:dev"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[ports]]
 localPort = 3000
@@ -53,6 +53,10 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3001
 
 [[ports]]
 localPort = 8080
@@ -65,8 +69,13 @@ externalPort = 8081
 [userenv]
 
 [userenv.shared]
-JWT_SECRET = "b672cd78121eaefabd4e2c6fe68f79fb0ef017493732465835f53edce313cb47230e569a081ac8d471f93a2acb164cc2"
-JWT_REFRESH_SECRET = "9c59aee4b830dea08d63ae12b2e44d4b8d2ac10d57075ded755ed41a561fb52a23fd248771628bfc24fff6df26da3de0"
+JWT_SECRET = "local-dev-jwt-secret-key-change-in-production"
+JWT_REFRESH_SECRET = "local-dev-refresh-secret-key-change-in-production"
 NODE_ENV = "development"
-ESKIZ_EMAIL = "ozodaaminjonova3039@gmail.com"
-ESKIZ_PASSWORD = "C0CIMYisFuUYA1H2xGrC8NB5oCCpEoa4cyCbHN7H"
+API_KEYS = "local-dev-api-key"
+BACKUP_ENCRYPTION_KEY = "34958ddc29ac71c957e5c718bce2293a63b6f59ec225150803ba3a357728a72c0344a5b7ff32259459d72e0b0605b45012a88ee6aedb9f90f4e792b4d8ca4e4b"
+DATA_RETENTION_DAYS = "90"
+ENCRYPTION_KEY = "3aa3d9cd590251257a7c01601035dc34f19b95bc3268b4a833d82392810f35274e17253399b7d519c535f644e5bf1f4adcf829f4ae3c89af154252c574935002"
+PORT = "5000"
+PRODUCTION_DOMAIN = "localhost"
+YOUR_DOMAIN = "localhost"

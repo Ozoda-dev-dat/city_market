@@ -31,6 +31,16 @@ Two workflows are configured:
 - **Start Backend**: `npm run server:dev` — Express server on port 5000 (landing page + API)
 - **Start Frontend**: Expo dev server on port 8080 — shows QR code for mobile testing
 
+### First-time DB setup
+
+Run once after cloning or when the database is reset:
+
+```bash
+npm run db:setup
+```
+
+This creates all tables and seeds initial data (categories, products, promo codes, admin user). Tables are created with `IF NOT EXISTS` so it is safe to re-run.
+
 ## API Configuration
 
 The frontend communicates with the backend via `EXPO_PUBLIC_DOMAIN` environment variable.
