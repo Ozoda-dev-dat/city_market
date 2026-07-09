@@ -128,7 +128,26 @@ export default function AuthScreen() {
       setRegisterStep("otp");
       startTimer();
     } catch (e: any) {
-      Alert.alert("Xatolik", e?.message || "Kod yuborishda xatolik");
+      const rawMessage: string = e?.message || "";
+      let errorMessage = "Kod yuborishda xatolik";
+      try {
+        const match = rawMessage.match(/\{.*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          errorMessage = parsed.error || parsed.message || errorMessage;
+        } else if (rawMessage) {
+          errorMessage = rawMessage;
+        }
+      } catch {}
+      if (errorMessage.includes("allaqachon ro'yxatdan o'tgan")) {
+        Alert.alert(
+          "Telefon raqam mavjud",
+          "Bu telefon raqam allaqachon ro'yxatdan o'tgan. Kirish tugmasini bosib tizimga kiring.",
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert("Xatolik", errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -165,7 +184,18 @@ export default function AuthScreen() {
       setOtpCode("");
       startTimer();
     } catch (e: any) {
-      Alert.alert("Xatolik", e?.message || "Kod yuborishda xatolik");
+      const rawMessage: string = e?.message || "";
+      let errorMessage = "Kod yuborishda xatolik";
+      try {
+        const match = rawMessage.match(/\{.*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          errorMessage = parsed.error || parsed.message || errorMessage;
+        } else if (rawMessage) {
+          errorMessage = rawMessage;
+        }
+      } catch {}
+      Alert.alert("Xatolik", errorMessage);
     } finally {
       setLoading(false);
     }
