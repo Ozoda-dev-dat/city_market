@@ -63,7 +63,11 @@ export default function SubcategoryProductsScreen() {
   const accentBg = subcategory?.bgColor || parentCategory?.bgColor || "#F0FDF4";
 
   const filtered = useMemo(() => {
+    // Filter by subcategoryId first; fall back to parent category if none assigned
     let list = allProducts.filter((p) => (p as any).subcategoryId === id);
+    if (list.length === 0 && subcategory?.categoryId) {
+      list = allProducts.filter((p) => p.category === subcategory.categoryId);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((p) => p.name.toLowerCase().includes(q));
@@ -71,7 +75,7 @@ export default function SubcategoryProductsScreen() {
     if (sortBy === "price_asc") list = [...list].sort((a, b) => a.price - b.price);
     if (sortBy === "price_desc") list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [allProducts, id, search, sortBy]);
+  }, [allProducts, id, search, sortBy, subcategory]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bgColors: [string, string, string] = isDarkMode

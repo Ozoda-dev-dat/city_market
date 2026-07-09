@@ -172,7 +172,11 @@ export default function CategoryDetailScreen() {
 
   const category = categories.find((c) => c.id === id);
   const catSubcategories = subcategories.filter((s) => s.categoryId === id);
-  const hasSubcategories = catSubcategories.length > 0;
+  // Only show subcategory cards if at least one subcategory actually has products assigned
+  const hasSubcategoryProducts = catSubcategories.some(
+    (sub) => allProducts.some((p) => (p as any).subcategoryId === sub.id)
+  );
+  const hasSubcategories = catSubcategories.length > 0 && hasSubcategoryProducts;
   const accentColor = category?.color ?? "#16A34A";
   const accentBg = category?.bgColor ?? "#F0FDF4";
 
