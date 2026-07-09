@@ -22,11 +22,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useTranslation } from "@/lib/I18nProvider";
 import { useTheme } from "@/context/ThemeContext";
 
-type RegisterStep = "form" | "otp";
-
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
-  const { login, sendOtp, verifyOtpRegister, user, isLoading: authLoading } = useAuth();
+  const { login, register, user, isLoading: authLoading } = useAuth();
   const { t, lang, setLang } = useTranslation();
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
@@ -42,12 +40,10 @@ export default function AuthScreen() {
   const [isStore, setIsStore] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [storeAddress, setStoreAddress] = useState("");
-
-  const [registerStep, setRegisterStep] = useState<RegisterStep>("form");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpTimer, setOtpTimer] = useState(0);
-  const [devCode, setDevCode] = useState<string | undefined>(undefined);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -57,26 +53,6 @@ export default function AuthScreen() {
       else router.replace("/(tabs)");
     }
   }, [user, authLoading]);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const startTimer = () => {
-    setOtpTimer(60);
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setOtpTimer((t) => {
-        if (t <= 1) {
-          clearInterval(timerRef.current!);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-  };
 
   const handleLogin = async () => {
     if (!phoneSuffix || !password) {
@@ -108,7 +84,7 @@ export default function AuthScreen() {
     }
   };
 
-  const handleSendOtp = async () => {
+  const handleRegister = async () => {
     if (!phoneSuffix || phoneSuffix.length < 9) {
       Alert.alert("Xatolik", "To'liq telefon raqamni kiriting");
       return;
@@ -121,71 +97,27 @@ export default function AuthScreen() {
       Alert.alert("Xatolik", "Do'kon nomini kiriting");
       return;
     }
-    setLoading(true);
-    try {
-      const result = await sendOtp(phoneNumber, "register");
-      setDevCode(result.devCode);
-      setRegisterStep("otp");
-      startTimer();
-    } catch (e: any) {
-      const rawMessage: string = e?.message || "";
-      let errorMessage = "Kod yuborishda xatolik";
-      try {
-        const match = rawMessage.match(/\{.*\}/);
-        if (match) {
-          const parsed = JSON.parse(match[0]);
-          errorMessage = parsed.error || parsed.message || errorMessage;
-        } else if (rawMessage) {
-          errorMessage = rawMessage;
-        }
-      } catch {}
-      if (errorMessage.includes("allaqachon ro'yxatdan o'tgan")) {
-        Alert.alert(
-          "Telefon raqam mavjud",
-          "Bu telefon raqam allaqachon ro'yxatdan o'tgan. Kirish tugmasini bosib tizimga kiring.",
-          [{ text: "OK" }]
-        );
-      } else {
-        Alert.alert("Xatolik", errorMessage);
-      }
-    } finally {
-      setLoading(false);
+    if (!regPassword || regPassword.length < 6) {
+      Alert.alert("Xatolik", "Parol kamida 6 ta belgidan iborat bo'lishi kerak");
+      return;
     }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (otpCode.length !== 6) {
-      Alert.alert("Xatolik", "6 xonali kodni kiriting");
+    if (regPassword !== regConfirmPassword) {
+      Alert.alert("Xatolik", "Parollar mos kelmaydi");
       return;
     }
     setLoading(true);
     try {
-      await verifyOtpRegister(
+      await register(
         phoneNumber,
-        otpCode,
+        regPassword,
         name,
         isStore ? "store" : "customer",
         isStore ? storeName : undefined,
         isStore ? storeAddress : undefined,
       );
     } catch (e: any) {
-      Alert.alert("Xatolik", e?.message || "Tasdiqlashda xatolik");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (otpTimer > 0) return;
-    setLoading(true);
-    try {
-      const result = await sendOtp(phoneNumber, "register");
-      setDevCode(result.devCode);
-      setOtpCode("");
-      startTimer();
-    } catch (e: any) {
       const rawMessage: string = e?.message || "";
-      let errorMessage = "Kod yuborishda xatolik";
+      let errorMessage = "Ro'yxatdan o'tishda xatolik";
       try {
         const match = rawMessage.match(/\{.*\}/);
         if (match) {
@@ -195,18 +127,14 @@ export default function AuthScreen() {
           errorMessage = rawMessage;
         }
       } catch {}
-      Alert.alert("Xatolik", errorMessage);
+      if (errorMessage.toLowerCase().includes("already exists") || errorMessage.includes("allaqachon")) {
+        Alert.alert("Telefon raqam mavjud", "Bu telefon raqam allaqachon ro'yxatdan o'tgan. Kirish tugmasini bosib tizimga kiring.");
+      } else {
+        Alert.alert("Xatolik", errorMessage);
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetRegister = () => {
-    setRegisterStep("form");
-    setOtpCode("");
-    setDevCode(undefined);
-    if (timerRef.current) clearInterval(timerRef.current);
-    setOtpTimer(0);
   };
 
   return (
@@ -258,7 +186,7 @@ export default function AuthScreen() {
                 setIsLogin(true);
                 setPhoneSuffix(""); setPassword(""); setName("");
                 setIsStore(false); setStoreName(""); setStoreAddress("");
-                resetRegister();
+                setRegPassword(""); setRegConfirmPassword("");
               }}
             >
               <Ionicons
@@ -274,7 +202,7 @@ export default function AuthScreen() {
               onPress={() => {
                 setIsLogin(false);
                 setPhoneSuffix(""); setPassword(""); setName("");
-                resetRegister();
+                setRegPassword(""); setRegConfirmPassword("");
               }}
             >
               <Ionicons
@@ -348,7 +276,7 @@ export default function AuthScreen() {
                 )}
               </Pressable>
             </>
-          ) : registerStep === "form" ? (
+          ) : (
             <>
               <View style={styles.roleRow}>
                 <Pressable
@@ -438,88 +366,63 @@ export default function AuthScreen() {
                 </View>
               </View>
 
-              <View style={styles.smsNote}>
-                <Ionicons name="information-circle-outline" size={15} color={Colors.textMuted} />
-                <Text style={styles.smsNoteText}>Telefon raqamingizga tasdiqlash kodi yuboriladi</Text>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Parol</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Kamida 6 ta belgi"
+                    placeholderTextColor={Colors.textMuted}
+                    value={regPassword}
+                    onChangeText={setRegPassword}
+                    secureTextEntry={!showRegPassword}
+                  />
+                  <Pressable onPress={() => setShowRegPassword(!showRegPassword)}>
+                    <Ionicons
+                      name={showRegPassword ? "eye-off-outline" : "eye-outline"}
+                      size={18}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Parolni tasdiqlang</Text>
+                <View style={styles.inputBox}>
+                  <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Parolni qayta kiriting"
+                    placeholderTextColor={Colors.textMuted}
+                    value={regConfirmPassword}
+                    onChangeText={setRegConfirmPassword}
+                    secureTextEntry={!showRegConfirmPassword}
+                  />
+                  <Pressable onPress={() => setShowRegConfirmPassword(!showRegConfirmPassword)}>
+                    <Ionicons
+                      name={showRegConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                      size={18}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
               </View>
 
               <Pressable
                 style={[styles.authBtn, loading && { opacity: 0.7 }]}
-                onPress={handleSendOtp}
+                onPress={handleRegister}
                 disabled={loading}
               >
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <View style={styles.btnInner}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />
-                    <Text style={styles.authBtnText}>SMS kod yuborish</Text>
+                    <Ionicons name="person-add-outline" size={18} color="#fff" />
+                    <Text style={styles.authBtnText}>Ro'yxatdan o'tish</Text>
                   </View>
                 )}
-              </Pressable>
-            </>
-          ) : (
-            <>
-              <Pressable style={styles.backBtn} onPress={resetRegister}>
-                <Ionicons name="arrow-back" size={18} color={Colors.primary} />
-                <Text style={styles.backBtnText}>Orqaga</Text>
-              </Pressable>
-
-              <View style={styles.otpHeader}>
-                <View style={styles.otpIconCircle}>
-                  <Ionicons name="phone-portrait-outline" size={28} color={Colors.primary} />
-                </View>
-                <Text style={styles.otpTitle}>Kodni kiriting</Text>
-                <Text style={styles.otpSubtitle}>
-                  <Text style={{ color: Colors.primary }}>+998 {phoneSuffix}</Text>
-                  {"\n"}raqamiga 6 xonali kod yuborildi
-                </Text>
-              </View>
-
-              {!!devCode && (
-                <View style={styles.devCodeBox}>
-                  <Ionicons name="bug-outline" size={14} color="#92400E" />
-                  <Text style={styles.devCodeText}>Test kodi: <Text style={{ fontFamily: "Poppins_700Bold" }}>{devCode}</Text></Text>
-                </View>
-              )}
-
-              <View style={styles.otpInputRow}>
-                <TextInput
-                  style={styles.otpInput}
-                  placeholder="------"
-                  placeholderTextColor={Colors.textMuted}
-                  value={otpCode}
-                  onChangeText={(t) => setOtpCode(t.replace(/\D/g, "").slice(0, 6))}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                  autoFocus
-                />
-              </View>
-
-              <Pressable
-                style={[styles.authBtn, (loading || otpCode.length !== 6) && { opacity: 0.7 }]}
-                onPress={handleVerifyOtp}
-                disabled={loading || otpCode.length !== 6}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <View style={styles.btnInner}>
-                    <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-                    <Text style={styles.authBtnText}>Tasdiqlash</Text>
-                  </View>
-                )}
-              </Pressable>
-
-              <Pressable
-                style={[styles.resendBtn, otpTimer > 0 && { opacity: 0.5 }]}
-                onPress={handleResendOtp}
-                disabled={otpTimer > 0 || loading}
-              >
-                <Ionicons name="refresh-outline" size={15} color={Colors.primary} />
-                <Text style={styles.resendText}>
-                  {otpTimer > 0 ? `Qayta yuborish (${otpTimer}s)` : "Qayta yuborish"}
-                </Text>
               </Pressable>
             </>
           )}
