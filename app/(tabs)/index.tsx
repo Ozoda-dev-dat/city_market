@@ -623,6 +623,9 @@ export default function HomeScreen() {
                 onPressSubcategory={(sub) =>
                   router.push({ pathname: "/subcategory/[id]", params: { id: sub.id } })
                 }
+                onPressCategory={() =>
+                  router.push({ pathname: "/category/[id]", params: { id: cat.id } })
+                }
               />
             );
           });
