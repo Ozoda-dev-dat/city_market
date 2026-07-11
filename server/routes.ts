@@ -355,11 +355,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req, res) => {
       try {
-        const { phoneNumber, password, name } = req.body;
+        const { phoneNumber, password, name, vehicleType, courierStatus } = req.body;
         
         // Validate input
         if (!phoneNumber || !password || !name) {
           return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const allowedVehicleTypes = ["on_foot", "bike", "scooter", "car"];
+        if (vehicleType && !allowedVehicleTypes.includes(vehicleType)) {
+          return res.status(400).json({ error: "Invalid vehicle type" });
+        }
+        const allowedStatuses = ["active", "on_leave", "suspended"];
+        if (courierStatus && !allowedStatuses.includes(courierStatus)) {
+          return res.status(400).json({ error: "Invalid courier status" });
         }
         
         // Check if user already exists
@@ -375,7 +384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phoneNumber, 
           password: hashedPassword, 
           name, 
-          role: "courier" 
+          role: "courier",
+          vehicleType: vehicleType || "on_foot",
+          courierStatus: courierStatus || "active",
         });
         
         // Remove password from response

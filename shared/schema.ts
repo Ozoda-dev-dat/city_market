@@ -14,6 +14,8 @@ export const users = pgTable("users", {
   longitude: text("longitude"),
   storeId: varchar("store_id").references(() => stores.id, { onDelete: "set null" }),
   isActive: boolean("is_active").default(true).notNull(),
+  vehicleType: text("vehicle_type"), // for couriers: bike, car, on_foot, scooter
+  courierStatus: text("courier_status"), // for couriers: active, on_leave, suspended
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
