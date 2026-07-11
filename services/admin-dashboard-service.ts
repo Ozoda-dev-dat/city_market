@@ -278,22 +278,49 @@ export class AdminDashboardService {
     revenue: number;
   }>> {
     try {
-      // This is a simplified version - in production you'd want to calculate from order items
-      const products = await this.db
+      // Orders store line items as jsonb ({ name, price, qty }) with no productId,
+      // so sold quantity/revenue is aggregated by matching product name. Cancelled,
+      // failed and rejected orders are excluded since they were never fulfilled.
+      const EXCLUDED_STATUSES = ['cancelled', 'failed', 'rejected'];
+
+      const orders = await this.db
+        .select({ items: schema.orders.items })
+        .from(schema.orders)
+        .where(and(
+          isNull(schema.orders.deletedAt),
+          sql`${schema.orders.status} NOT IN (${sql.join(EXCLUDED_STATUSES.map(s => sql`${s}`), sql`, `)})`
+        ));
+
+      const soldByName = new Map<string, { totalSold: number; revenue: number }>();
+      for (const order of orders) {
+        const items = Array.isArray(order.items) ? order.items as Array<{ name?: string; price?: number; qty?: number }> : [];
+        for (const item of items) {
+          if (!item?.name) continue;
+          const qty = Number(item.qty) || 0;
+          const price = Number(item.price) || 0;
+          const existing = soldByName.get(item.name) || { totalSold: 0, revenue: 0 };
+          existing.totalSold += qty;
+          existing.revenue += qty * price;
+          soldByName.set(item.name, existing);
+        }
+      }
+
+      const activeProducts = await this.db
         .select()
         .from(schema.products)
         .where(and(
           eq(schema.products.isActive, true),
           isNull(schema.products.deletedAt)
-        ))
-        .orderBy(desc(schema.products.stockQuantity))
-        .limit(limit);
+        ));
 
-      return products.map(product => ({
-        product,
-        totalSold: Math.floor(Math.random() * 1000), // Mock data
-        revenue: product.price * Math.floor(Math.random() * 1000) // Mock data
-      }));
+      return activeProducts
+        .map(product => ({
+          product,
+          totalSold: soldByName.get(product.name)?.totalSold || 0,
+          revenue: soldByName.get(product.name)?.revenue || 0,
+        }))
+        .sort((a, b) => b.totalSold - a.totalSold)
+        .slice(0, limit);
     } catch (error) {
       console.error('Failed to get top products:', error);
       return [];
