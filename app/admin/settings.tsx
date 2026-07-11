@@ -26,6 +26,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useApp } from "@/context/ProductsContext";
 import { useCart } from "@/context/CartContext";
 import { useBiometric } from "@/context/BiometricContext";
+import { apiRequest } from "@/lib/query-client";
 
 const getMenuItemStyles = (isDarkMode: boolean) => {
   const Colors = getColors(isDarkMode);
@@ -293,22 +294,25 @@ export default function AdminSettingsScreen() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      Alert.alert("Xatolik", "Parol kamida 6 belgidan iborat bo'lishi kerak");
+    if (newPassword.length < 8) {
+      Alert.alert("Xatolik", "Parol kamida 8 belgidan iborat bo'lishi kerak");
       return;
     }
 
     setLoadingPassword(true);
     try {
-      // In a real app, you would send this to your backend
-      // For now, just show success
+      const res = await apiRequest("PATCH", "/api/password", { oldPassword, newPassword });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Parolni o'zgartirishda xatolik yuz berdi");
+      }
       Alert.alert("Muvaffaqiyat", "Parol o'zgartirildi");
       setPasswordModalVisible(false);
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      Alert.alert("Xatolik", "Parolni o'zgartirishda xatolik yuz berdi");
+    } catch (error: any) {
+      Alert.alert("Xatolik", error?.message || "Parolni o'zgartirishda xatolik yuz berdi");
     } finally {
       setLoadingPassword(false);
     }
@@ -486,6 +490,11 @@ export default function AdminSettingsScreen() {
                 value={newPassword}
                 onChangeText={setNewPassword}
               />
+              <Text style={{ fontSize: 12, color: Colors.textSecondary, marginTop: -6, marginBottom: 8 }}>
+                {lang === "uz"
+                  ? "Kamida 8 belgi: katta/kichik harf, raqam va maxsus belgi"
+                  : "Минимум 8 символов: заглавная/строчная буква, цифра и спецсимвол"}
+              </Text>
 
               <Text style={styles.inputLabel}>
                 {lang === "uz" ? "Parolni tasdiqlang" : "Подтвердите пароль"}
