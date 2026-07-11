@@ -3,6 +3,7 @@ import { adminDashboardService } from '../services/admin-dashboard-service';
 import { inventoryService } from '../services/inventory-service';
 import { adminUserService } from '../services/admin-user-service';
 import { adminSettingsService } from '../services/admin-settings-service';
+import { auditService } from './audit-service';
 
 export class AdminRoutes {
   // Dashboard routes
@@ -86,7 +87,7 @@ export class AdminRoutes {
 
   static async updateStock(req: Request, res: Response): Promise<void> {
     try {
-      const { productId, newStock, movementType, quantity, reason, unitCost } = req.body;
+      const { productId, newStock, movementType, quantity, reason, unitCost, referenceId } = req.body;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -101,9 +102,11 @@ export class AdminRoutes {
         quantity,
         reason,
         userId,
-        undefined,
+        referenceId,
         unitCost
       );
+
+      await auditService.logUpdate('products', productId, userId, req.ip, req.get('user-agent'));
 
       res.json(movement);
     } catch (error) {
@@ -163,6 +166,7 @@ export class AdminRoutes {
     try {
       const userData = req.body;
       const user = await adminUserService.createUser(userData);
+      await auditService.logInsert('users', user.id, req.user?.id, req.ip, req.get('user-agent'));
       res.status(201).json(user);
     } catch (error) {
       console.error('Failed to create user:', error);
@@ -182,6 +186,7 @@ export class AdminRoutes {
       }
 
       const user = await adminUserService.updateUser(id, updates, updatedBy);
+      await auditService.logUpdate('users', id, updatedBy, req.ip, req.get('user-agent'));
       res.json(user);
     } catch (error) {
       console.error('Failed to update user:', error);
@@ -200,6 +205,7 @@ export class AdminRoutes {
       }
 
       await adminUserService.softDeleteUser(id, deletedBy);
+      await auditService.logDelete('users', id, deletedBy, req.ip, req.get('user-agent'));
       res.status(204).send();
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -218,6 +224,7 @@ export class AdminRoutes {
       }
 
       const user = await adminUserService.restoreUser(id, restoredBy);
+      await auditService.logRestore('users', id, restoredBy, req.ip, req.get('user-agent'));
       res.json(user);
     } catch (error) {
       console.error('Failed to restore user:', error);
