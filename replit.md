@@ -41,6 +41,16 @@ npm run db:setup
 
 This creates all tables and seeds initial data (categories, products, promo codes, admin user). Tables are created with `IF NOT EXISTS` so it is safe to re-run.
 
+### Re-import setup checklist
+
+After importing this repo fresh into a new Replit environment, the workflows fail until you:
+1. Run `npm install` (installs `expo`, `tsx`, and all other deps — the workflows fail with "expo: No such file or directory" / "tsx: not found" until this runs).
+2. Set the `DATABASE_URL` secret (Postgres connection string) — required before the backend can start or `db:setup` can run.
+3. Run `npm run db:setup` to create tables and seed data.
+4. Restart both workflows.
+
+`SESSION_SECRET` plus the dev JWT/encryption keys already baked into `.replit`'s `userenv` are sufficient for local development; rotate them before any production deployment.
+
 ## API Configuration
 
 The frontend communicates with the backend via `EXPO_PUBLIC_DOMAIN` environment variable.
