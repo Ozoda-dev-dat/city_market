@@ -206,7 +206,7 @@ export default function AddProductScreen() {
               </View>
             ) : (
               <View style={styles.imagePreviewPlaceholder}>
-                <Text style={styles.imagePlaceholderText}>📷</Text>
+                <Ionicons name="image-outline" size={28} color={Colors.textMuted} />
               </View>
             )}
             <Pressable
