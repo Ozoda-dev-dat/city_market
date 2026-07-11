@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,19 @@ import {
   ScrollView,
   Pressable,
   Platform,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BarChart } from "react-native-chart-kit";
 import getColors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { formatPrice } from "@/constants/data";
 import { useApp } from "@/context/ProductsContext";
 import { useAuth } from "@/context/AuthContext";
+
+type ChartRange = 7 | 30;
 
 export default function AdminFinanceScreen() {
   const insets = useSafeAreaInsets();
@@ -38,6 +42,8 @@ export default function AdminFinanceScreen() {
     );
   }
 
+  const [chartRange, setChartRange] = useState<ChartRange>(7);
+
   const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + o.total, 0);
   const pendingRevenue = orders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').reduce((sum, o) => sum + o.total, 0);
   const monthlyRevenue = orders
@@ -45,6 +51,40 @@ export default function AdminFinanceScreen() {
     .reduce((sum, o) => sum + o.total, 0);
   const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
   const totalOrders = orders.length;
+
+  const deliveredOrders = useMemo(
+    () => orders.filter(o => o.status === 'delivered'),
+    [orders]
+  );
+
+  const chartData = useMemo(() => {
+    const days: { label: string; total: number }[] = [];
+    const now = new Date();
+    for (let i = chartRange - 1; i >= 0; i--) {
+      const day = new Date(now);
+      day.setDate(now.getDate() - i);
+      day.setHours(0, 0, 0, 0);
+      const nextDay = new Date(day);
+      nextDay.setDate(day.getDate() + 1);
+
+      const dayTotal = deliveredOrders
+        .filter(o => {
+          const created = new Date(o.createdAt);
+          return created >= day && created < nextDay;
+        })
+        .reduce((sum, o) => sum + o.total, 0);
+
+      const label = chartRange === 7
+        ? day.toLocaleDateString("uz-UZ", { weekday: "short" })
+        : `${day.getDate()}`;
+
+      days.push({ label, total: dayTotal });
+    }
+    return days;
+  }, [deliveredOrders, chartRange]);
+
+  const chartWidth = Dimensions.get("window").width - 32;
+  const labelInterval = chartRange === 30 ? 4 : 1;
 
   return (
     <ScrollView
@@ -80,11 +120,63 @@ export default function AdminFinanceScreen() {
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Daromad tahlili</Text>
-      <View style={styles.chartPlaceholder}>
-        <Ionicons name="bar-chart-outline" size={48} color={Colors.textMuted} />
-        <Text style={styles.chartText}>Grafik tez orada qo&apos;shiladi</Text>
+      <View style={styles.chartHeader}>
+        <Text style={styles.sectionTitle}>Daromad tahlili</Text>
+        <View style={styles.rangeToggle}>
+          {([7, 30] as ChartRange[]).map((range) => (
+            <Pressable
+              key={range}
+              onPress={() => setChartRange(range)}
+              style={[
+                styles.rangeButton,
+                chartRange === range && styles.rangeButtonActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.rangeButtonText,
+                  chartRange === range && styles.rangeButtonTextActive,
+                ]}
+              >
+                {range} kun
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
+
+      {chartData.some(d => d.total > 0) ? (
+        <View style={styles.chartCard}>
+          <BarChart
+            data={{
+              labels: chartData.map((d, i) => (i % labelInterval === 0 ? d.label : "")),
+              datasets: [{ data: chartData.map(d => d.total) }],
+            }}
+            width={chartWidth}
+            height={220}
+            fromZero
+            yAxisLabel=""
+            yAxisSuffix=""
+            withInnerLines={false}
+            showValuesOnTopOfBars={false}
+            chartConfig={{
+              backgroundGradientFrom: Colors.card,
+              backgroundGradientTo: Colors.card,
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(22, 163, 74, ${opacity})`,
+              labelColor: () => Colors.textSecondary,
+              propsForBackgroundLines: { stroke: Colors.cardBorder },
+              barPercentage: chartRange === 30 ? 0.5 : 0.6,
+            }}
+            style={{ borderRadius: 12 }}
+          />
+        </View>
+      ) : (
+        <View style={styles.chartPlaceholder}>
+          <Ionicons name="bar-chart-outline" size={48} color={Colors.textMuted} />
+          <Text style={styles.chartText}>Tanlangan davrda daromad yo&apos;q</Text>
+        </View>
+      )}
 
       <Text style={styles.sectionTitle}>Oxirgi tranzaksiyalar</Text>
       {orders.slice(0, 10).filter(o => o.status === 'delivered').map((order) => (
@@ -191,6 +283,53 @@ const getStyles = (isDarkMode: boolean) => {
       color: Colors.text,
       marginTop: 24,
       marginBottom: 12,
+    },
+    chartHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    rangeToggle: {
+      flexDirection: "row",
+      backgroundColor: Colors.card,
+      borderRadius: 8,
+      padding: 3,
+      borderWidth: 1,
+      borderColor: Colors.cardBorder,
+    },
+    rangeButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 6,
+    },
+    rangeButtonActive: {
+      backgroundColor: Colors.primary,
+    },
+    rangeButtonText: {
+      fontSize: 12,
+      fontFamily: "Poppins_500Medium",
+      color: Colors.textSecondary,
+    },
+    rangeButtonTextActive: {
+      color: "#fff",
+    },
+    chartCard: {
+      backgroundColor: Colors.card,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: "center",
+      marginBottom: 24,
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
     },
     chartPlaceholder: {
       backgroundColor: Colors.card,
