@@ -1,0 +1,32 @@
+[1G[0K⠙[1G[0K⠹[1G[0K
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K⠹[1G[0K[dotenv@17.3.1] injecting env (0) from .env [2m-- tip: ⚙️  write to custom object with { processEnv: myObject }[0m
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+✅ Environment validation passed
+📊 Environment: development
+🌐 Port: 5000
+🔐 Log Level: info
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "otp_codes" already exists, skipping'[39m,
+  file: [32m'parse_utilcmd.c'[39m,
+  line: [32m'207'[39m,
+  routine: [32m'transformCreateStmt'[39m
+}
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "idx_otp_phone" already exists, skipping'[39m,
+  file: [32m'index.c'[39m,
+  line: [32m'889'[39m,
+  routine: [32m'index_create'[39m
+}
