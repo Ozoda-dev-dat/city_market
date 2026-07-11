@@ -22,6 +22,12 @@ export default function AdminCategoriesScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [subName, setSubName] = useState<Record<string, string>>({});
 
+  const ICON_OPTIONS = [
+    "grid", "cafe", "leaf", "water", "wine", "restaurant",
+    "fast-food", "nutrition", "flash", "archive", "ice-cream", "egg",
+    "basket", "fish", "pizza", "beer", "wine-outline", "cart",
+  ];
+
   const handleCreateCategory = async () => {
     if (!catName.trim()) return Alert.alert("Xatolik", "Nom kiriting");
     try {
@@ -104,13 +110,22 @@ export default function AdminCategoriesScreen() {
               value={catName}
               onChangeText={setCatName}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Icon: cafe, leaf, water, wine, restaurant, fast-food, nutrition, flash, archive, ice-cream, egg"
-              placeholderTextColor={Colors.textMuted}
-              value={catIcon}
-              onChangeText={setCatIcon}
-            />
+            <Text style={styles.sectionLabel}>Ikon tanlang</Text>
+            <View style={styles.iconGrid}>
+              {ICON_OPTIONS.map(icon => (
+                <Pressable
+                  key={icon}
+                  style={[styles.iconOption, catIcon === icon && styles.iconOptionActive]}
+                  onPress={() => setCatIcon(icon)}
+                >
+                  <Ionicons
+                    name={icon as any}
+                    size={22}
+                    color={catIcon === icon ? "#fff" : Colors.textSecondary}
+                  />
+                </Pressable>
+              ))}
+            </View>
             <Pressable style={styles.btn} onPress={handleCreateCategory}>
               <Text style={{ color: "#fff", fontWeight: "bold" }}>Yaratish</Text>
             </Pressable>
@@ -202,6 +217,17 @@ const getStyles = (isDarkMode: boolean) => {
     btn: {
       backgroundColor: Colors.primary, padding: 15,
       borderRadius: 12, alignItems: "center",
+    },
+    iconGrid: {
+      flexDirection: "row", flexWrap: "wrap", gap: 8,
+    },
+    iconOption: {
+      width: 44, height: 44, borderRadius: 12,
+      backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.divider,
+      alignItems: "center", justifyContent: "center",
+    },
+    iconOptionActive: {
+      backgroundColor: Colors.primary, borderColor: Colors.primary,
     },
     card: {
       backgroundColor: Colors.card, borderRadius: 16,
