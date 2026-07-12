@@ -622,7 +622,6 @@ export default function ProfileScreen() {
             {[
               { icon: "receipt-outline", label: "Buyurtmalar", val: userOrders.length, color: "#16A34A" },
               { icon: "bag-handle-outline", label: "Savatda", val: cartCount, color: "#F97316" },
-              { icon: "star-outline", label: "Ballar", val: 0, color: "#F59E0B" },
             ].map((st, i) => (
               <React.Fragment key={st.label}>
                 {i > 0 && <View style={[s.statDiv, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "#E2E8F0" }]} />}
