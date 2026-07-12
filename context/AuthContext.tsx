@@ -14,6 +14,7 @@ interface AuthContextValue {
   verifyOtpRegister: (phoneNumber: string, code: string, name: string, role?: string, storeName?: string, storeAddress?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
+  updatePaymentMethod: (preferredPaymentMethod: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -111,7 +112,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (name: string) => {
-    const res = await apiRequest("PATCH", "/api/profile", { name });
+    await patchProfile({ name });
+  };
+
+  const updatePaymentMethod = async (preferredPaymentMethod: string) => {
+    await patchProfile({ preferredPaymentMethod });
+  };
+
+  const patchProfile = async (fields: Record<string, string>) => {
+    const res = await apiRequest("PATCH", "/api/profile", fields);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(JSON.stringify(body));
@@ -135,8 +144,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOtpRegister,
     logout,
     updateProfile,
+    updatePaymentMethod,
     isLoading,
-  }), [user, token, login, register, sendOtp, verifyOtpRegister, logout, updateProfile, isLoading]);
+  }), [user, token, login, register, sendOtp, verifyOtpRegister, logout, updateProfile, updatePaymentMethod, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

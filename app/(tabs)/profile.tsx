@@ -40,10 +40,11 @@ const APP_BUILD = "2025.07";
    PAYMENT MODAL
    ════════════════════════════════════════════ */
 function PaymentModal({
-  visible, onClose, isDarkMode,
-}: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
+  visible, onClose, isDarkMode, value, onSave, saving,
+}: { visible: boolean; onClose: () => void; isDarkMode: boolean; value: string; onSave: (v: string) => void; saving: boolean }) {
   const C = getColors(isDarkMode);
-  const [selected, setSelected] = useState("cash");
+  const [selected, setSelected] = useState(value);
+  React.useEffect(() => { if (visible) setSelected(value); }, [visible, value]);
   const bg = isDarkMode ? "#18181B" : "#FFFFFF";
   const cardBg = isDarkMode ? "rgba(255,255,255,0.06)" : "#F8FAFC";
   const cardBorder = isDarkMode ? "rgba(255,255,255,0.1)" : "#E2E8F0";
@@ -122,9 +123,13 @@ function PaymentModal({
             })}
           </View>
 
-          <Pressable style={[ms.btn, { backgroundColor: "#16A34A", marginTop: 20 }]} onPress={onClose}>
+          <Pressable
+            style={[ms.btn, { backgroundColor: "#16A34A", marginTop: 20, opacity: saving ? 0.6 : 1 }]}
+            onPress={() => onSave(selected)}
+            disabled={saving}
+          >
             <Ionicons name="checkmark" size={18} color="#fff" />
-            <Text style={ms.btnText}>Saqlash</Text>
+            <Text style={ms.btnText}>{saving ? "Saqlanmoqda…" : "Saqlash"}</Text>
           </Pressable>
         </Pressable>
       </Pressable>
@@ -484,7 +489,7 @@ function Sep({ isDarkMode }: { isDarkMode: boolean }) {
    ════════════════════════════════════════════ */
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, updatePaymentMethod } = useAuth();
   const { items } = useCart();
   const { orders } = useApp();
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -497,6 +502,7 @@ export default function ProfileScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
@@ -518,6 +524,11 @@ export default function ProfileScreen() {
   const userOrders = orders || [];
   const cartCount = (items || []).reduce((s: number, i: any) => s + (i?.quantity || 0), 0);
   const initials = (user.name || "U").charAt(0).toUpperCase();
+  const paymentLabels: Record<string, string> = {
+    cash: "Naqd pul", payme: "Payme", click: "Click", uzcard: "Uzcard / Humo",
+  };
+  const paymentMethod = (user as any).preferredPaymentMethod || "cash";
+  const paymentLabel = paymentLabels[paymentMethod] ?? "Naqd pul";
   const locationLabel = location?.address
     ? (location.address.length > 24 ? location.address.slice(0, 24) + "…" : location.address)
     : "Tanlanmagan";
@@ -750,7 +761,7 @@ export default function ProfileScreen() {
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="card-outline" label="To'lov usullari" value="Naqd pul"
+              icon="card-outline" label="To'lov usullari" value={paymentLabel}
               onPress={() => setShowPaymentModal(true)}
               iconBg="rgba(22,163,74,0.1)" iconColor="#16A34A"
               isDarkMode={isDarkMode}
@@ -910,7 +921,21 @@ export default function ProfileScreen() {
       </Modal>
 
       {/* ── Feature modals ── */}
-      <PaymentModal visible={showPaymentModal} onClose={() => setShowPaymentModal(false)} isDarkMode={isDarkMode} />
+      <PaymentModal
+        visible={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        isDarkMode={isDarkMode}
+        value={paymentMethod}
+        saving={savingPayment}
+        onSave={async (v) => {
+          setSavingPayment(true);
+          try {
+            await updatePaymentMethod(v);
+            setShowPaymentModal(false);
+          } catch { Alert.alert("Xatolik", "To'lov usulini saqlashda xatolik yuz berdi"); }
+          finally { setSavingPayment(false); }
+        }}
+      />
       <LanguageModal visible={showLangModal} onClose={() => setShowLangModal(false)} lang={lang} setLang={setLang} isDarkMode={isDarkMode} />
       <HelpModal visible={showHelpModal} onClose={() => setShowHelpModal(false)} isDarkMode={isDarkMode} />
       <AboutModal visible={showAboutModal} onClose={() => setShowAboutModal(false)} isDarkMode={isDarkMode} />

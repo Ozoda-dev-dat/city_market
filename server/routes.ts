@@ -399,16 +399,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Update profile name
+  // Update profile (name and/or preferred payment method)
   app.patch("/api/profile",
     authenticateToken,
     async (req, res) => {
       try {
-        const { name } = req.body;
-        if (!name || typeof name !== "string" || name.trim().length < 1) {
-          return res.status(400).json({ error: "Invalid name" });
+        const { name, preferredPaymentMethod } = req.body;
+        const updates: Record<string, string> = {};
+
+        if (name !== undefined) {
+          if (typeof name !== "string" || name.trim().length < 1) {
+            return res.status(400).json({ error: "Invalid name" });
+          }
+          updates.name = name.trim();
         }
-        const updated = await storage.updateUser(req.user!.userId, { name: name.trim() });
+
+        if (preferredPaymentMethod !== undefined) {
+          const allowed = ["cash", "payme", "click", "uzcard"];
+          if (!allowed.includes(preferredPaymentMethod)) {
+            return res.status(400).json({ error: "Invalid payment method" });
+          }
+          updates.preferredPaymentMethod = preferredPaymentMethod;
+        }
+
+        if (Object.keys(updates).length === 0) {
+          return res.status(400).json({ error: "No valid fields to update" });
+        }
+
+        const updated = await storage.updateUser(req.user!.userId, updates);
         const { password: _, ...userWithoutPassword } = updated as any;
         res.json({ user: userWithoutPassword });
       } catch (error) {

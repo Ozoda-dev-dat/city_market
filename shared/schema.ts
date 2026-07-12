@@ -16,6 +16,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true).notNull(),
   vehicleType: text("vehicle_type"), // for couriers: bike, car, on_foot, scooter
   courierStatus: text("courier_status"), // for couriers: active, on_leave, suspended
+  preferredPaymentMethod: text("preferred_payment_method").default("cash"), // cash, payme, click, uzcard
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
