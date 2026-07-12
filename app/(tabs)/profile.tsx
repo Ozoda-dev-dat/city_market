@@ -555,15 +555,20 @@ export default function ProfileScreen() {
       Alert.alert("Xatolik", "Barcha maydonlarni to'ldiring"); return;
     }
     if (newPassword !== confirmPassword) { Alert.alert("Xatolik", "Yangi parollar mos kelmaydi"); return; }
-    if (newPassword.length < 6) { Alert.alert("Xatolik", "Parol kamida 6 ta belgidan iborat bo'lishi kerak"); return; }
+    if (newPassword.length < 8) { Alert.alert("Xatolik", "Parol kamida 8 ta belgidan iborat bo'lishi kerak"); return; }
     setSavingPassword(true);
     try {
-      await apiRequest("PATCH", "/api/password", { oldPassword, newPassword });
+      const res = await apiRequest("PATCH", "/api/password", { oldPassword, newPassword });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Parolni o'zgartirishda xatolik yuz berdi");
+      }
       setShowPasswordModal(false);
       setOldPassword(""); setNewPassword(""); setConfirmPassword("");
       Alert.alert("✓ Muvaffaqiyat", "Parol muvaffaqiyatli o'zgartirildi");
-    } catch { Alert.alert("Xatolik", "Parolni o'zgartirishda xatolik yuz berdi"); }
-    finally { setSavingPassword(false); }
+    } catch (error: any) {
+      Alert.alert("Xatolik", error?.message || "Parolni o'zgartirishda xatolik yuz berdi");
+    } finally { setSavingPassword(false); }
   };
 
   const getStatusLabel = (s: string) =>
@@ -883,7 +888,7 @@ export default function ProfileScreen() {
                 </LinearGradient>
                 <View style={{ flex: 1 }}>
                   <Text style={[ms.hdrTitle, { color: C.text }]}>Parolni o'zgartirish</Text>
-                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Kamida 6 ta belgi</Text>
+                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Kamida 8 ta belgi</Text>
                 </View>
               </View>
               {[
@@ -907,6 +912,9 @@ export default function ProfileScreen() {
                   </Pressable>
                 </View>
               ))}
+              <Text style={{ fontSize: 12, color: C.textSecondary, marginTop: 8 }}>
+                Kamida 8 belgi: katta/kichik harf, raqam va maxsus belgi
+              </Text>
               <View style={ms.btnRow}>
                 <Pressable style={[ms.cancelBtn, { borderColor: isDarkMode ? "rgba(255,255,255,0.1)" : "#E2E8F0" }]} onPress={() => setShowPasswordModal(false)}>
                   <Text style={[ms.cancelTxt, { color: C.textSecondary }]}>Bekor</Text>
