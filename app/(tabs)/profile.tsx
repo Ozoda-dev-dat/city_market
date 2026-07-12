@@ -32,6 +32,7 @@ import { LocationPicker } from "@/components/LocationPicker";
 import { formatPrice } from "@/constants/data";
 import { useTranslation } from "@/lib/I18nProvider";
 import { apiRequest } from "@/lib/query-client";
+import { requestPushToken, getNotificationPermissionStatus } from "@/lib/push-notifications";
 
 const APP_VERSION = "1.0.0";
 const APP_BUILD = "2025.07";
@@ -489,7 +490,7 @@ function Sep({ isDarkMode }: { isDarkMode: boolean }) {
    ════════════════════════════════════════════ */
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, logout, updateProfile, updatePaymentMethod } = useAuth();
+  const { user, logout, updateProfile, updatePaymentMethod, setNotificationsEnabled, registerPushToken } = useAuth();
   const { items } = useCart();
   const { orders } = useApp();
   const { isDarkMode, toggleDarkMode } = useTheme();
@@ -498,11 +499,11 @@ export default function ProfileScreen() {
   const { lang, setLang } = useTranslation();
 
   const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [notifications, setNotifications] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
+  const [savingNotifications, setSavingNotifications] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
@@ -519,6 +520,19 @@ export default function ProfileScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  React.useEffect(() => {
+    if (!user) return;
+    const enabled = (user as any).notificationsEnabled !== false;
+    const hasToken = !!(user as any).pushToken;
+    if (!enabled || hasToken) return;
+    (async () => {
+      const status = await getNotificationPermissionStatus();
+      if (status !== "granted") return;
+      const token = await requestPushToken();
+      if (token) { try { await registerPushToken(token); } catch { /* non-fatal */ } }
+    })();
+  }, [user?.id]);
+
   if (!user) { router.replace("/auth"); return null; }
 
   const userOrders = orders || [];
@@ -529,6 +543,7 @@ export default function ProfileScreen() {
   };
   const paymentMethod = (user as any).preferredPaymentMethod || "cash";
   const paymentLabel = paymentLabels[paymentMethod] ?? "Naqd pul";
+  const notificationsEnabled = (user as any).notificationsEnabled !== false;
   const locationLabel = location?.address
     ? (location.address.length > 24 ? location.address.slice(0, 24) + "…" : location.address)
     : "Tanlanmagan";
@@ -548,6 +563,28 @@ export default function ProfileScreen() {
       setShowEditModal(false);
     } catch { Alert.alert("Xatolik", "Ismni yangilashda xatolik yuz berdi"); }
     finally { setSavingName(false); }
+  };
+
+  const handleToggleNotifications = async (value: boolean) => {
+    setSavingNotifications(true);
+    try {
+      if (value) {
+        const token = await requestPushToken();
+        if (!token) {
+          Alert.alert(
+            "Ruxsat berilmadi",
+            "Bildirishnomalarni yoqish uchun qurilma sozlamalaridan ilovaga bildirishnoma yuborish ruxsatini bering."
+          );
+          return;
+        }
+        await registerPushToken(token);
+      }
+      await setNotificationsEnabled(value);
+    } catch {
+      Alert.alert("Xatolik", "Sozlamani saqlashda xatolik yuz berdi");
+    } finally {
+      setSavingNotifications(false);
+    }
   };
 
   const handleChangePassword = async () => {
@@ -785,7 +822,7 @@ export default function ProfileScreen() {
           <View style={[s.menuCard, cardSurface, { borderWidth: 1 }]}>
             <MenuItem
               icon="notifications-outline" label="Bildirishnomalar"
-              toggle toggleValue={notifications} onToggle={setNotifications}
+              toggle toggleValue={notificationsEnabled} onToggle={handleToggleNotifications}
               iconBg="rgba(249,115,22,0.1)" iconColor="#F97316"
               isDarkMode={isDarkMode}
             />

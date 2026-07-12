@@ -15,6 +15,8 @@ interface AuthContextValue {
   logout: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   updatePaymentMethod: (preferredPaymentMethod: string) => Promise<void>;
+  setNotificationsEnabled: (notificationsEnabled: boolean) => Promise<void>;
+  registerPushToken: (pushToken: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -119,8 +121,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await patchProfile({ preferredPaymentMethod });
   };
 
-  const patchProfile = async (fields: Record<string, string>) => {
-    const res = await apiRequest("PATCH", "/api/profile", fields);
+  const setNotificationsEnabled = async (notificationsEnabled: boolean) => {
+    await patchProfile({ notificationsEnabled });
+  };
+
+  const registerPushToken = async (pushToken: string) => {
+    await persistUser("POST", "/api/push-token", { pushToken });
+  };
+
+  const patchProfile = async (fields: Record<string, string | boolean>) => {
+    await persistUser("PATCH", "/api/profile", fields);
+  };
+
+  const persistUser = async (method: string, endpoint: string, fields: Record<string, unknown>) => {
+    const res = await apiRequest(method, endpoint, fields);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(JSON.stringify(body));
@@ -145,8 +159,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     updateProfile,
     updatePaymentMethod,
+    setNotificationsEnabled,
+    registerPushToken,
     isLoading,
-  }), [user, token, login, register, sendOtp, verifyOtpRegister, logout, updateProfile, updatePaymentMethod, isLoading]);
+  }), [user, token, login, register, sendOtp, verifyOtpRegister, logout, updateProfile, updatePaymentMethod, setNotificationsEnabled, registerPushToken, isLoading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

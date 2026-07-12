@@ -9,6 +9,7 @@ import { generateToken } from "../lib/jwt";
 import { validateRequestBody, authSchemas } from "../lib/validation";
 import { sendSms, isSmsConfigured } from "./sms-service";
 import { otpService } from "./otp-service";
+import { sendPushToUser } from "./push-service";
 import { 
   authenticateToken, 
   requireAdmin, 
@@ -404,8 +405,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authenticateToken,
     async (req, res) => {
       try {
-        const { name, preferredPaymentMethod } = req.body;
-        const updates: Record<string, string> = {};
+        const { name, preferredPaymentMethod, notificationsEnabled } = req.body;
+        const updates: Record<string, string | boolean> = {};
 
         if (name !== undefined) {
           if (typeof name !== "string" || name.trim().length < 1) {
@@ -422,6 +423,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updates.preferredPaymentMethod = preferredPaymentMethod;
         }
 
+        if (notificationsEnabled !== undefined) {
+          if (typeof notificationsEnabled !== "boolean") {
+            return res.status(400).json({ error: "Invalid notificationsEnabled value" });
+          }
+          updates.notificationsEnabled = notificationsEnabled;
+        }
+
         if (Object.keys(updates).length === 0) {
           return res.status(400).json({ error: "No valid fields to update" });
         }
@@ -431,6 +439,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ user: userWithoutPassword });
       } catch (error) {
         res.status(500).json({ error: "Failed to update profile" });
+      }
+    }
+  );
+
+  // Register/clear the current device's Expo push token
+  app.post("/api/push-token",
+    authenticateToken,
+    async (req, res) => {
+      try {
+        const { pushToken } = req.body;
+        if (pushToken !== null && typeof pushToken !== "string") {
+          return res.status(400).json({ error: "Invalid push token" });
+        }
+        const updated = await storage.updateUser(req.user!.userId, { pushToken } as any);
+        const { password: _, ...userWithoutPassword } = updated as any;
+        res.json({ user: userWithoutPassword });
+      } catch (error) {
+        console.error("Error saving push token:", error);
+        res.status(500).json({ error: "Failed to save push token" });
       }
     }
   );
@@ -1058,6 +1085,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             orderId: order.id,
             status: order.status,
           });
+          const statusLabels: Record<string, string> = {
+            confirmed: "Buyurtmangiz tasdiqlandi",
+            preparing: "Buyurtmangiz tayyorlanmoqda",
+            ready: "Buyurtmangiz tayyor",
+            delivering: "Buyurtmangiz yo'lda",
+            delivered: "Buyurtmangiz yetkazildi",
+            cancelled: "Buyurtmangiz bekor qilindi",
+          };
+          const label = statusLabels[order.status];
+          if (label) {
+            sendPushToUser(order.customerId, "City Market", `${label} — #${order.id.slice(-6).toUpperCase()}`, {
+              orderId: order.id,
+              status: order.status,
+            });
+          }
         }
         res.json(order);
       } catch (error) {

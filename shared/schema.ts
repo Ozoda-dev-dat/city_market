@@ -17,6 +17,8 @@ export const users = pgTable("users", {
   vehicleType: text("vehicle_type"), // for couriers: bike, car, on_foot, scooter
   courierStatus: text("courier_status"), // for couriers: active, on_leave, suspended
   preferredPaymentMethod: text("preferred_payment_method").default("cash"), // cash, payme, click, uzcard
+  pushToken: text("push_token"), // Expo push notification token
+  notificationsEnabled: boolean("notifications_enabled").default(true).notNull(),
   deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
