@@ -25,7 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import getColors from "@/constants/colors";
+import getColors, { Colors as StaticColors } from "@/constants/colors";
 import { BANNERS, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
 import { CategorySubcategorySection } from "@/components/CategorySubcategorySection";
@@ -70,7 +70,7 @@ function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: bo
   }, [isActive]);
 
   const style = useAnimatedStyle(() => ({ width: w.value, opacity: op.value }));
-  return <Animated.View style={[styles.dot, { backgroundColor: "#16A34A" }, style]} />;
+  return <Animated.View style={[styles.dot, { backgroundColor: StaticColors.primary }, style]} />;
 }
 
 function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number }) {
@@ -236,7 +236,7 @@ function CategoryCard({ item, onPress, imageUrl, wide }: {
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const bgColor: string = item.bgColor ?? "#F0FDF4";
+  const bgColor: string = item.bgColor ?? StaticColors.bannerGradientBottom;
 
   return (
     <Animated.View style={[catStyles.card, anim]}>
@@ -291,7 +291,7 @@ const catStyles = StyleSheet.create({
   },
   label: {
     fontFamily: "Poppins_700Bold",
-    color: "#111827",
+    color: StaticColors.text,
   },
   labelHalf: {
     fontSize: 15,
@@ -421,9 +421,11 @@ export default function HomeScreen() {
   }, [startBannerAutoScroll]);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
-  const bgColors: [string, string, string] = isDarkMode
-    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
-    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
+  const bgColors: [string, string, string] = [
+    Colors.screenGradientStart,
+    Colors.screenGradientMid,
+    Colors.background,
+  ];
 
   return (
     <View style={{ flex: 1 }}>
@@ -461,7 +463,7 @@ export default function HomeScreen() {
               style={styles.locationRow}
               onPress={() => setShowLocationModal(true)}
             >
-              <Ionicons name="location" size={14} color="#16A34A" />
+              <Ionicons name="location" size={14} color={Colors.primary} />
               <Text style={[styles.locationText, { color: Colors.textSecondary }]} numberOfLines={1}>
                 {location?.address
                   ? location.address.length > 32
@@ -515,13 +517,13 @@ export default function HomeScreen() {
           onPress={() => {}}
         >
           <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
-            <Ionicons name="search" size={16} color="#16A34A" />
+            <Ionicons name="search" size={16} color={Colors.primary} />
           </View>
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
             Mahsulot yoki kategoriya...
           </Text>
           <View style={[styles.filterBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
-            <Ionicons name="options-outline" size={16} color="#16A34A" />
+            <Ionicons name="options-outline" size={16} color={Colors.primary} />
           </View>
         </Pressable>
 
@@ -530,17 +532,17 @@ export default function HomeScreen() {
           borderColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.18)",
         }]}>
           <View style={styles.deliveryItem}>
-            <Ionicons name="bicycle-outline" size={16} color="#16A34A" />
+            <Ionicons name="bicycle-outline" size={16} color={Colors.primary} />
             <Text style={[styles.deliveryItemText, { color: Colors.text }]}>30 daqiqada yetkazish</Text>
           </View>
           <View style={styles.deliverySep} />
           <View style={styles.deliveryItem}>
-            <Ionicons name="shield-checkmark-outline" size={16} color="#16A34A" />
+            <Ionicons name="shield-checkmark-outline" size={16} color={Colors.primary} />
             <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Sifat kafolati</Text>
           </View>
           <View style={styles.deliverySep} />
           <View style={styles.deliveryItem}>
-            <Ionicons name="storefront-outline" size={16} color="#16A34A" />
+            <Ionicons name="storefront-outline" size={16} color={Colors.primary} />
             <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Yangi mahsulotlar</Text>
           </View>
         </View>
@@ -777,7 +779,7 @@ const styles = StyleSheet.create({
     minWidth: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#EF4444",
+    backgroundColor: StaticColors.error,
     borderWidth: 1.5,
     borderColor: "#fff",
     alignItems: "center",
@@ -884,7 +886,7 @@ const styles = StyleSheet.create({
   seeAll: {
     fontFamily: "Poppins_500Medium",
     fontSize: 14,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   hScroll: {
     overflow: "visible",
@@ -893,7 +895,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#EF4444",
+    backgroundColor: StaticColors.error,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,

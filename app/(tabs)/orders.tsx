@@ -14,19 +14,19 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import getColors from "@/constants/colors";
+import getColors, { Colors as StaticColors } from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { apiRequest } from "@/lib/query-client";
 import { formatPrice } from "@/constants/data";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  pending:    { label: "Yangi",           color: "#F59E0B", bg: "#FFFBEB", icon: "time-outline" },
-  confirmed:  { label: "Qabul qilindi",   color: "#3B82F6", bg: "#EFF6FF", icon: "checkmark-circle-outline" },
-  preparing:  { label: "Tayyorlanmoqda",  color: "#8B5CF6", bg: "#F5F3FF", icon: "bag-handle-outline" },
-  ready:      { label: "Tayyor",          color: "#16A34A", bg: "#DCFCE7", icon: "cube-outline" },
-  delivering: { label: "Yo'lda",          color: "#0891B2", bg: "#E0F2FE", icon: "bicycle-outline" },
-  delivered:  { label: "Yetkazildi",      color: "#16A34A", bg: "#DCFCE7", icon: "home-outline" },
-  cancelled:  { label: "Bekor qilingan",  color: "#EF4444", bg: "#FEF2F2", icon: "close-circle-outline" },
+  pending:    { label: "Yangi",           color: StaticColors.warning, bg: StaticColors.warningBg, icon: "time-outline" },
+  confirmed:  { label: "Qabul qilindi",   color: StaticColors.info,    bg: StaticColors.infoBg,     icon: "checkmark-circle-outline" },
+  preparing:  { label: "Tayyorlanmoqda",  color: StaticColors.purple,  bg: StaticColors.purpleBg,   icon: "bag-handle-outline" },
+  ready:      { label: "Tayyor",          color: StaticColors.primary, bg: StaticColors.primaryLight, icon: "cube-outline" },
+  delivering: { label: "Yo'lda",          color: StaticColors.cyan,    bg: StaticColors.cyanBg,     icon: "bicycle-outline" },
+  delivered:  { label: "Yetkazildi",      color: StaticColors.primary, bg: StaticColors.primaryLight, icon: "home-outline" },
+  cancelled:  { label: "Bekor qilingan",  color: StaticColors.error,   bg: StaticColors.errorBg,    icon: "close-circle-outline" },
 };
 
 const FILTER_TABS = [
@@ -65,7 +65,7 @@ function LivePulse() {
     <Animated.View
       style={{
         width: 8, height: 8, borderRadius: 4,
-        backgroundColor: "#0891B2",
+        backgroundColor: StaticColors.cyan,
         transform: [{ scale }],
       }}
     />
@@ -217,12 +217,12 @@ export default function CustomerOrdersScreen() {
                 {isLive && (
                   <View style={styles.trackRow}>
                     <View style={styles.trackInfo}>
-                      <Ionicons name="bicycle" size={14} color="#0891B2" />
+                      <Ionicons name="bicycle" size={14} color={StaticColors.cyan} />
                       <Text style={styles.trackInfoText}>Kuryer sizga kelmoqda</Text>
                     </View>
                     <View style={styles.trackBtn}>
                       <Text style={styles.trackBtnText}>Kuzatish</Text>
-                      <Ionicons name="chevron-forward" size={14} color="#0891B2" />
+                      <Ionicons name="chevron-forward" size={14} color={StaticColors.cyan} />
                     </View>
                   </View>
                 )}
@@ -336,7 +336,7 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       gap: 5,
-      backgroundColor: "#E0F2FE",
+      backgroundColor: Colors.cyanBg,
       paddingHorizontal: 8,
       paddingVertical: 5,
       borderRadius: 10,
@@ -344,7 +344,7 @@ const getStyles = (isDarkMode: boolean) => {
     liveText: {
       fontFamily: "Poppins_700Bold",
       fontSize: 10,
-      color: "#0891B2",
+      color: Colors.cyan,
       letterSpacing: 0.5,
     },
     statusBadge: {
@@ -376,7 +376,7 @@ const getStyles = (isDarkMode: boolean) => {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: "#E0F2FE",
+      backgroundColor: Colors.cyanBg,
       paddingHorizontal: 14,
       paddingVertical: 10,
     },
@@ -384,13 +384,13 @@ const getStyles = (isDarkMode: boolean) => {
     trackInfoText: {
       fontFamily: "Poppins_500Medium",
       fontSize: 13,
-      color: "#0891B2",
+      color: Colors.cyan,
     },
     trackBtn: { flexDirection: "row", alignItems: "center", gap: 2 },
     trackBtnText: {
       fontFamily: "Poppins_600SemiBold",
       fontSize: 13,
-      color: "#0891B2",
+      color: Colors.cyan,
     },
     progressRow: {
       flexDirection: "row",

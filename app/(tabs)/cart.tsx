@@ -28,7 +28,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { apiRequest, queryClient, resolveImageUrl } from "@/lib/query-client";
 import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
-import getColors from "@/constants/colors";
+import getColors, { Colors as StaticColors } from "@/constants/colors";
 import { useLocation } from "@/context/LocationContext";
 
 const STORE_ORIGIN = { latitude: 41.4741824, longitude: 60.7735868 };
@@ -105,12 +105,12 @@ function CartItemRow({
           <Ionicons
             name={item.quantity === 1 ? "trash-outline" : "remove"}
             size={16}
-            color="#16A34A"
+            color={Colors.primary}
           />
         </Pressable>
         <Text style={itemStyles.qty}>{item.quantity}</Text>
         <Pressable style={itemStyles.qtyBtn} onPress={() => handleQty(1)}>
-          <Ionicons name="add" size={16} color="#16A34A" />
+          <Ionicons name="add" size={16} color={Colors.primary} />
         </Pressable>
       </View>
     </Animated.View>
@@ -137,14 +137,14 @@ const itemStyles = StyleSheet.create({
     height: 64,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: StaticColors.successBgSoft,
   },
   image: { width: "100%", height: "100%" },
   imageFallback: { alignItems: "center", justifyContent: "center" },
-  imageLetter: { fontFamily: "Poppins_700Bold", fontSize: 22, color: "#16A34A" },
+  imageLetter: { fontFamily: "Poppins_700Bold", fontSize: 22, color: StaticColors.primary },
   info: { flex: 1, gap: 4 },
   name: { fontFamily: "Poppins_600SemiBold", fontSize: 13, lineHeight: 18 },
-  price: { fontFamily: "Poppins_700Bold", fontSize: 14, color: "#16A34A" },
+  price: { fontFamily: "Poppins_700Bold", fontSize: 14, color: StaticColors.primary },
   controls: {
     flexDirection: "row",
     alignItems: "center",
@@ -162,7 +162,7 @@ const itemStyles = StyleSheet.create({
   qty: {
     fontFamily: "Poppins_700Bold",
     fontSize: 14,
-    color: "#16A34A",
+    color: StaticColors.primary,
     minWidth: 22,
     textAlign: "center",
   },
@@ -290,9 +290,11 @@ export default function CartScreen() {
     }
   };
 
-  const bgColors: [string, string, string] = isDarkMode
-    ? ["#0a1f12", "#0f0f12", "#0C0C0E"]
-    : ["#d4ede0", "#eaf4ee", "#F5F6F5"];
+  const bgColors: [string, string, string] = [
+    Colors.screenGradientStart,
+    Colors.screenGradientMid,
+    Colors.background,
+  ];
 
   if (items.length === 0) {
     return (
@@ -306,7 +308,7 @@ export default function CartScreen() {
               borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
             }
           ]}>
-            <Ionicons name="bag-outline" size={44} color="#16A34A" />
+            <Ionicons name="bag-outline" size={44} color={Colors.primary} />
           </View>
           <Text style={[styles.emptyTitle, { color: Colors.text }]}>Savat bo&apos;sh</Text>
           <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
@@ -371,7 +373,7 @@ export default function CartScreen() {
                 deliveryType === "delivery" && styles.deliveryToggleBtnActive,
                 {
                   backgroundColor: deliveryType === "delivery"
-                    ? "#16A34A"
+                    ? Colors.primary
                     : isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                 }
               ]}
@@ -399,7 +401,7 @@ export default function CartScreen() {
                 deliveryType === "pickup" && styles.deliveryToggleBtnActive,
                 {
                   backgroundColor: deliveryType === "pickup"
-                    ? "#16A34A"
+                    ? Colors.primary
                     : isDarkMode ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
                 }
               ]}
@@ -427,7 +429,7 @@ export default function CartScreen() {
               styles.pickupInfo,
               { backgroundColor: isDarkMode ? "rgba(22,163,74,0.12)" : "rgba(22,163,74,0.08)" }
             ]}>
-              <Ionicons name="location" size={16} color="#16A34A" />
+              <Ionicons name="location" size={16} color={Colors.primary} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.pickupInfoTitle}>Do'kon manzili</Text>
                 <Text style={styles.pickupInfoAddr}>Al-Xorazmiy 2-tor ko'chasi, 48/5, Xonqa, Xorazm viloyati</Text>
@@ -483,7 +485,7 @@ export default function CartScreen() {
                 </Text>
               )}
               {deliveryType === "pickup" && (
-                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: "#16A34A" }}>
+                <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.primary }}>
                   O'zim olib ketaman
                 </Text>
               )}
@@ -494,8 +496,8 @@ export default function CartScreen() {
           </View>
           {discount > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: "#EF4444" }]}>Chegirma</Text>
-              <Text style={[styles.summaryValue, { color: "#EF4444" }]}>-{discount}%</Text>
+              <Text style={[styles.summaryLabel, { color: Colors.error }]}>Chegirma</Text>
+              <Text style={[styles.summaryValue, { color: Colors.error }]}>-{discount}%</Text>
             </View>
           )}
           <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]} />
@@ -507,7 +509,7 @@ export default function CartScreen() {
 
         {delivery === 0 && (
           <View style={[styles.freeBanner, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
-            <Ionicons name="bicycle" size={18} color="#16A34A" />
+            <Ionicons name="bicycle" size={18} color={Colors.primary} />
             <Text style={styles.freeBannerText}>Bepul yetkazib berish</Text>
           </View>
         )}
@@ -594,12 +596,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#16A34A",
+    backgroundColor: StaticColors.primary,
     paddingHorizontal: 28,
     paddingVertical: 14,
     borderRadius: 18,
     marginTop: 8,
-    shadowColor: "#16A34A",
+    shadowColor: StaticColors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -622,11 +624,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   countBadge: {
-    backgroundColor: "#16A34A",
+    backgroundColor: StaticColors.primary,
     borderRadius: 10,
     paddingHorizontal: 9,
     paddingVertical: 3,
-    shadowColor: "#16A34A",
+    shadowColor: StaticColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -664,7 +666,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   promoBtn: {
-    backgroundColor: "#16A34A",
+    backgroundColor: StaticColors.primary,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -702,7 +704,7 @@ const styles = StyleSheet.create({
   freeText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 15,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   divider: {
     height: 1,
@@ -714,7 +716,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontFamily: "Poppins_700Bold",
     fontSize: 19,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   freeBanner: {
     flexDirection: "row",
@@ -728,7 +730,7 @@ const styles = StyleSheet.create({
   freeBannerText: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   note: {
     fontFamily: "Poppins_400Regular",
@@ -780,17 +782,17 @@ const styles = StyleSheet.create({
   pickupInfoTitle: {
     fontFamily: "Poppins_600SemiBold",
     fontSize: 13,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   pickupInfoAddr: {
     fontFamily: "Poppins_400Regular",
     fontSize: 12,
-    color: "#16A34A",
+    color: StaticColors.primary,
   },
   pickupInfoNote: {
     fontFamily: "Poppins_400Regular",
     fontSize: 11,
-    color: "#4ADE80",
+    color: StaticColors.mintGreen,
     marginTop: 2,
   },
   footer: {
@@ -802,14 +804,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   checkoutBtn: {
-    backgroundColor: "#16A34A",
+    backgroundColor: StaticColors.primary,
     borderRadius: 20,
     paddingVertical: 16,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    shadowColor: "#16A34A",
+    shadowColor: StaticColors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 18,

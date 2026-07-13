@@ -1,3 +1,4 @@
 - [npm supply-chain firewall blocks](npm-firewall-blocks.md) — some packages (e.g. shell-quote) are blocked at ALL versions by Replit's package firewall; version bumps won't help, vendor a local replacement instead.
 - [Replit Postgres SSL](replit-postgres-ssl.md) — Replit's built-in Postgres uses `sslmode=disable`; hardcoded `ssl: 'require'` in db clients breaks connections migrated from Neon/other hosted DBs.
 - [Removed dead admin-services module](dead-admin-routes-module.md) — server/app.ts + admin-routes.ts + services/admin-*-service.ts were unreachable dead code; real admin backend lives in server/routes.ts + db-storage.ts.
+- [RN mode-dependent color tokens](rn-mode-dependent-color-tokens.md) — module-level StyleSheet.create can't use getColors(isDarkMode) results; use the static mode-independent export instead.
