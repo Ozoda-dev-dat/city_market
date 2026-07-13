@@ -480,6 +480,7 @@ function MenuItem({
 }
 
 function Sep({ isDarkMode }: { isDarkMode: boolean }) {
+  const C = getColors(isDarkMode);
   return (
     <View style={[s.sep, { backgroundColor: C.chipBg }]} />
   );
