@@ -164,7 +164,7 @@ async function startServer() {
       log(`🌐 API: http://localhost:${PORT}`);
       log(`🏥 Health: http://localhost:${PORT}/health`);
       log(`🗄️  Database: SQLite (supermarket_go_dev.db)`);
-      log(`👤 Admin login: +998901234567 / admin`);
+      log(`👤 Admin login: +998978562020 / Odamboy1307`);
     });
 
     // Graceful shutdown

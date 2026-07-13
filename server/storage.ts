@@ -52,7 +52,7 @@ export class MemStorage implements IStorage {
     cats.forEach(c => this.categories.set(c.id, c as Category));
     
     // Default Admin
-    this.createUser({ phoneNumber: "+998901234567", password: "admin", role: "admin", name: "Admin" });
+    this.createUser({ phoneNumber: "+998978562020", password: "Odamboy1307", role: "admin", name: "Admin" });
   }
 
   async getUser(id: string) { return this.users.get(id); }

@@ -187,10 +187,10 @@ export class DbStorage implements IStorage {
 
       if (existingAdmin.length === 0) {
         const bcrypt = await import('bcryptjs');
-        const hashedPassword = await bcrypt.hash("admin", 10);
+        const hashedPassword = await bcrypt.hash("Odamboy1307", 10);
         // Create default admin
         await this.db.insert(schema.users).values({
-          phoneNumber: "+998901234567",
+          phoneNumber: "+998978562020",
           password: hashedPassword,
           role: "admin",
           name: "Admin"

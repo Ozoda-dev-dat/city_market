@@ -114,7 +114,7 @@ const server = app.listen(PORT, () => {
   console.log(`🌐 API: http://localhost:${PORT}`);
   console.log(`🏥 Health: http://localhost:${PORT}/health`);
   console.log(`🗄️  Database: SQLite (supermarket_go_dev.db)`);
-  console.log(`👤 Admin login: +998901234567 / admin`);
+  console.log(`👤 Admin login: +998978562020 / Odamboy1307`);
 });
 
 // Graceful shutdown

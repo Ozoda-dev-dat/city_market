@@ -229,7 +229,7 @@ function HelpModal({
   const cardBorder = C.inputBorder;
 
   const contacts = [
-    { icon: "call", label: "Telefon", value: "+998 71 000 00 00", color: C.primary, url: "tel:+998710000000" },
+    { icon: "call", label: "Telefon", value: "+998 97 548 20 20", color: C.primary, url: "tel:+998975482020" },
     { icon: "mail", label: "Email", value: "support@citymarket.uz", color: C.info, url: "mailto:support@citymarket.uz" },
     { icon: "logo-telegram", label: "Telegram", value: "@citymarket_uz", color: C.telegram, url: "https://t.me/citymarket_uz" },
   ];
