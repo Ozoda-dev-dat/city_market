@@ -30,6 +30,7 @@ import { formatPrice } from "@/constants/data";
 import * as Haptics from "expo-haptics";
 import getColors, { Colors as StaticColors } from "@/constants/colors";
 import { useLocation } from "@/context/LocationContext";
+import { useTranslation } from "@/lib/I18nProvider";
 
 const STORE_ORIGIN = { latitude: 41.4741824, longitude: 60.7735868 };
 const DELIVERY_RATE_PER_KM = 1500;
@@ -175,6 +176,7 @@ export default function CartScreen() {
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
   const { location } = useLocation();
+  const { t } = useTranslation();
   const [promo, setPromo] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedPromoMin, setAppliedPromoMin] = useState(0);
@@ -190,8 +192,8 @@ export default function CartScreen() {
       setAppliedPromoMin(0);
       setPromo("");
       Alert.alert(
-        "Promokod bekor qilindi",
-        `Savat summasi minimal talabdan past tushib ketgani uchun chegirma olib tashlandi.`
+        t("cart_promo_cancelled_title"),
+        t("cart_promo_cancelled_msg")
       );
     }
   }, [totalPrice]);
@@ -229,20 +231,20 @@ export default function CartScreen() {
         if (data.error === "MIN_AMOUNT_NOT_MET") {
           const minFmt = data.minAmount.toLocaleString("uz-UZ");
           Alert.alert(
-            "Minimal summa yetarli emas",
+            t("cart_promo_min_title"),
             `Bu promokod faqat ${minFmt} so'm va undan yuqori buyurtmalar uchun amal qiladi.`
           );
         } else {
-          Alert.alert("Xatolik", "Promokod noto'g'ri yoki faol emas");
+          Alert.alert(t("error_title"), t("cart_promo_invalid"));
         }
         return;
       }
       setDiscount(data.discountPercent);
       setAppliedPromoMin(data.minAmount ?? 0);
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Muvaffaqiyat", `${data.discountPercent}% chegirma qo'llanildi`);
+      Alert.alert(t("cart_promo_success"), `${data.discountPercent}${t("cart_promo_applied")}`);
     } catch (e) {
-      Alert.alert("Xatolik", "Promokod noto'g'ri yoki faol emas");
+      Alert.alert(t("error_title"), t("cart_promo_invalid"));
     }
   };
 
@@ -266,7 +268,7 @@ export default function CartScreen() {
         customerId: user?.id,
         customerName: user?.name || "Mehmon",
         phoneNumber: user?.phoneNumber || "",
-        address: deliveryType === "pickup" ? "Do'kondan olib ketiladi" : (userLocation?.address || "Toshkent shahri"),
+        address: deliveryType === "pickup" ? t("cart_pickup_address_value") : (userLocation?.address || t("cart_default_city")),
         latitude: deliveryType === "pickup" ? null : (userLocation?.latitude || null),
         longitude: deliveryType === "pickup" ? null : (userLocation?.longitude || null),
         total: finalTotal,
@@ -285,7 +287,7 @@ export default function CartScreen() {
       clearCart();
       router.push(`/order/${newOrder.id}`);
     } catch (e) {
-      Alert.alert("Xatolik", "Buyurtma berishda xatolik yuz berdi");
+      Alert.alert(t("error_title"), t("cart_order_error"));
       setIsCheckingOut(false);
     }
   };
@@ -310,15 +312,15 @@ export default function CartScreen() {
           ]}>
             <Ionicons name="bag-outline" size={44} color={Colors.primary} />
           </View>
-          <Text style={[styles.emptyTitle, { color: Colors.text }]}>Savat bo&apos;sh</Text>
+          <Text style={[styles.emptyTitle, { color: Colors.text }]}>{t("cart_empty_title")}</Text>
           <Text style={[styles.emptySubtitle, { color: Colors.textSecondary }]}>
-            Mahsulotlarni bosh sahifadan qo&apos;shing
+            {t("cart_empty_sub")}
           </Text>
           <Pressable
             style={styles.shopBtn}
             onPress={() => router.push("/(tabs)")}
           >
-            <Text style={styles.shopBtnText}>Bosh sahifaga o&apos;tish</Text>
+            <Text style={styles.shopBtnText}>{t("cart_go_home")}</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" />
           </Pressable>
         </View>
@@ -335,7 +337,7 @@ export default function CartScreen() {
       ]} />
 
       <View style={[styles.headerRow, { paddingTop: topPad + 12 }]}>
-        <Text style={[styles.title, { color: Colors.text }]}>Savat</Text>
+        <Text style={[styles.title, { color: Colors.text }]}>{t("cart_title")}</Text>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{totalItems}</Text>
         </View>
@@ -364,7 +366,7 @@ export default function CartScreen() {
           }
         ]}>
           <Text style={[styles.deliveryToggleTitle, { color: Colors.text }]}>
-            Yetkazib berish usuli
+            {t("cart_delivery_method")}
           </Text>
           <View style={styles.deliveryToggleRow}>
             <Pressable
@@ -391,7 +393,7 @@ export default function CartScreen() {
                 styles.deliveryToggleBtnText,
                 { color: deliveryType === "delivery" ? "#fff" : Colors.textSecondary }
               ]}>
-                Yetkazib berish
+                {t("cart_delivery")}
               </Text>
             </Pressable>
 
@@ -419,7 +421,7 @@ export default function CartScreen() {
                 styles.deliveryToggleBtnText,
                 { color: deliveryType === "pickup" ? "#fff" : Colors.textSecondary }
               ]}>
-                O'zim olib ketaman
+                {t("cart_pickup")}
               </Text>
             </Pressable>
           </View>
@@ -431,9 +433,9 @@ export default function CartScreen() {
             ]}>
               <Ionicons name="location" size={16} color={Colors.primary} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.pickupInfoTitle}>Do'kon manzili</Text>
-                <Text style={styles.pickupInfoAddr}>Al-Xorazmiy 2-tor ko'chasi, 48/5, Xonqa, Xorazm viloyati</Text>
-                <Text style={styles.pickupInfoNote}>Zakaz tayyor bo'lganda SMS xabar olasiz</Text>
+                <Text style={styles.pickupInfoTitle}>{t("cart_pickup_store_name")}</Text>
+                <Text style={styles.pickupInfoAddr}>{t("cart_pickup_address")}</Text>
+                <Text style={styles.pickupInfoNote}>{t("cart_pickup_sms_note")}</Text>
               </View>
             </View>
           )}
@@ -449,7 +451,7 @@ export default function CartScreen() {
           <Ionicons name="pricetag-outline" size={18} color={Colors.textMuted} style={{ marginLeft: 4 }} />
           <TextInput
             style={[styles.promoInput, { color: Colors.text }]}
-            placeholder="Promokod kiriting"
+            placeholder={t("cart_promo_placeholder")}
             placeholderTextColor={Colors.textMuted}
             value={promo}
             onChangeText={setPromo}
@@ -459,7 +461,7 @@ export default function CartScreen() {
             onPress={applyPromo}
             disabled={promo.length === 0}
           >
-            <Text style={styles.promoBtnText}>Qo&apos;llash</Text>
+            <Text style={styles.promoBtnText}>{t("cart_promo_apply")}</Text>
           </Pressable>
         </View>
 
@@ -471,13 +473,13 @@ export default function CartScreen() {
           }
         ]}>
           <View style={styles.summaryRow}>
-            <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>Mahsulotlar</Text>
+            <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>{t("cart_summary_products")}</Text>
             <Text style={[styles.summaryValue, { color: Colors.text }]}>{formatPrice(totalPrice)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <View style={{ gap: 2 }}>
               <Text style={[styles.summaryLabel, { color: Colors.textSecondary }]}>
-                {deliveryType === "pickup" ? "Yetkazib berish" : "Yetkazib berish"}
+                {t("cart_summary_delivery")}
               </Text>
               {deliveryType === "delivery" && deliveryDistanceKm !== null && deliveryFeeBase > 0 && (
                 <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.textMuted }}>
@@ -486,23 +488,23 @@ export default function CartScreen() {
               )}
               {deliveryType === "pickup" && (
                 <Text style={{ fontFamily: "Poppins_400Regular", fontSize: 11, color: Colors.primary }}>
-                  O'zim olib ketaman
+                  {t("cart_pickup")}
                 </Text>
               )}
             </View>
             <Text style={[styles.summaryValue, delivery === 0 ? styles.freeText : { color: Colors.text }]}>
-              {deliveryType === "pickup" ? "Bepul" : delivery === 0 ? "Bepul" : formatPrice(delivery)}
+              {deliveryType === "pickup" ? t("cart_free") : delivery === 0 ? t("cart_free") : formatPrice(delivery)}
             </Text>
           </View>
           {discount > 0 && (
             <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: Colors.error }]}>Chegirma</Text>
+              <Text style={[styles.summaryLabel, { color: Colors.error }]}>{t("cart_discount")}</Text>
               <Text style={[styles.summaryValue, { color: Colors.error }]}>-{discount}%</Text>
             </View>
           )}
           <View style={[styles.divider, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)" }]} />
           <View style={styles.summaryRow}>
-            <Text style={[styles.totalLabel, { color: Colors.text }]}>Jami</Text>
+            <Text style={[styles.totalLabel, { color: Colors.text }]}>{t("cart_summary_total")}</Text>
             <Text style={styles.totalValue}>{formatPrice(finalTotal)}</Text>
           </View>
         </View>
@@ -510,7 +512,7 @@ export default function CartScreen() {
         {delivery === 0 && (
           <View style={[styles.freeBanner, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
             <Ionicons name="bicycle" size={18} color={Colors.primary} />
-            <Text style={styles.freeBannerText}>Bepul yetkazib berish</Text>
+            <Text style={styles.freeBannerText}>{t("cart_free_delivery")}</Text>
           </View>
         )}
 

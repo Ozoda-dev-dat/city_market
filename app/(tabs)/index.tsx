@@ -40,6 +40,7 @@ import { LocationPermissionModal, shouldShowLocationPrompt } from "@/components/
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "@/context/LocationContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "@/lib/I18nProvider";
 import { Product as SchemaProduct } from "@/shared/schema";
 import { Product } from "@/constants/data";
 
@@ -74,7 +75,7 @@ function BannerDot({ isActive, isDarkMode }: { isActive: boolean; isDarkMode: bo
   return <Animated.View style={[styles.dot, { backgroundColor: StaticColors.primary }, style]} />;
 }
 
-function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number }) {
+function Banner({ item, onPress, bannerWidth, deliveryLabel }: { item: (typeof BANNERS)[0]; onPress: () => void; bannerWidth: number; deliveryLabel: string }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -106,7 +107,7 @@ function Banner({ item, onPress, bannerWidth }: { item: (typeof BANNERS)[0]; onP
           </View>
           <View style={bannerStyles.deliveryPill}>
             <Ionicons name="bicycle" size={12} color="rgba(255,255,255,0.9)" />
-            <Text style={bannerStyles.deliveryText}>30 daqiqa</Text>
+            <Text style={bannerStyles.deliveryText}>{deliveryLabel}</Text>
           </View>
         </View>
 
@@ -328,6 +329,7 @@ export default function HomeScreen() {
   const [activeBanner, setActiveBanner] = useState(0);
   const { isDarkMode } = useTheme();
   const Colors = getColors(isDarkMode);
+  const { t } = useTranslation();
 
   const { products, categories, subcategories } = useApp();
   const { addToCart } = useCart();
@@ -373,7 +375,7 @@ export default function HomeScreen() {
 
   const handleAddToCart = (product: any) => {
     if (!product.inStock) {
-      Alert.alert("Xatolik", "Ushbu mahsulot vaqtincha tugagan");
+      Alert.alert(t("error_title"), t("home_out_of_stock_msg"));
       return;
     }
     const productForCart: SchemaProduct = {
@@ -459,7 +461,7 @@ export default function HomeScreen() {
 
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.greeting, { color: Colors.textSecondary }]}>Xayrli kun</Text>
+            <Text style={[styles.greeting, { color: Colors.textSecondary }]}>{t("home_greeting")}</Text>
             <Pressable
               style={styles.locationRow}
               onPress={() => setShowLocationModal(true)}
@@ -470,7 +472,7 @@ export default function HomeScreen() {
                   ? location.address.length > 32
                     ? location.address.slice(0, 32) + "…"
                     : location.address
-                  : "Joylashuvni aniqlash"}
+                  : t("home_detect_location")}
               </Text>
               <Ionicons
                 name={locationLoading ? "reload-outline" : "chevron-down"}
@@ -521,7 +523,7 @@ export default function HomeScreen() {
             <Ionicons name="search" size={16} color={Colors.primary} />
           </View>
           <Text style={[styles.searchPlaceholder, { color: Colors.textMuted }]}>
-            Mahsulot yoki kategoriya...
+            {t("home_search_placeholder")}
           </Text>
           <View style={[styles.filterBtn, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.18)" : "rgba(22,163,74,0.1)" }]}>
             <Ionicons name="options-outline" size={16} color={Colors.primary} />
@@ -534,17 +536,17 @@ export default function HomeScreen() {
         }]}>
           <View style={styles.deliveryItem}>
             <Ionicons name="bicycle-outline" size={16} color={Colors.primary} />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>30 daqiqada yetkazish</Text>
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>{t("home_delivery_fast")}</Text>
           </View>
           <View style={styles.deliverySep} />
           <View style={styles.deliveryItem}>
             <Ionicons name="shield-checkmark-outline" size={16} color={Colors.primary} />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Sifat kafolati</Text>
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>{t("home_quality_guarantee")}</Text>
           </View>
           <View style={styles.deliverySep} />
           <View style={styles.deliveryItem}>
             <Ionicons name="storefront-outline" size={16} color={Colors.primary} />
-            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>Yangi mahsulotlar</Text>
+            <Text style={[styles.deliveryItemText, { color: Colors.text }]}>{t("home_new_products")}</Text>
           </View>
         </View>
 
@@ -564,6 +566,7 @@ export default function HomeScreen() {
               item={item}
               bannerWidth={BANNER_W}
               onPress={() => {}}
+              deliveryLabel={t("home_banner_delivery")}
             />
           )}
           style={styles.bannerList}
@@ -580,7 +583,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>Kategoriyalar</Text>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("home_section_categories")}</Text>
         </View>
 
         {(() => {
@@ -640,7 +643,7 @@ export default function HomeScreen() {
         {featuredProducts.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Tavsiya etilgan</Text>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("home_section_featured")}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
               {featuredProducts.map((product) => (
@@ -657,10 +660,10 @@ export default function HomeScreen() {
         {saleProducts.length > 0 && (
           <>
             <View style={[styles.sectionHeader, { marginTop: 8 }]}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Chegirmali</Text>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("home_section_sale")}</Text>
               <View style={styles.saleBadge}>
                 <Ionicons name="pricetag" size={11} color="#fff" />
-                <Text style={styles.saleBadgeText}>30% gacha</Text>
+                <Text style={styles.saleBadgeText}>{t("home_sale_badge")}</Text>
               </View>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
@@ -678,7 +681,7 @@ export default function HomeScreen() {
         {featuredProducts.length === 0 && saleProducts.length === 0 && products.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>Barcha mahsulotlar</Text>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>{t("home_section_all")}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
               {products.slice(0, 8).map((product) => (
