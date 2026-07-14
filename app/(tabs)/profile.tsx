@@ -489,7 +489,7 @@ export default function ProfileScreen() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const C = getColors(isDarkMode);
   const { location } = useLocation();
-  const { lang, setLang } = useTranslation();
+  const { lang, setLang, t } = useTranslation();
 
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
