@@ -26,6 +26,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import getColors, { Colors as StaticColors } from "@/constants/colors";
+import { Radius } from "@/constants/radius";
 import { BANNERS, formatPrice } from "@/constants/data";
 import { ProductCard } from "@/components/ProductCard";
 import { CategorySubcategorySection } from "@/components/CategorySubcategorySection";
@@ -129,7 +130,7 @@ const BANNER_H = 210;
 const bannerStyles = StyleSheet.create({
   card: {
     height: BANNER_H,
-    borderRadius: 26,
+    borderRadius: Radius.xxl,
     marginHorizontal: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -160,7 +161,7 @@ const bannerStyles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 11,
     paddingVertical: 5,
-    borderRadius: 20,
+    borderRadius: Radius.lg,
   },
   tagText: {
     fontFamily: "Poppins_600SemiBold",
@@ -174,7 +175,7 @@ const bannerStyles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.18)",
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 20,
+    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
@@ -215,7 +216,7 @@ const bannerStyles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.35)",
   },
@@ -278,7 +279,7 @@ const catStyles = StyleSheet.create({
     flex: 1,
   },
   inner: {
-    borderRadius: 20,
+    borderRadius: Radius.lg,
     overflow: "hidden",
   },
   innerHalf: {
@@ -724,6 +725,7 @@ const styles = StyleSheet.create({
     bottom: 120,
     left: -80,
   },
+  // Note: blobTR/blobBL borderRadius values (150, 120) are circular/decorative — left unchanged
   content: {
     paddingHorizontal: 16,
   },
@@ -735,7 +737,7 @@ const styles = StyleSheet.create({
   logoBannerImage: {
     width: 180,
     height: 72,
-    borderRadius: 16,
+    borderRadius: Radius.md,
     overflow: "hidden",
   },
   header: {
@@ -762,7 +764,7 @@ const styles = StyleSheet.create({
   notifBtn: {
     width: 46,
     height: 46,
-    borderRadius: 23,
+    borderRadius: Radius.xl,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,

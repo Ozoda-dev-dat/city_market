@@ -6,7 +6,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import { Ionicons } from "@expo/vector-icons";
 import { SUBCATEGORY_IMAGES } from "@/components/subcategoryImages";
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -79,35 +78,6 @@ export function CategorySubcategorySection({
 
   return (
     <View style={styles.section}>
-      {/* Category header row */}
-      <View style={[styles.catHeader, { paddingHorizontal: H_PAD }]}>
-        <View style={styles.catHeaderLeft}>
-          <View style={[styles.catIconWrap, { backgroundColor: accentColor + "18" }]}>
-            <Ionicons
-              name={(category?.icon as any) ?? "grid-outline"}
-              size={18}
-              color={accentColor}
-            />
-          </View>
-          <Text style={[styles.catHeaderName, { color: textColor }]} numberOfLines={1}>
-            {category?.name ?? ""}
-          </Text>
-        </View>
-        {onPressCategory && (
-          <Pressable
-            style={styles.seeAllBtn}
-            onPress={() => {
-              if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              onPressCategory();
-            }}
-            hitSlop={8}
-          >
-            <Text style={[styles.seeAllText, { color: accentColor }]}>Barchasini ko'rish</Text>
-            <Ionicons name="chevron-forward" size={13} color={accentColor} />
-          </Pressable>
-        )}
-      </View>
-
       {rows.map((row, idx) => {
         const isSingle = row.length === 1;
         return (
