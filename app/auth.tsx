@@ -56,11 +56,11 @@ export default function AuthScreen() {
 
   const handleLogin = async () => {
     if (!phoneSuffix || !password) {
-      Alert.alert("Xatolik", "Telefon raqam va parolni kiriting");
+      Alert.alert(t("error_title"), t("error_fill_phone_password"));
       return;
     }
     if (!/^\d{9}$/.test(phoneSuffix)) {
-      Alert.alert("Xatolik", "Telefon raqam 9 xonali bo'lishi kerak (masalan: 901234567)");
+      Alert.alert(t("error_title"), t("error_phone_length"));
       return;
     }
     setLoading(true);
@@ -68,7 +68,7 @@ export default function AuthScreen() {
       await login(phoneNumber, password);
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
-      let errorMessage = "Telefon raqam yoki parol noto'g'ri";
+      let errorMessage = t("error_login_failed");
       try {
         const match = rawMessage.match(/\{.*\}/);
         if (match) {
@@ -78,7 +78,7 @@ export default function AuthScreen() {
           errorMessage = rawMessage;
         }
       } catch {}
-      Alert.alert("Xatolik", errorMessage);
+      Alert.alert(t("error_title"), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,23 +86,23 @@ export default function AuthScreen() {
 
   const handleRegister = async () => {
     if (!phoneSuffix || phoneSuffix.length < 9) {
-      Alert.alert("Xatolik", "To'liq telefon raqamni kiriting");
+      Alert.alert(t("error_title"), t("error_full_phone"));
       return;
     }
     if (!name || name.trim().length < 2) {
-      Alert.alert("Xatolik", "Ismingizni kiriting (kamida 2 ta harf)");
+      Alert.alert(t("error_title"), t("error_name_min"));
       return;
     }
     if (isStore && (!storeName || storeName.trim().length < 2)) {
-      Alert.alert("Xatolik", "Do'kon nomini kiriting");
+      Alert.alert(t("error_title"), t("error_store_name"));
       return;
     }
     if (!regPassword || regPassword.length < 6) {
-      Alert.alert("Xatolik", "Parol kamida 6 ta belgidan iborat bo'lishi kerak");
+      Alert.alert(t("error_title"), t("error_password_min6"));
       return;
     }
     if (regPassword !== regConfirmPassword) {
-      Alert.alert("Xatolik", "Parollar mos kelmaydi");
+      Alert.alert(t("error_title"), t("error_password_mismatch"));
       return;
     }
     setLoading(true);
@@ -117,7 +117,7 @@ export default function AuthScreen() {
       );
     } catch (e: any) {
       const rawMessage: string = e?.message || "";
-      let errorMessage = "Ro'yxatdan o'tishda xatolik";
+      let errorMessage = t("error_register_failed");
       try {
         const match = rawMessage.match(/\{.*\}/);
         if (match) {
@@ -128,9 +128,9 @@ export default function AuthScreen() {
         }
       } catch {}
       if (errorMessage.toLowerCase().includes("already exists") || errorMessage.includes("allaqachon")) {
-        Alert.alert("Telefon raqam mavjud", "Bu telefon raqam allaqachon ro'yxatdan o'tgan. Kirish tugmasini bosib tizimga kiring.");
+        Alert.alert(t("phone_exists_title"), t("phone_exists_message"));
       } else {
-        Alert.alert("Xatolik", errorMessage);
+        Alert.alert(t("error_title"), errorMessage);
       }
     } finally {
       setLoading(false);
@@ -160,7 +160,7 @@ export default function AuthScreen() {
             resizeMode="contain"
           />
           <Text style={styles.heroTitle}>City Market</Text>
-          <Text style={styles.heroSubtitle}>Tez va qulay yetkazib berish</Text>
+          <Text style={styles.heroSubtitle}>{t("hero_subtitle")}</Text>
 
           <View style={styles.langRow}>
             <Pressable
@@ -195,7 +195,7 @@ export default function AuthScreen() {
                 color={isLogin ? "#16A34A" : "#9CA3AF"}
                 style={{ marginBottom: 2 }}
               />
-              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Kirish</Text>
+              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>{t("login")}</Text>
             </Pressable>
             <Pressable
               style={[styles.tab, !isLogin && styles.tabActive]}
@@ -212,7 +212,7 @@ export default function AuthScreen() {
                 style={{ marginBottom: 2 }}
               />
               <Text style={[styles.tabText, !isLogin && styles.tabTextActive]} numberOfLines={1} adjustsFontSizeToFit>
-                Ro'yhatdan o'tish
+                {t("register")}
               </Text>
             </Pressable>
           </View>
@@ -220,7 +220,7 @@ export default function AuthScreen() {
           {isLogin ? (
             <>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Telefon raqam</Text>
+                <Text style={styles.inputLabel}>{t("phone")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <View style={styles.prefixBadge}>
@@ -229,7 +229,7 @@ export default function AuthScreen() {
                   <View style={styles.prefixDivider} />
                   <TextInput
                     style={styles.input}
-                    placeholder="90 123 45 67"
+                    placeholder={t("phone_placeholder")}
                     placeholderTextColor={Colors.textMuted}
                     value={phoneSuffix}
                     onChangeText={(text) => {
@@ -243,7 +243,7 @@ export default function AuthScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Parol</Text>
+                <Text style={styles.inputLabel}>{t("password")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <TextInput
@@ -272,7 +272,7 @@ export default function AuthScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.authBtnText}>Kirish</Text>
+                  <Text style={styles.authBtnText}>{t("login")}</Text>
                 )}
               </Pressable>
             </>
@@ -284,24 +284,24 @@ export default function AuthScreen() {
                   onPress={() => setIsStore(false)}
                 >
                   <Ionicons name="person-outline" size={16} color={!isStore ? "#fff" : Colors.textMuted} />
-                  <Text style={[styles.roleBtnText, !isStore && styles.roleBtnTextActive]}>Mijoz</Text>
+                  <Text style={[styles.roleBtnText, !isStore && styles.roleBtnTextActive]}>{t("role_customer")}</Text>
                 </Pressable>
                 <Pressable
                   style={[styles.roleBtn, isStore && styles.roleBtnActive]}
                   onPress={() => setIsStore(true)}
                 >
                   <Ionicons name="storefront-outline" size={16} color={isStore ? "#fff" : Colors.textMuted} />
-                  <Text style={[styles.roleBtnText, isStore && styles.roleBtnTextActive]}>Do'kon egasi</Text>
+                  <Text style={[styles.roleBtnText, isStore && styles.roleBtnTextActive]}>{t("role_store")}</Text>
                 </Pressable>
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>{isStore ? "Sizning ismingiz" : "Ism"}</Text>
+                <Text style={styles.inputLabel}>{isStore ? t("your_name") : t("name")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="person-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
-                    placeholder="Ismingizni kiriting"
+                    placeholder={t("name_placeholder")}
                     placeholderTextColor={Colors.textMuted}
                     value={name}
                     onChangeText={setName}
@@ -313,12 +313,12 @@ export default function AuthScreen() {
               {isStore && (
                 <>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Do'kon nomi</Text>
+                    <Text style={styles.inputLabel}>{t("store_name")}</Text>
                     <View style={styles.inputBox}>
                       <Ionicons name="storefront-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                       <TextInput
                         style={styles.input}
-                        placeholder="Do'kon nomini kiriting"
+                        placeholder={t("store_name_placeholder")}
                         placeholderTextColor={Colors.textMuted}
                         value={storeName}
                         onChangeText={setStoreName}
@@ -327,12 +327,12 @@ export default function AuthScreen() {
                     </View>
                   </View>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Do'kon manzili</Text>
+                    <Text style={styles.inputLabel}>{t("store_address")}</Text>
                     <View style={styles.inputBox}>
                       <Ionicons name="location-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                       <TextInput
                         style={styles.input}
-                        placeholder="Shahar, ko'cha, uy"
+                        placeholder={t("store_address_placeholder")}
                         placeholderTextColor={Colors.textMuted}
                         value={storeAddress}
                         onChangeText={setStoreAddress}
@@ -344,7 +344,7 @@ export default function AuthScreen() {
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Telefon raqam</Text>
+                <Text style={styles.inputLabel}>{t("phone")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="call-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <View style={styles.prefixBadge}>
@@ -353,7 +353,7 @@ export default function AuthScreen() {
                   <View style={styles.prefixDivider} />
                   <TextInput
                     style={styles.input}
-                    placeholder="90 123 45 67"
+                    placeholder={t("phone_placeholder")}
                     placeholderTextColor={Colors.textMuted}
                     value={phoneSuffix}
                     onChangeText={(text) => {
@@ -367,12 +367,12 @@ export default function AuthScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Parol</Text>
+                <Text style={styles.inputLabel}>{t("password")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
-                    placeholder="Kamida 6 ta belgi"
+                    placeholder={t("password_min_placeholder")}
                     placeholderTextColor={Colors.textMuted}
                     value={regPassword}
                     onChangeText={setRegPassword}
@@ -389,12 +389,12 @@ export default function AuthScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Parolni tasdiqlang</Text>
+                <Text style={styles.inputLabel}>{t("confirm_password")}</Text>
                 <View style={styles.inputBox}>
                   <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
-                    placeholder="Parolni qayta kiriting"
+                    placeholder={t("confirm_password_placeholder")}
                     placeholderTextColor={Colors.textMuted}
                     value={regConfirmPassword}
                     onChangeText={setRegConfirmPassword}
@@ -420,7 +420,7 @@ export default function AuthScreen() {
                 ) : (
                   <View style={styles.btnInner}>
                     <Ionicons name="person-add-outline" size={18} color="#fff" />
-                    <Text style={styles.authBtnText}>Ro'yxatdan o'tish</Text>
+                    <Text style={styles.authBtnText}>{t("register")}</Text>
                   </View>
                 )}
               </Pressable>

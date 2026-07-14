@@ -44,6 +44,7 @@ function PaymentModal({
   visible, onClose, isDarkMode, value, onSave, saving,
 }: { visible: boolean; onClose: () => void; isDarkMode: boolean; value: string; onSave: (v: string) => void; saving: boolean }) {
   const C = getColors(isDarkMode);
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(value);
   React.useEffect(() => { if (visible) setSelected(value); }, [visible, value]);
   const bg = C.sheetBg;
@@ -52,20 +53,20 @@ function PaymentModal({
 
   const methods = [
     {
-      id: "cash", icon: "cash-outline", label: "Naqd pul",
-      sub: "Kuryer kelganda to'lash", color: C.primary, available: true,
+      id: "cash", icon: "cash-outline", label: t("cash"),
+      sub: t("cash_sub"), color: C.primary, available: true,
     },
     {
       id: "payme", icon: "phone-portrait-outline", label: "Payme",
-      sub: "Tez orada qo'shiladi", color: C.payme, available: false,
+      sub: t("coming_soon"), color: C.payme, available: false,
     },
     {
       id: "click", icon: "flash-outline", label: "Click",
-      sub: "Tez orada qo'shiladi", color: C.accent, available: false,
+      sub: t("coming_soon"), color: C.accent, available: false,
     },
     {
       id: "uzcard", icon: "card-outline", label: "Uzcard / Humo",
-      sub: "Tez orada qo'shiladi", color: C.purple, available: false,
+      sub: t("coming_soon"), color: C.purple, available: false,
     },
   ];
 
@@ -81,8 +82,8 @@ function PaymentModal({
               <Ionicons name="card-outline" size={20} color={C.textInverse} />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text style={[ms.hdrTitle, { color: C.text }]}>To'lov usullari</Text>
-              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>To'lov turini tanlang</Text>
+              <Text style={[ms.hdrTitle, { color: C.text }]}>{t("payment_methods_title")}</Text>
+              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>{t("payment_methods_sub")}</Text>
             </View>
           </View>
 
@@ -116,7 +117,7 @@ function PaymentModal({
                     </View>
                   ) : (
                     <View style={[ms.badge, { backgroundColor: C.chipBg }]}>
-                      <Text style={[ms.badgeText, { color: C.textMuted }]}>Tez orada</Text>
+                      <Text style={[ms.badgeText, { color: C.textMuted }]}>{t("coming_soon_badge")}</Text>
                     </View>
                   )}
                 </Pressable>
@@ -130,7 +131,7 @@ function PaymentModal({
             disabled={saving}
           >
             <Ionicons name="checkmark" size={18} color={C.textInverse} />
-            <Text style={ms.btnText}>{saving ? "Saqlanmoqda…" : "Saqlash"}</Text>
+            <Text style={ms.btnText}>{saving ? t("saving") : t("save")}</Text>
           </Pressable>
         </Pressable>
       </Pressable>
@@ -145,13 +146,14 @@ function LanguageModal({
   visible, onClose, lang, setLang, isDarkMode,
 }: { visible: boolean; onClose: () => void; lang: string; setLang: (l: string) => void; isDarkMode: boolean }) {
   const C = getColors(isDarkMode);
+  const { t } = useTranslation();
   const bg = C.sheetBg;
   const cardBg = C.cardSoftBg;
   const cardBorder = C.inputBorder;
 
   const langs = [
-    { id: "uz", flag: "🇺🇿", label: "O'zbekcha", sub: "Uzbek tili", desc: "Rasmiy davlat tili" },
-    { id: "ru", flag: "🇷🇺", label: "Русский", sub: "Rus tili", desc: "Ruscha interfeys" },
+    { id: "uz", flag: "🇺🇿", label: t("lang_uz_full"), desc: t("lang_uz_desc") },
+    { id: "ru", flag: "🇷🇺", label: t("lang_ru_full"), desc: t("lang_ru_desc") },
   ];
 
   return (
@@ -165,8 +167,8 @@ function LanguageModal({
               <Ionicons name="language-outline" size={20} color={C.textInverse} />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text style={[ms.hdrTitle, { color: C.text }]}>Til tanlash</Text>
-              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Ilova tilini o'zgartiring</Text>
+              <Text style={[ms.hdrTitle, { color: C.text }]}>{t("lang_select_title")}</Text>
+              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>{t("lang_select_sub")}</Text>
             </View>
           </View>
 
@@ -207,7 +209,7 @@ function LanguageModal({
           }]}>
             <Ionicons name="information-circle-outline" size={16} color={C.indigo} />
             <Text style={[ms.langNoteText, { color: C.textSecondary }]}>
-              Til o'zgartirilganda ilova qayta yuklanmaydi
+              {t("lang_note")}
             </Text>
           </View>
         </Pressable>
@@ -223,34 +225,23 @@ function HelpModal({
   visible, onClose, isDarkMode,
 }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
   const C = getColors(isDarkMode);
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const bg = C.sheetBg;
   const cardBg = C.cardSoftBg;
   const cardBorder = C.inputBorder;
 
   const contacts = [
-    { icon: "call", label: "Telefon", value: "+998 97 548 20 20", color: C.primary, url: "tel:+998975482020" },
+    { icon: "call", label: t("phone"), value: "+998 97 548 20 20", color: C.primary, url: "tel:+998975482020" },
     { icon: "mail", label: "Email", value: "support@citymarket.uz", color: C.info, url: "mailto:support@citymarket.uz" },
     { icon: "logo-telegram", label: "Telegram", value: "@citymarket_uz", color: C.telegram, url: "https://t.me/citymarket_uz" },
   ];
 
   const faqs = [
-    {
-      q: "Yetkazib berish qancha vaqt oladi?",
-      a: "Odatda 30–60 daqiqa ichida yetkazib beramiz. Trafik va buyurtmalar soniga qarab bu vaqt o'zgarishi mumkin.",
-    },
-    {
-      q: "Minimal buyurtma summasi bormi?",
-      a: "Minimal buyurtma summasi 30 000 so'm. Undan past bo'lsa buyurtma rasmiylashtirilmaydi.",
-    },
-    {
-      q: "Buyurtmani bekor qilish mumkinmi?",
-      a: "Ha, buyurtma \"Tayyorlanmoqda\" holatiga o'tmaguncha bekor qilish mumkin.",
-    },
-    {
-      q: "To'lov qanday amalga oshiriladi?",
-      a: "Hozircha faqat naqd pul to'lovi mavjud. Online to'lov tez orada qo'shiladi.",
-    },
+    { q: t("faq_q1"), a: t("faq_a1") },
+    { q: t("faq_q2"), a: t("faq_a2") },
+    { q: t("faq_q3"), a: t("faq_a3") },
+    { q: t("faq_q4"), a: t("faq_a4") },
   ];
 
   return (
@@ -264,13 +255,13 @@ function HelpModal({
               <Ionicons name="help-buoy-outline" size={20} color={C.textInverse} />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text style={[ms.hdrTitle, { color: C.text }]}>Yordam markazi</Text>
-              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Har kuni 9:00 – 21:00</Text>
+              <Text style={[ms.hdrTitle, { color: C.text }]}>{t("help_center_title")}</Text>
+              <Text style={[ms.hdrSub, { color: C.textSecondary }]}>{t("help_center_hours")}</Text>
             </View>
           </View>
 
           {/* Contact cards */}
-          <Text style={[ms.secLabel, { color: C.textSecondary }]}>Bog'lanish</Text>
+          <Text style={[ms.secLabel, { color: C.textSecondary }]}>{t("contact_us")}</Text>
           <View style={{ gap: 8, marginBottom: 20 }}>
             {contacts.map(c => (
               <Pressable
@@ -293,7 +284,7 @@ function HelpModal({
           </View>
 
           {/* FAQ accordion */}
-          <Text style={[ms.secLabel, { color: C.textSecondary }]}>Ko'p so'raladigan savollar</Text>
+          <Text style={[ms.secLabel, { color: C.textSecondary }]}>{t("faq_title")}</Text>
           <View style={{ gap: 8 }}>
             {faqs.map((f, i) => {
               const open = openFaq === i;
@@ -344,21 +335,22 @@ function AboutModal({
   visible, onClose, isDarkMode,
 }: { visible: boolean; onClose: () => void; isDarkMode: boolean }) {
   const C = getColors(isDarkMode);
+  const { t } = useTranslation();
   const bg = C.sheetBg;
   const cardBg = C.cardSoftBg;
   const cardBorder = C.inputBorder;
 
   const infos = [
-    { label: "Versiya", value: `v${APP_VERSION}` },
-    { label: "Chiqarilgan", value: APP_BUILD },
-    { label: "Tuzuvchi", value: "City Market Team" },
-    { label: "Mintaqa", value: "O'zbekiston" },
+    { label: t("app_version_label"), value: `v${APP_VERSION}` },
+    { label: t("app_release_label"), value: APP_BUILD },
+    { label: t("app_developer_label"), value: t("app_developer_value") },
+    { label: t("app_region_label"), value: t("app_region_value") },
   ];
 
   const links = [
-    { icon: "document-text-outline", label: "Foydalanish shartlari", color: C.indigo, url: "https://citymarket.uz/terms" },
-    { icon: "shield-checkmark-outline", label: "Maxfiylik siyosati", color: C.info, url: "https://citymarket.uz/privacy" },
-    { icon: "star-outline", label: "Ilovani baholang", color: C.warning, url: "https://play.google.com/store" },
+    { icon: "document-text-outline", label: t("terms_of_use"), color: C.indigo, url: "https://citymarket.uz/terms" },
+    { icon: "shield-checkmark-outline", label: t("privacy_policy"), color: C.info, url: "https://citymarket.uz/privacy" },
+    { icon: "star-outline", label: t("rate_app"), color: C.warning, url: "https://play.google.com/store" },
   ];
 
   return (
@@ -376,7 +368,7 @@ function AboutModal({
               <Ionicons name="storefront" size={38} color={C.textInverse} />
             </LinearGradient>
             <Text style={[ms.aboutName, { color: C.text }]}>City Market</Text>
-            <Text style={[ms.aboutSlogan, { color: C.textSecondary }]}>Tez va qulay yetkazib berish</Text>
+            <Text style={[ms.aboutSlogan, { color: C.textSecondary }]}>{t("hero_subtitle")}</Text>
             <View style={[ms.verChip, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.15)" : "rgba(22,163,74,0.1)" }]}>
               <Ionicons name="code-slash-outline" size={12} color={C.primary} />
               <Text style={ms.verChipText}>v{APP_VERSION} · {APP_BUILD}</Text>
@@ -417,7 +409,7 @@ function AboutModal({
           </View>
 
           <Text style={[ms.copyright, { color: C.textMuted }]}>
-            © 2025 City Market. Barcha huquqlar himoyalangan.
+            {t("copyright")}
           </Text>
         </Pressable>
       </Pressable>
@@ -540,29 +532,29 @@ export default function ProfileScreen() {
   const cartCount = (items || []).reduce((s: number, i: any) => s + (i?.quantity || 0), 0);
   const initials = (user.name || "U").charAt(0).toUpperCase();
   const paymentLabels: Record<string, string> = {
-    cash: "Naqd pul", payme: "Payme", click: "Click", uzcard: "Uzcard / Humo",
+    cash: t("cash"), payme: "Payme", click: "Click", uzcard: "Uzcard / Humo",
   };
   const paymentMethod = (user as any).preferredPaymentMethod || "cash";
-  const paymentLabel = paymentLabels[paymentMethod] ?? "Naqd pul";
+  const paymentLabel = paymentLabels[paymentMethod] ?? t("cash");
   const notificationsEnabled = (user as any).notificationsEnabled !== false;
   const locationLabel = location?.address
     ? (location.address.length > 24 ? location.address.slice(0, 24) + "…" : location.address)
-    : "Tanlanmagan";
+    : t("address_not_selected");
 
   const handleLogout = () => {
-    Alert.alert("Chiqish", "Tizimdan chiqmoqchimisiz?", [
-      { text: "Yo'q", style: "cancel" },
-      { text: "Ha, chiqish", style: "destructive", onPress: async () => { await logout(); router.replace("/auth"); } },
+    Alert.alert(t("logout_title"), t("logout_confirm"), [
+      { text: t("no"), style: "cancel" },
+      { text: t("yes_logout"), style: "destructive", onPress: async () => { await logout(); router.replace("/auth"); } },
     ]);
   };
 
   const handleSaveName = async () => {
-    if (!editName.trim()) { Alert.alert("Xatolik", "Ism bo'sh bo'lishi mumkin emas"); return; }
+    if (!editName.trim()) { Alert.alert(t("error_title"), t("error_name_empty")); return; }
     setSavingName(true);
     try {
       await updateProfile(editName.trim());
       setShowEditModal(false);
-    } catch { Alert.alert("Xatolik", "Ismni yangilashda xatolik yuz berdi"); }
+    } catch { Alert.alert(t("error_title"), t("error_name_update")); }
     finally { setSavingName(false); }
   };
 
@@ -573,8 +565,8 @@ export default function ProfileScreen() {
         const token = await requestPushToken();
         if (!token) {
           Alert.alert(
-            "Ruxsat berilmadi",
-            "Bildirishnomalarni yoqish uchun qurilma sozlamalaridan ilovaga bildirishnoma yuborish ruxsatini bering."
+            t("notif_permission_title"),
+            t("notif_permission_msg")
           );
           return;
         }
@@ -582,7 +574,7 @@ export default function ProfileScreen() {
       }
       await setNotificationsEnabled(value);
     } catch {
-      Alert.alert("Xatolik", "Sozlamani saqlashda xatolik yuz berdi");
+      Alert.alert(t("error_title"), t("error_notif_save"));
     } finally {
       setSavingNotifications(false);
     }
@@ -590,28 +582,28 @@ export default function ProfileScreen() {
 
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
-      Alert.alert("Xatolik", "Barcha maydonlarni to'ldiring"); return;
+      Alert.alert(t("error_title"), t("error_fill_all")); return;
     }
-    if (newPassword !== confirmPassword) { Alert.alert("Xatolik", "Yangi parollar mos kelmaydi"); return; }
-    if (newPassword.length < 8) { Alert.alert("Xatolik", "Parol kamida 8 ta belgidan iborat bo'lishi kerak"); return; }
+    if (newPassword !== confirmPassword) { Alert.alert(t("error_title"), t("error_new_password_mismatch")); return; }
+    if (newPassword.length < 8) { Alert.alert(t("error_title"), t("error_password_min8")); return; }
     setSavingPassword(true);
     try {
       const res = await apiRequest("PATCH", "/api/password", { oldPassword, newPassword });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Parolni o'zgartirishda xatolik yuz berdi");
+        throw new Error(body.error || t("error_password_change"));
       }
       setShowPasswordModal(false);
       setOldPassword(""); setNewPassword(""); setConfirmPassword("");
-      Alert.alert("✓ Muvaffaqiyat", "Parol muvaffaqiyatli o'zgartirildi");
+      Alert.alert(t("success_title"), t("password_changed"));
     } catch (error: any) {
-      Alert.alert("Xatolik", error?.message || "Parolni o'zgartirishda xatolik yuz berdi");
+      Alert.alert(t("error_title"), error?.message || t("error_password_change"));
     } finally { setSavingPassword(false); }
   };
 
   const getStatusLabel = (s: string) =>
-    ({ pending: "Kutilmoqda", confirmed: "Tasdiqlandi", preparing: "Tayyorlanmoqda",
-       ready: "Tayyor", delivering: "Yo'lda", delivered: "Yetkazildi", cancelled: "Bekor qilindi" }[s] ?? s);
+    ({ pending: t("status_pending"), confirmed: t("status_confirmed"), preparing: t("status_preparing"),
+       ready: t("status_ready"), delivering: t("status_delivering"), delivered: t("status_delivered"), cancelled: t("status_cancelled") }[s] ?? s);
 
   const getStatusColor = (s: string) =>
     s === "delivered" ? C.primary : s === "cancelled" ? C.error : C.warning;
@@ -632,13 +624,13 @@ export default function ProfileScreen() {
         >
           {/* header row */}
           <View style={s.bannerRow}>
-            <Text style={[s.pageTitle, { color: isDarkMode ? C.bannerGradientBottom : C.primaryDeep }]}>Profil</Text>
+            <Text style={[s.pageTitle, { color: isDarkMode ? C.bannerGradientBottom : C.primaryDeep }]}>{t("profile_title")}</Text>
             <Pressable
               style={[s.editBtn, { backgroundColor: isDarkMode ? "rgba(255,255,255,0.12)" : "rgba(20,83,45,0.1)" }]}
               onPress={() => { setEditName(user.name || ""); setShowEditModal(true); }}
             >
               <Ionicons name="create-outline" size={17} color={isDarkMode ? C.mintGreenLight : C.primaryGradientEnd} />
-              <Text style={[s.editBtnText, { color: isDarkMode ? C.mintGreenLight : C.primaryGradientEnd }]}>Tahrirlash</Text>
+              <Text style={[s.editBtnText, { color: isDarkMode ? C.mintGreenLight : C.primaryGradientEnd }]}>{t("edit")}</Text>
             </Pressable>
           </View>
 
@@ -665,7 +657,7 @@ export default function ProfileScreen() {
                   color={user.role === "admin" ? C.warning : C.primary}
                 />
                 <Text style={[s.rolePillText, { color: user.role === "admin" ? C.warning : C.primary }]}>
-                  {user.role === "admin" ? "Admin" : user.role === "courier" ? "Kuryer" : "Mijoz"}
+                  {user.role === "admin" ? t("admin") : user.role === "courier" ? t("courier") : t("role_customer")}
                 </Text>
               </View>
             </View>
@@ -674,8 +666,8 @@ export default function ProfileScreen() {
           {/* Stats row */}
           <View style={[s.statsCard, cardSurface, { borderWidth: 1 }]}>
             {[
-              { icon: "receipt-outline", label: "Buyurtmalar", val: userOrders.length, color: C.primary },
-              { icon: "bag-handle-outline", label: "Savatda", val: cartCount, color: C.accent },
+              { icon: "receipt-outline", label: t("orders_stat"), val: userOrders.length, color: C.primary },
+              { icon: "bag-handle-outline", label: t("cart_stat"), val: cartCount, color: C.accent },
             ].map((st, i) => (
               <React.Fragment key={st.label}>
                 {i > 0 && <View style={[s.statDiv, { backgroundColor: C.inputBorder }]} />}
@@ -705,8 +697,8 @@ export default function ProfileScreen() {
               <View style={s.roleLeft}>
                 <View style={s.roleIconBox}><Ionicons name="bicycle" size={20} color={C.textInverse} /></View>
                 <View>
-                  <Text style={s.roleTitle}>Kuryer paneli</Text>
-                  <Text style={s.roleSub}>Buyurtmalarni yetkazish</Text>
+                  <Text style={s.roleTitle}>{t("courier_panel")}</Text>
+                  <Text style={s.roleSub}>{t("courier_panel_sub")}</Text>
                 </View>
               </View>
               <View style={s.roleArrow}><Ionicons name="arrow-forward" size={16} color={C.textInverse} /></View>
@@ -720,8 +712,8 @@ export default function ProfileScreen() {
               <View style={s.roleLeft}>
                 <View style={s.roleIconBox}><Ionicons name="shield-checkmark" size={20} color={C.textInverse} /></View>
                 <View>
-                  <Text style={s.roleTitle}>Admin Panel</Text>
-                  <Text style={s.roleSub}>Boshqaruv markazi</Text>
+                  <Text style={s.roleTitle}>{t("admin_panel")}</Text>
+                  <Text style={s.roleSub}>{t("admin_panel_sub")}</Text>
                 </View>
               </View>
               <View style={s.roleArrow}><Ionicons name="arrow-forward" size={16} color={C.textInverse} /></View>
@@ -730,10 +722,10 @@ export default function ProfileScreen() {
 
           {/* ── Recent orders ── */}
           <View style={s.sectionHead}>
-            <Text style={[s.sectionTitle, { color: C.text }]}>So'nggi buyurtmalar</Text>
+            <Text style={[s.sectionTitle, { color: C.text }]}>{t("recent_orders")}</Text>
             {userOrders.length > 0 && (
               <Pressable onPress={() => router.push("/orders")} style={s.seeAllBtn}>
-                <Text style={s.seeAllText}>Barchasi</Text>
+                <Text style={s.seeAllText}>{t("see_all")}</Text>
                 <Ionicons name="arrow-forward" size={13} color={C.primary} />
               </Pressable>
             )}
@@ -745,8 +737,8 @@ export default function ProfileScreen() {
                 <Ionicons name="receipt-outline" size={28} color={C.primary} />
               </LinearGradient>
               <View style={{ flex: 1 }}>
-                <Text style={[s.emptyTitle, { color: C.text }]}>Buyurtmalar yo'q</Text>
-                <Text style={[s.emptySub, { color: C.textSecondary }]}>Birinchi buyurtmangizni bering</Text>
+                <Text style={[s.emptyTitle, { color: C.text }]}>{t("no_orders")}</Text>
+                <Text style={[s.emptySub, { color: C.textSecondary }]}>{t("no_orders_sub")}</Text>
               </View>
               <Pressable style={s.shopBtn} onPress={() => router.push("/(tabs)/")}>
                 <Ionicons name="storefront-outline" size={16} color={C.textInverse} />
@@ -778,13 +770,13 @@ export default function ProfileScreen() {
                     </Text>
                     <Text style={[s.orderMetaDot, { color: C.textMuted }]}>·</Text>
                     <Text style={[s.orderMetaTxt, { color: C.textSecondary }]}>
-                      {((order.items as any[]) ?? []).length} ta mahsulot
+                      {((order.items as any[]) ?? []).length} {t("product_count_suffix")}
                     </Text>
                   </View>
                   <View style={s.orderBottom}>
                     <Text style={[s.orderPrice, { color: C.text }]}>{formatPrice(order.total)}</Text>
                     <View style={s.trackBtn}>
-                      <Text style={s.trackTxt}>Kuzatish</Text>
+                      <Text style={s.trackTxt}>{t("track")}</Text>
                       <Ionicons name="arrow-forward" size={12} color={C.primary} />
                     </View>
                   </View>
@@ -794,24 +786,24 @@ export default function ProfileScreen() {
           )}
 
           {/* ── Settings: Hisob ── */}
-          <SectionHeader title="Hisob" icon="person-circle-outline" isDarkMode={isDarkMode} />
+          <SectionHeader title={t("section_account")} icon="person-circle-outline" isDarkMode={isDarkMode} />
           <View style={[s.menuCard, cardSurface, { borderWidth: 1 }]}>
             <MenuItem
-              icon="location-outline" label="Manzil" value={locationLabel}
+              icon="location-outline" label={t("address")} value={locationLabel}
               onPress={() => setShowLocationPicker(true)}
               iconBg="rgba(239,68,68,0.1)" iconColor={C.error}
               isDarkMode={isDarkMode}
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="card-outline" label="To'lov usullari" value={paymentLabel}
+              icon="card-outline" label={t("payment_methods")} value={paymentLabel}
               onPress={() => setShowPaymentModal(true)}
               iconBg="rgba(22,163,74,0.1)" iconColor={C.primary}
               isDarkMode={isDarkMode}
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="lock-closed-outline" label="Parolni o'zgartirish"
+              icon="lock-closed-outline" label={t("change_password")}
               onPress={() => { setOldPassword(""); setNewPassword(""); setConfirmPassword(""); setShowPasswordModal(true); }}
               iconBg="rgba(99,102,241,0.1)" iconColor={C.indigo}
               isDarkMode={isDarkMode}
@@ -819,24 +811,24 @@ export default function ProfileScreen() {
           </View>
 
           {/* ── Settings: Ilova ── */}
-          <SectionHeader title="Ilova sozlamalari" icon="settings-outline" isDarkMode={isDarkMode} />
+          <SectionHeader title={t("section_app_settings")} icon="settings-outline" isDarkMode={isDarkMode} />
           <View style={[s.menuCard, cardSurface, { borderWidth: 1 }]}>
             <MenuItem
-              icon="notifications-outline" label="Bildirishnomalar"
+              icon="notifications-outline" label={t("notifications")}
               toggle toggleValue={notificationsEnabled} onToggle={handleToggleNotifications}
               iconBg="rgba(249,115,22,0.1)" iconColor={C.accent}
               isDarkMode={isDarkMode}
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="moon-outline" label="Tungi rejim"
+              icon="moon-outline" label={t("dark_mode")}
               toggle toggleValue={isDarkMode} onToggle={toggleDarkMode}
               iconBg="rgba(99,102,241,0.1)" iconColor={C.indigo}
               isDarkMode={isDarkMode}
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="language-outline" label="Til"
+              icon="language-outline" label={t("language")}
               value={lang === "uz" ? "🇺🇿 O'zbekcha" : "🇷🇺 Русский"}
               onPress={() => setShowLangModal(true)}
               iconBg="rgba(139,92,246,0.1)" iconColor={C.purple}
@@ -845,17 +837,17 @@ export default function ProfileScreen() {
           </View>
 
           {/* ── Settings: Support ── */}
-          <SectionHeader title="Qo'llab-quvvatlash" icon="heart-outline" isDarkMode={isDarkMode} />
+          <SectionHeader title={t("section_support")} icon="heart-outline" isDarkMode={isDarkMode} />
           <View style={[s.menuCard, cardSurface, { borderWidth: 1 }]}>
             <MenuItem
-              icon="headset-outline" label="Yordam markazi"
+              icon="headset-outline" label={t("help_center")}
               onPress={() => setShowHelpModal(true)}
               iconBg="rgba(59,130,246,0.1)" iconColor={C.info}
               isDarkMode={isDarkMode}
             />
             <Sep isDarkMode={isDarkMode} />
             <MenuItem
-              icon="information-circle-outline" label="Ilova haqida" value={`v${APP_VERSION}`}
+              icon="information-circle-outline" label={t("about_app")} value={`v${APP_VERSION}`}
               onPress={() => setShowAboutModal(true)}
               iconBg="rgba(16,185,129,0.1)" iconColor={C.emerald}
               isDarkMode={isDarkMode}
@@ -865,7 +857,7 @@ export default function ProfileScreen() {
           {/* ── Logout ── */}
           <View style={[s.menuCard, cardSurface, { borderWidth: 1 }]}>
             <MenuItem
-              icon="log-out-outline" label="Tizimdan chiqish"
+              icon="log-out-outline" label={t("logout")}
               danger onPress={handleLogout} isDarkMode={isDarkMode}
             />
           </View>
@@ -890,23 +882,23 @@ export default function ProfileScreen() {
                   <Ionicons name="person-outline" size={20} color={C.textInverse} />
                 </LinearGradient>
                 <View style={{ flex: 1 }}>
-                  <Text style={[ms.hdrTitle, { color: C.text }]}>Ismni tahrirlash</Text>
-                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Ism va familiyangizni kiriting</Text>
+                  <Text style={[ms.hdrTitle, { color: C.text }]}>{t("edit_name_title")}</Text>
+                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>{t("edit_name_sub")}</Text>
                 </View>
               </View>
               <TextInput
                 style={[ms.input, { color: C.text, backgroundColor: C.inputBg, borderColor: C.inputBorder }]}
                 value={editName} onChangeText={setEditName}
-                placeholder="Ismingizni kiriting"
+                placeholder={t("name_placeholder")}
                 placeholderTextColor={C.textMuted}
                 autoFocus maxLength={50}
               />
               <View style={ms.btnRow}>
                 <Pressable style={[ms.cancelBtn, { borderColor: C.inputBorder }]} onPress={() => setShowEditModal(false)}>
-                  <Text style={[ms.cancelTxt, { color: C.textSecondary }]}>Bekor</Text>
+                  <Text style={[ms.cancelTxt, { color: C.textSecondary }]}>{t("cancel")}</Text>
                 </Pressable>
                 <Pressable style={[ms.btn, { flex: 1, backgroundColor: C.primary, opacity: savingName ? 0.6 : 1 }]} onPress={handleSaveName} disabled={savingName}>
-                  <Text style={ms.btnText}>{savingName ? "Saqlanmoqda…" : "Saqlash"}</Text>
+                  <Text style={ms.btnText}>{savingName ? t("saving") : t("save")}</Text>
                 </Pressable>
               </View>
             </Pressable>
@@ -925,14 +917,14 @@ export default function ProfileScreen() {
                   <Ionicons name="lock-closed-outline" size={20} color={C.textInverse} />
                 </LinearGradient>
                 <View style={{ flex: 1 }}>
-                  <Text style={[ms.hdrTitle, { color: C.text }]}>Parolni o'zgartirish</Text>
-                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>Kamida 8 ta belgi</Text>
+                  <Text style={[ms.hdrTitle, { color: C.text }]}>{t("change_password_title")}</Text>
+                  <Text style={[ms.hdrSub, { color: C.textSecondary }]}>{t("change_password_sub")}</Text>
                 </View>
               </View>
               {[
-                { val: oldPassword, set: setOldPassword, ph: "Eski parol", show: showOld, toggle: () => setShowOld(p => !p) },
-                { val: newPassword, set: setNewPassword, ph: "Yangi parol", show: showNew, toggle: () => setShowNew(p => !p) },
-                { val: confirmPassword, set: setConfirmPassword, ph: "Yangi parolni tasdiqlang", show: showConfirm, toggle: () => setShowConfirm(p => !p) },
+                { val: oldPassword, set: setOldPassword, ph: t("old_password_placeholder"), show: showOld, toggle: () => setShowOld(p => !p) },
+                { val: newPassword, set: setNewPassword, ph: t("new_password_placeholder"), show: showNew, toggle: () => setShowNew(p => !p) },
+                { val: confirmPassword, set: setConfirmPassword, ph: t("confirm_new_password_placeholder"), show: showConfirm, toggle: () => setShowConfirm(p => !p) },
               ].map((f, i) => (
                 <View key={i} style={[ms.pwdWrap, i > 0 && { marginTop: 10 }]}>
                   <TextInput
@@ -951,14 +943,14 @@ export default function ProfileScreen() {
                 </View>
               ))}
               <Text style={{ fontSize: 12, color: C.textSecondary, marginTop: 8 }}>
-                Kamida 8 belgi: katta/kichik harf, raqam va maxsus belgi
+                {t("password_rules")}
               </Text>
               <View style={ms.btnRow}>
                 <Pressable style={[ms.cancelBtn, { borderColor: C.inputBorder }]} onPress={() => setShowPasswordModal(false)}>
-                  <Text style={[ms.cancelTxt, { color: C.textSecondary }]}>Bekor</Text>
+                  <Text style={[ms.cancelTxt, { color: C.textSecondary }]}>{t("cancel")}</Text>
                 </Pressable>
                 <Pressable style={[ms.btn, { flex: 1, backgroundColor: C.indigo, opacity: savingPassword ? 0.6 : 1 }]} onPress={handleChangePassword} disabled={savingPassword}>
-                  <Text style={ms.btnText}>{savingPassword ? "Saqlanmoqda…" : "O'zgartirish"}</Text>
+                  <Text style={ms.btnText}>{savingPassword ? t("saving") : t("change")}</Text>
                 </Pressable>
               </View>
             </Pressable>
@@ -978,7 +970,7 @@ export default function ProfileScreen() {
           try {
             await updatePaymentMethod(v);
             setShowPaymentModal(false);
-          } catch { Alert.alert("Xatolik", "To'lov usulini saqlashda xatolik yuz berdi"); }
+          } catch { Alert.alert(t("error_title"), t("error_saving")); }
           finally { setSavingPayment(false); }
         }}
       />
