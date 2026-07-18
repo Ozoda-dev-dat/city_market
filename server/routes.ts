@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./db-storage";
 import { setupWebSocket, broadcast, sendToUser } from "./websocket";
-import { insertProductSchema, insertOrderSchema } from "@shared/schema";
+import { insertProductSchema, insertOrderSchema } from "../shared/schema";
 import * as XLSX from "xlsx";
 import { hashPassword, comparePassword, validatePasswordStrength } from "../lib/password";
 import { generateToken } from "../lib/jwt";

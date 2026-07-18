@@ -1,6 +1,6 @@
 import { 
   type User, type Product, type Category, type Order, type PromoCode, type Subcategory, type Store
-} from "@shared/schema";
+} from "../shared/schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { eq, and, isNull, desc, sql, inArray } from "drizzle-orm";
 import postgres from "postgres";
@@ -128,7 +128,7 @@ export class DbStorage implements IStorage {
           // Under bakery
           { id: "sub-non",         name: "Non mahsulotlari",    icon: "pizza",      color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "bakery" },
           // Under konservalar
-          { id: "sub-konserva",       name: "Konservalar",              icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar-" },
+          { id: "sub-konserva",       name: "Konservalar",              icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar" },
           // Under murabbo va djemlar
           { id: "sub-murabbo",        name: "Murabbo va djemlar",       icon: "heart",        color: "#DB2777", bgColor: "#FDF2F8", categoryId: "murabbo-va-djemlar" },
           // Under choy

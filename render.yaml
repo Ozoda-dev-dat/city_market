@@ -4,8 +4,9 @@ services:
     env: node
     region: frankfurt
     plan: free
-    buildCommand: npm install
-    startCommand: npx tsx server/index.ts
+    buildCommand: rm -rf node_modules && npm install --legacy-peer-deps && ./node_modules/esbuild/bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=server_dist
+    startCommand: node server_dist/index.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production

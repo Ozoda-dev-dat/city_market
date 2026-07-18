@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from './data-security';
+import { getApiUrl } from './query-client';
 
 export interface SyncQueueItem {
   id: string;
@@ -171,7 +172,7 @@ export class SyncService {
   }
 
   private async processSyncItem(item: SyncQueueItem): Promise<void> {
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001';
+    const apiUrl = getApiUrl();
     
     switch (item.type) {
       case 'cart_update':

@@ -298,13 +298,24 @@ function proxyToMetro(req: Request, res: Response) {
 }
 
 function configureExpoAndLanding(app: express.Application) {
+  // Health check — must be before Metro proxy so Render / load balancers get a 200
+  app.get("/health", (_req: Request, res: Response) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   const templatePath = path.resolve(
     process.cwd(),
     "server",
     "templates",
     "landing-page.html",
   );
-  const landingPageTemplate = fs.readFileSync(templatePath, "utf-8");
+  let landingPageTemplate = "";
+  try {
+    landingPageTemplate = fs.readFileSync(templatePath, "utf-8");
+  } catch {
+    log("Warning: landing-page.html not found, using minimal fallback");
+    landingPageTemplate = "<!DOCTYPE html><html><body><h1>City Market API</h1></body></html>";
+  }
   const appName = getAppName();
 
   log("Serving static Expo files with dynamic manifest routing");

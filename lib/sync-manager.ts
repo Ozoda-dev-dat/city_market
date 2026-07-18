@@ -1,6 +1,7 @@
 import { logger } from './data-security';
 import { offlineCache } from './offline-cache';
 import { NetworkManager } from './network-manager';
+import { getApiUrl } from './query-client';
 
 export interface SyncOperation {
   id: string;
@@ -224,7 +225,7 @@ class SyncManager {
   }
 
   private async processOperation(operation: SyncOperation): Promise<void> {
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001';
+    const apiUrl = getApiUrl();
     
     switch (operation.entity) {
       case 'cart':

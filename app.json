@@ -3,7 +3,7 @@
     "name": "City Market",
     "scheme": "citymarket",
     "slug": "citymarket",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "uz.citymarket.app",
-      "versionCode": 6,
+      "versionCode": 9,
       "adaptiveIcon": {
         "backgroundColor": "#1A9B5C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

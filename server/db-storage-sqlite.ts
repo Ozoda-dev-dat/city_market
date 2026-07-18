@@ -1,6 +1,6 @@
 import { 
   type User, type Product, type Category, type Order, type PromoCode 
-} from "@shared/schema";
+} from "../shared/schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { eq, and, isNull } from "drizzle-orm";
 import Database from "better-sqlite3";

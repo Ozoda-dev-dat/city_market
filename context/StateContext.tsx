@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, Product, Order, Category, PromoCode } from '@/shared/schema';
+import { getApiUrl } from '@/lib/query-client';
 
 // Types
 export interface CartItem extends Product {
@@ -217,7 +218,7 @@ export function StateProvider({ children }: { children: ReactNode }) {
 
   // API helper functions
   const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-    const url = `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001'}${endpoint}`;
+    const url = `${getApiUrl().replace(/\/$/, '')}${endpoint}`;
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
