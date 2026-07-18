@@ -1,7 +1,14 @@
-import { Expo, type ExpoPushMessage } from "expo-server-sdk";
 import { storage } from "./db-storage";
 
-const expo = new Expo();
+let expo: any = null;
+
+async function getExpo() {
+  if (!expo) {
+    const { Expo } = await import("expo-server-sdk");
+    expo = new Expo();
+  }
+  return expo;
+}
 
 /**
  * Send a push notification to a user, if they have a valid token and
@@ -22,12 +29,14 @@ export async function sendPushToUser(
     const enabled = (user as any).notificationsEnabled;
     if (!token || enabled === false) return;
 
-    if (!Expo.isExpoPushToken(token)) {
+    const expo = await getExpo();
+
+    if (!expo.constructor.isExpoPushToken(token)) { 
       console.warn(`Push token for user ${userId} is not a valid Expo push token, skipping`);
       return;
     }
 
-    const message: ExpoPushMessage = {
+    const message = {
       to: token,
       sound: "default",
       title,

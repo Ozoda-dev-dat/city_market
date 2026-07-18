@@ -251,7 +251,7 @@ export const authSchemas = {
   }),
 
   updateLocation: z.object({
-    userId: z.string().uuid('Invalid user ID'),
+      userId: z.string().uuid('Invalid user ID'),
     latitude: z.string().regex(/^-?\d+\.?\d*$/, 'Invalid latitude format'),
     longitude: z.string().regex(/^-?\d+\.?\d*$/, 'Invalid longitude format'),
     address: z.string().min(5, 'Address must be at least 5 characters')
