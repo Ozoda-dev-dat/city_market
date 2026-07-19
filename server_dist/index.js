@@ -1773,8 +1773,14 @@ var otpService = {
 };
 
 // server/push-service.ts
-var import_expo_server_sdk = require("expo-server-sdk");
-var expo = new import_expo_server_sdk.Expo();
+var expo = null;
+async function getExpo() {
+  if (!expo) {
+    const { Expo } = await import("expo-server-sdk");
+    expo = new Expo();
+  }
+  return expo;
+}
 async function sendPushToUser(userId, title, body, data) {
   try {
     const user = await storage.getUser(userId);
@@ -1784,7 +1790,8 @@ async function sendPushToUser(userId, title, body, data) {
     const enabled = user.notificationsEnabled;
     if (!token || enabled === false)
       return;
-    if (!import_expo_server_sdk.Expo.isExpoPushToken(token)) {
+    const expo2 = await getExpo();
+    if (!expo2.constructor.isExpoPushToken(token)) {
       console.warn(`Push token for user ${userId} is not a valid Expo push token, skipping`);
       return;
     }
@@ -1795,7 +1802,7 @@ async function sendPushToUser(userId, title, body, data) {
       body,
       data: data ?? {}
     };
-    const receipts = await expo.sendPushNotificationsAsync([message]);
+    const receipts = await expo2.sendPushNotificationsAsync([message]);
     for (const receipt of receipts) {
       if (receipt.status === "error") {
         console.error("Push notification error:", receipt.message, receipt.details);
