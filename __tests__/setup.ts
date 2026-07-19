@@ -129,10 +129,10 @@ jest.mock('react-native-gesture-handler', () => ({
   FlingGestureHandler: {},
   PanGestureHandler: {},
   PinchGestureHandler: {},
-  RotationGestureHandler:,
+  RotationGestureHandler: {},
   Swipeable: {},
   TapGestureHandler: {},
-});
+}));
 
 // Mock Expo Constants
 jest.mock('expo-constants', () => ({

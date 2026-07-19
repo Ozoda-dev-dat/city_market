@@ -252,7 +252,7 @@ export const createApiErrorHandler = (defaultContext?: Partial<ErrorContext>) =>
 /**
  * Retry wrapper for async functions
  */
-export const withRetry = async <T>(
+export const withRetry = async <T,>(
   fn: () => Promise<T>,
   options: {
     maxRetries?: number;

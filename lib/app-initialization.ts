@@ -352,6 +352,7 @@ export const createInitializationTasks = (): Omit<InitializationTask, 'id'>[] =>
         // Final optimizations would go here
         logger.info('Final optimizations completed');
       },
+    },
   ];
 };
 

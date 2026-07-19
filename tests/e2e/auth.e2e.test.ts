@@ -120,7 +120,7 @@ describe('Shopping Cart E2E Tests', () => {
     await element(by.id('password-input')).typeText('password123');
     await element(by.id('login-submit-button')).tap();
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     await element(by.id('product-item-0')).tap();
     await element(by.id('add-to-cart-button')).tap();
     await element(by.id('cart-tab')).tap();
@@ -140,7 +140,7 @@ describe('Shopping Cart E2E Tests', () => {
     await element(by.id('password-input')).typeText('password123');
     await element(by.id('login-submit-button')).tap();
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     await element(by.id('product-item-0')).tap();
     await element(by.id('add-to-cart-button')).tap();
     await element(by.id('cart-tab')).tap();
@@ -159,7 +159,7 @@ describe('Shopping Cart E2E Tests', () => {
     await element(by.id('password-input')).typeText('password123');
     await element(by.id('login-submit-button')).tap();
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     await element(by.id('product-item-0')).tap();
     await element(by.id('add-to-cart-button')).tap();
     await element(by.id('cart-tab')).tap();
@@ -187,14 +187,14 @@ describe('Product Browsing E2E Tests', () => {
     await element(by.id('products-tab')).tap();
     
     // Verify products load
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     await expect(element(by.id('product-item-0'))).toBeVisible();
   });
 
   it('should search products', async () => {
     // Navigate to products
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     
     // Search for product
     await element(by.id('search-input')).typeText('Apple');
@@ -207,7 +207,7 @@ describe('Product Browsing E2E Tests', () => {
   it('should filter products by category', async () => {
     // Navigate to products
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     
     // Open category filter
     await element(by.id('category-filter')).tap();
@@ -222,7 +222,7 @@ describe('Product Browsing E2E Tests', () => {
   it('should view product details', async () => {
     // Navigate to products
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     
     // Tap on product
     await element(by.id('product-item-0')).tap();
@@ -382,7 +382,7 @@ describe('Performance E2E Tests', () => {
     await element(by.id('products-tab')).tap();
     
     // Wait for products to load
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     
     // Scroll through list
     await element(by.id('product-list')).scrollTo('bottom');
@@ -400,7 +400,7 @@ describe('Performance E2E Tests', () => {
     
     // Add multiple items to cart
     await element(by.id('products-tab')).tap();
-    await waitFor(element(by.id('product-list')).toBeVisible();
+    await waitFor(element(by.id('product-list')).toBeVisible());
     
     const startTime = Date.now();
     

@@ -51,6 +51,7 @@ export interface BrowsingAnalysis {
     category: string;
     viewCount: number;
     lastViewed: Date;
+  }>;
   timeSpent: number;
   timeSpentByCategory: Record<string, number>;
   searchQueries: Array<{
@@ -308,7 +309,7 @@ export class MissingFeaturesService {
         }
 
         // Recent orders get higher scores
-        const daysSinceOrder = (Date.now() - new Date(order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+        const daysSinceOrder = (Date.now() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
         if (daysSinceOrder < 7) {
           score += 15;
         }
@@ -397,7 +398,7 @@ export class MissingFeaturesService {
         offers.push({
           title: 'Loyal customer discount',
           discount: 10,
-          expiresAt: new Date.now() * 7 * 24 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           applicable: true
         });
       }
@@ -407,7 +408,7 @@ export class MissingFeaturesService {
         offers.push({
           title: `${topCategory.name} special offer`,
           discount: 12,
-          expiresAt: new Date.now() + 7 * 24 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           applicable: true
         });
       }
@@ -519,7 +520,7 @@ export class MissingFeaturesService {
         .where(and(
           eq(schema.products.isActive, true),
           isNull(schema.products.deletedAt)
-        )
+        ))
         .orderBy(desc(schema.products.rating))
         .limit(limit);
     } catch (error) {
@@ -567,7 +568,7 @@ export class MissingFeaturesService {
   private async isTrendingProduct(productId: string): Promise<boolean> {
     try {
       // In production, this would check if product has high view count or sales velocity
-      const viewCount = Math.floor(Math.random() * 1000) + 500); // Mock data
+      const viewCount = Math.floor(Math.random() * 1000) + 500; // Mock data
       const salesVelocity = Math.floor(Math.random() * 10) + 1; // Mock data
       
       return viewCount > 800 || salesVelocity > 5;
@@ -592,7 +593,7 @@ export class MissingFeaturesService {
         .where(and(
           eq(schema.orders.customerId, userId),
           isNull(schema.orders.deletedAt)
-        )
+        ))
         .orderBy(desc(schema.orders.createdAt))
         .limit(10);
 
@@ -616,7 +617,7 @@ export class MissingFeaturesService {
         .where(and(
           eq(schema.productReviews.userId, userId),
           isNull(schema.productReviews.deletedAt)
-        )
+        ))
         .orderBy(desc(schema.productReviews.createdAt))
         .limit(10);
 
@@ -716,7 +717,7 @@ export class RecommendationEngine {
       .where(and(
         eq(schema.orders.customerId, userId),
         isNull(schema.orders.deletedAt)
-      )
+      ))
       .orderBy(desc(schema.orders.createdAt));
 
     const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
@@ -725,7 +726,7 @@ export class RecommendationEngine {
     const favoriteCategories = await this.getFavoriteCategories(userId);
     
     const purchaseFrequency = orders.length > 0 
-      ? Math.floor((Date.now() - new Date(orders[0].createdAt.getTime()) / (1000 * 60 * 60 * 24)) / orders.length
+      ? Math.floor((Date.now() - orders[0].createdAt.getTime()) / (1000 * 60 * 60 * 24)) / orders.length
       : 0;
 
     return {
@@ -780,7 +781,7 @@ export class RecommendationEngine {
         .filter((item, index, arr) => arr.findIndex(i => i === index))
         .map(item => item.query)
         .reduce((acc, item) => acc + 1, {})
-        .sort((a, b) => b.count - b.count)
+        .sort((a, b) => b.count - a.count)
         .slice(0, 10),
       sessionDuration: totalSessionTime / (sessionDurations.length || 1),
       bounceRate: (sessionDurations.filter(d => d.duration > 30000).length / sessionDurations.length) * 100,
@@ -790,8 +791,7 @@ export class RecommendationEngine {
           const [category, duration] = d;
           acc[category] = (acc[category] || 0) + duration;
           return acc;
-        }, {}),
-        {})
+        }, {})
       ),
     };
   }
@@ -835,7 +835,7 @@ export class RecommendationEngine {
 
       return Object.entries(categoryCounts)
         .map(([category, count]) => ({ category, count, amount }))
-        .sort((a, b) => b.count - b.count))
+        .sort((a, b) => b.count - a.count)
         .slice(0, 5);
     } catch (error) {
       console.error('Failed to get favorite categories:', error);
@@ -859,7 +859,7 @@ export class RecommendationEngine {
         .where(and(
           eq(schema.orders.customerId, userId),
           isNull(schema.orders.deletedAt),
-          gte(schema.orders.createdAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
+          gte(schema.orders.createdAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) // Last 30 days
         ))
         .orderBy(desc(schema.orders.createdAt));
 
@@ -867,8 +867,6 @@ export class RecommendationEngine {
         const month = order.createdAt.toISOString().substring(0, 7); // YYYY-MM
         const amount = order.total;
         const category = order.items?.[0]?.category || 'uncategorized';
-        const acc = acc[month] || {};
-        
         acc[month] = (acc[month] || 0) + amount;
         return acc;
       }, {});
@@ -920,10 +918,10 @@ export class RecommendationEngine {
           acc[category] = (acc[category] || 'unknown') + 1;
           return acc;
         }, {})
-        .sort((a, b) => a.timestamp.getTime() - b.timestamp))
-        .slice(0, 10))
-        .sort((a, b) => b.count - b.count))
-        .slice(0, 5));
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+        .slice(0, 10)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
 
       return categoryViews;
     } catch (error) {
