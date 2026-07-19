@@ -8,7 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemedBackground } from "@/components/ThemedBackground";
-import { queryClient, getApiUrl } from "@/lib/query-client";
+import { queryClient } from "@/lib/query-client";
 import { CartProvider } from "@/context/CartContext";
 import { AppProvider } from "@/context/ProductsContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -92,15 +92,11 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const apiUrl = getApiUrl();
   const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
-    ionicons: { uri: `${apiUrl}/assets/fonts/Ionicons.ttf` },
-    MaterialCommunityIcons: { uri: `${apiUrl}/assets/fonts/MaterialCommunityIcons.ttf` },
-    FontAwesome: { uri: `${apiUrl}/assets/fonts/FontAwesome.ttf` },
   });
 
   const [fontTimedOut, setFontTimedOut] = useState(false);
