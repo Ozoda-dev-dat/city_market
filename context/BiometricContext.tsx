@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as LocalAuthentication from 'expo-local-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 type BiometricContextType = {
   isSupported: boolean;
@@ -25,6 +26,10 @@ export function BiometricProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const checkSupport = async () => {
+    if (Platform.OS === 'web') {
+      setIsSupported(false);
+      return;
+    }
     try {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
