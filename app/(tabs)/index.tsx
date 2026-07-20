@@ -408,11 +408,14 @@ export default function HomeScreen() {
   const bannerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startBannerAutoScroll = useCallback(() => {
+    if (BANNERS.length <= 1) return;
     if (bannerIntervalRef.current) clearInterval(bannerIntervalRef.current);
     bannerIntervalRef.current = setInterval(() => {
       setActiveBanner((prev) => {
         const next = (prev + 1) % BANNERS.length;
-        scrollRef.current?.scrollToIndex({ index: next, animated: true });
+        try {
+          scrollRef.current?.scrollToIndex({ index: next, animated: true });
+        } catch (_) {}
         return next;
       });
     }, 3500);

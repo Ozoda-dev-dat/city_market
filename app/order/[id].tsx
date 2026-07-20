@@ -25,9 +25,13 @@ import { Order } from "@/shared/schema";
 let MapView: any = null;
 let Marker: any = null;
 if (Platform.OS !== "web") {
-  const Maps = require("react-native-maps");
-  MapView = Maps.default;
-  Marker = Maps.Marker;
+  try {
+    const Maps = require("react-native-maps");
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+  } catch (e) {
+    console.warn("[Maps] react-native-maps failed to load:", e);
+  }
 }
 
 interface Coord {
