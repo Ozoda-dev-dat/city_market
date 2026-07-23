@@ -49,10 +49,10 @@ function MenuItem({
       style={styles.menuItem}
       onPress={onPress}
     >
-      <View style={styles.menuIcon}>
+      <View style={[styles.menuIcon, color ? { backgroundColor: color + "18" } : { backgroundColor: Colors.primaryLight }]}>
         <Ionicons name={icon as any} size={20} color={color || Colors.primary} />
       </View>
-      <Text style={styles.menuLabel}>{label}</Text>
+      <Text style={[styles.menuLabel, color ? { color } : {}]}>{label}</Text>
       {toggle ? (
         <Switch
           value={toggleValue}
@@ -61,7 +61,10 @@ function MenuItem({
           thumbColor={Colors.background}
         />
       ) : (
-        value && <Text style={styles.menuValue}>{value}</Text>
+        <View style={styles.menuRight}>
+          {value && <Text style={styles.menuValue}>{value}</Text>}
+          {onPress && <Ionicons name="chevron-forward" size={16} color={Colors.textMuted} />}
+        </View>
       )}
     </Pressable>
   );
@@ -122,38 +125,46 @@ export default function ProfileScreen() {
 
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarEmoji}>👤</Text>
-          <Text style={styles.avatarEmoji}>👤</Text>
+            <Text style={styles.avatarLetter}>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{user.name}</Text>
+            <Text style={styles.profilePhone}>{user.phoneNumber}</Text>
+            <View style={styles.profileBadge}>
+              <Ionicons name="star" size={12} color="#F59E0B" />
+              <Text style={styles.profileBadgeText}>
+                {user.role === 'admin' ? 'Admin' : user.role === 'courier' ? 'Kuryer' : 'Mijoz'}
+              </Text>
+            </View>
+          </View>
+          <Pressable style={styles.editBtn} onPress={() => Alert.alert("Tahrir", "Profilni tahrirlash funksiyasi tez orada qo'shiladi")}>
+            <Ionicons name="create-outline" size={18} color={Colors.primary} />
+          </Pressable>
         </View>
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{user.name}</Text>
-          <Text style={styles.profilePhone}>{user.phoneNumber}</Text>
-          <View style={styles.profileBadge}>
-            <Ionicons name="star" size={12} color="#F59E0B" />
-            <Text style={styles.profileBadgeText}>
-              {user.role === 'admin' ? 'Admin' : user.role === 'courier' ? 'Kuryer' : 'Mijoz'}
-            </Text>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconWrap}>
+              <Ionicons name="receipt-outline" size={18} color={Colors.primary} />
+            </View>
+            <Text style={styles.statValue}>{userOrders.length}</Text>
+            <Text style={styles.statLabel}>Buyurtmalar</Text>
+          </View>
+          <View style={[styles.statCard, styles.statCardCenter]}>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+              <Ionicons name="bag-handle-outline" size={18} color="#fff" />
+            </View>
+            <Text style={[styles.statValue, styles.statValueLight]}>{totalItems}</Text>
+            <Text style={[styles.statLabel, styles.statLabelLight]}>Savatda</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconWrap}>
+              <Ionicons name="star-outline" size={18} color={Colors.primary} />
+            </View>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Ballar</Text>
           </View>
         </View>
-        <Pressable style={styles.editBtn} onPress={() => Alert.alert("Tahrir", "Profilni tahrirlash funksiyasi tez orada qo'shiladi")}>
-          <Ionicons name="create-outline" size={18} color={Colors.primary} />
-        </Pressable>
-      </View>
-
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{userOrders.length}</Text>
-          <Text style={styles.statLabel}>Buyurtmalar</Text>
-        </View>
-        <View style={[styles.statCard, styles.statCardCenter]}>
-          <Text style={[styles.statValue, styles.statValueLight]}>{totalItems}</Text>
-          <Text style={[styles.statLabel, styles.statLabelLight]}>Savatda</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>0</Text>
-          <Text style={styles.statLabel}>Ballar</Text>
-        </View>
-      </View>
 
       <Text style={styles.sectionTitle}>So&apos;nggi buyurtmalar</Text>
 
@@ -340,13 +351,15 @@ const getStyles = (isDarkMode: boolean) => {
   avatarContainer: {
     width: 64,
     height: 64,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primary,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarEmoji: {
-    fontSize: 30,
+  avatarLetter: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 28,
+    color: "#fff",
   },
   profileInfo: {
     flex: 1,
@@ -396,6 +409,7 @@ const getStyles = (isDarkMode: boolean) => {
     borderRadius: 16,
     padding: 14,
     alignItems: "center",
+    gap: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -405,9 +419,18 @@ const getStyles = (isDarkMode: boolean) => {
   statCardCenter: {
     backgroundColor: Colors.primary,
   },
+  statIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
   statValue: {
     fontFamily: "Poppins_700Bold",
-    fontSize: 22,
+    fontSize: 20,
     color: Colors.text,
   },
   statValueLight: {
@@ -415,8 +438,9 @@ const getStyles = (isDarkMode: boolean) => {
   },
   statLabel: {
     fontFamily: "Poppins_400Regular",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.textSecondary,
+    textAlign: "center",
   },
   statLabelLight: {
     color: "rgba(255,255,255,0.8)",

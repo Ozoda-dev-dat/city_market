@@ -316,14 +316,14 @@ const getStyles = (isDarkMode: boolean) => {
       }),
     },
     searchBar: {
-      backgroundColor: Colors.glass,
+      backgroundColor: Colors.card,
       borderRadius: 16,
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 16,
       paddingVertical: 14,
       marginBottom: 20,
-      borderWidth: 1,
+      borderWidth: 1.5,
       borderColor: Colors.cardBorder,
       ...Platform.select({
         ios: {
@@ -333,7 +333,7 @@ const getStyles = (isDarkMode: boolean) => {
           shadowRadius: 12,
         },
         android: {
-          elevation: 8,
+          elevation: 6,
         },
       }),
     },

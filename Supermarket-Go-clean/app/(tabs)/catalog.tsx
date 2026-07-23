@@ -148,9 +148,11 @@ export default function CatalogScreen() {
 
       {filtered.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="search" size={48} color={Colors.textMuted} />
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="cube-outline" size={40} color={Colors.textMuted} />
+          </View>
           <Text style={styles.emptyTitle}>Mahsulot topilmadi</Text>
-          <Text style={styles.emptySubtitle}>Qidiruv yoki filtrni o&apos;zgartirib ko&apos;ring</Text>
+          <Text style={styles.emptySubtitle}>Bu bo&apos;limda hali mahsulot yo&apos;q</Text>
         </View>
       ) : (
         <FlatList
@@ -213,6 +215,8 @@ const getStyles = (isDarkMode: boolean) => {
       paddingHorizontal: 14,
       paddingVertical: 11,
       gap: 8,
+      borderWidth: 1.5,
+      borderColor: Colors.cardBorder,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
@@ -286,8 +290,22 @@ const getStyles = (isDarkMode: boolean) => {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
+      gap: 10,
       paddingBottom: 60,
+    },
+    emptyIconWrap: {
+      width: 88,
+      height: 88,
+      borderRadius: 24,
+      backgroundColor: Colors.card,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 4,
     },
     emptyTitle: {
       fontFamily: "Poppins_600SemiBold",
