@@ -29,6 +29,8 @@ function ClassicTabLayout() {
         tabBarItemStyle: {
           paddingVertical: 0,
           marginHorizontal: 4,
+          justifyContent: "center",
+          alignItems: "center",
         },
         tabBarStyle: {
           position: "absolute",
