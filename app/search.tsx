@@ -76,7 +76,7 @@ export default function SearchScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <LinearGradient colors={bgColors} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={bgColors} style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]} />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 10 }]}>
@@ -109,6 +109,7 @@ export default function SearchScreen() {
             <Ionicons name="search" size={16} color={Colors.primary} style={{ marginLeft: 4 }} />
             <TextInput
               ref={inputRef}
+              autoFocus
               style={[styles.searchInput, { color: Colors.text }]}
               placeholder="Mahsulot yoki kategoriya..."
               placeholderTextColor={Colors.textMuted}
