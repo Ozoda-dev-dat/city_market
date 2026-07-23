@@ -520,7 +520,7 @@ export default function HomeScreen() {
               borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
             }
           ]}
-          onPress={() => {}}
+          onPress={() => router.push("/search")}
         >
           <View style={[styles.searchIconWrap, { backgroundColor: isDarkMode ? "rgba(22,163,74,0.2)" : "rgba(22,163,74,0.12)" }]}>
             <Ionicons name="search" size={16} color={Colors.primary} />
