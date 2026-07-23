@@ -27,10 +27,17 @@ function ClassicTabLayout() {
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textMuted,
         tabBarItemStyle: {
+          height: 62,
           paddingVertical: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
           marginHorizontal: 4,
           justifyContent: "center",
           alignItems: "center",
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
+          marginBottom: 0,
         },
         tabBarStyle: {
           position: "absolute",
@@ -39,6 +46,8 @@ function ClassicTabLayout() {
           height: 62,
           borderRadius: 31,
           paddingHorizontal: 20,
+          paddingTop: 0,
+          paddingBottom: 0,
           backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
           borderTopWidth: 0,
         },
