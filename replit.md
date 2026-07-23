@@ -31,14 +31,12 @@ To reset/re-apply the schema:
 npx drizzle-kit push --force
 ```
 
-To seed initial data (categories, admin user, sample products):
+To seed an admin user and sample products (development only):
 ```bash
-npm run db:setup
+SEED_ADMIN_PHONE=+998901234567 SEED_ADMIN_PASSWORD=YourPassword tsx scripts/seed-admin.ts
 ```
 
-Default admin credentials (development only):
-- Phone: `+998978562020`
-- Password: `Odamboy1307`
+Replace the phone and password with your own values. The script refuses to run in `NODE_ENV=production`.
 
 ## User Roles
 

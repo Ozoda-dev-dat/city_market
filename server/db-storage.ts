@@ -119,7 +119,7 @@ export class DbStorage implements IStorage {
           await this.db.insert(schema.categories).values(cat);
         }
 
-        // Create default subcategories
+        // Create default subcategories — only reference category IDs defined above
         const subcats = [
           // Under fruits
           { id: "sub-mevalar",    name: "Mevalar",              icon: "nutrition",  color: "#FF6B35", bgColor: "#FFF0EB", categoryId: "fruits" },
@@ -128,47 +128,19 @@ export class DbStorage implements IStorage {
           // Under bakery
           { id: "sub-non",         name: "Non mahsulotlari",    icon: "pizza",      color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "bakery" },
           // Under konservalar
-          { id: "sub-konserva",       name: "Konservalar",              icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar" },
-          // Under murabbo va djemlar
-          { id: "sub-murabbo",        name: "Murabbo va djemlar",       icon: "heart",        color: "#DB2777", bgColor: "#FDF2F8", categoryId: "murabbo-va-djemlar" },
-          // Under choy
-          { id: "sub-choy",           name: "Choy",                     icon: "cafe",         color: "#6B7280", bgColor: "#F3F4F6", categoryId: "choy" },
-          // Under coffee category
-          { id: "sub-coffee-cat",     name: "Coffee",                   icon: "cafe",         color: "#6F4E37", bgColor: "#F5ECE5", categoryId: "coffee" },
-          // Under ketchuplar
-          { id: "sub-ketchup",        name: "Ketchuplar",               icon: "fast-food",    color: "#DC2626", bgColor: "#FEF2F2", categoryId: "ketchuplar" },
-          // Under makaron
-          { id: "sub-makaron",        name: "Makaron, un va yormalar",  icon: "restaurant",   color: "#D97706", bgColor: "#FFFBEB", categoryId: "makaron-un-yormalar" },
-          // Under mayonezlar
-          { id: "sub-mayonez",        name: "Mayonezlar",               icon: "restaurant",   color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "mayonezlar" },
-          // Under sharbatlar category
-          { id: "sub-sharbat-cat",    name: "Sharbatlar",               icon: "wine",         color: "#F97316", bgColor: "#FFF7ED", categoryId: "sharbatlar" },
+          { id: "sub-konserva",    name: "Konservalar",          icon: "cube-outline", color: "#374151", bgColor: "#F3F4F6", categoryId: "konservalar" },
           // Under shokoladlar
-          { id: "sub-shokolad",       name: "Shokoladlar",              icon: "gift-outline", color: "#92400E", bgColor: "#FEF3C7", categoryId: "shokoladlar" },
-          // Under shokolatli-pastalar
-          { id: "sub-pasta",          name: "Shokolatli pastalar",      icon: "cafe",         color: "#78350F", bgColor: "#FEF3C7", categoryId: "shokolatli-pastalar" },
-          // Under yog-va-souslar
-          { id: "sub-yog",            name: "Yog va souslar",           icon: "flask",        color: "#FBBF24", bgColor: "#FFFBEB", categoryId: "yog-va-souslar" },
-          // Under yongok-va-sneklar
-          { id: "sub-sneklar",        name: "Yongok va sneklar",        icon: "pizza",        color: "#D97706", bgColor: "#FEF3C7", categoryId: "yongok-va-sneklar" },
-          // Under bolalar-ovqatlar
-          { id: "sub-bolalar",        name: "Bolalar ovqatlar",         icon: "heart",        color: "#F472B6", bgColor: "#FDF2F8", categoryId: "bolalar-ovqatlar" },
-          // Under oyinchoqlar
-          { id: "sub-oyinchoq",       name: "Oyinchoqlar",              icon: "gift-outline", color: "#8B5CF6", bgColor: "#F5F3FF", categoryId: "oyinchoqlar" },
-          // Under shampunlar
-          { id: "sub-shampun",        name: "Shampunlar",               icon: "water",        color: "#06B6D4", bgColor: "#ECFEFF", categoryId: "shampunlar" },
-          // Under tagliklar
-          { id: "sub-taglik",         name: "Tagliklar",                icon: "cube-outline", color: "#6B7280", bgColor: "#F9FAFB", categoryId: "tagliklar" },
+          { id: "sub-shokolad",    name: "Shokoladlar",          icon: "gift-outline", color: "#92400E", bgColor: "#FEF3C7", categoryId: "shokoladlar" },
           // Under ichimliklar
-          { id: "sub-energetik",  name: "Energetik ichimliklar",icon: "flash",      color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
+          { id: "sub-energetik",   name: "Energetik ichimliklar", icon: "flash",    color: "#F59E0B", bgColor: "#FEF3C7", categoryId: "ichimliklar" },
           // Under meat
-          { id: "sub-gosht",      name: "Go'sht",               icon: "flame",      color: "#EF4444", bgColor: "#FEF2F2", categoryId: "meat" },
-          { id: "sub-kolbasa",    name: "Kolbasa mahsulotlari", icon: "fast-food",  color: "#DC2626", bgColor: "#FEF2F2", categoryId: "meat" },
+          { id: "sub-gosht",       name: "Go'sht",               icon: "flame",     color: "#EF4444", bgColor: "#FEF2F2", categoryId: "meat" },
+          { id: "sub-kolbasa",     name: "Kolbasa mahsulotlari", icon: "fast-food", color: "#DC2626", bgColor: "#FEF2F2", categoryId: "meat" },
           // Under dairy
-          { id: "sub-pishloq",    name: "Pishloq",              icon: "restaurant", color: "#FBBF24", bgColor: "#FFFBEB", categoryId: "dairy" },
-          { id: "sub-qatiq",      name: "Qatiq mahsulotlari",   icon: "water",      color: "#3B82F6", bgColor: "#EFF6FF", categoryId: "dairy" },
-          { id: "sub-tuxum",      name: "Tuxum mahsulotlari",   icon: "egg",        color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "dairy" },
-          { id: "sub-yogurt",     name: "Yogurt",               icon: "water",      color: "#8B5CF6", bgColor: "#F5F3FF", categoryId: "dairy" },
+          { id: "sub-pishloq",     name: "Pishloq",              icon: "restaurant", color: "#FBBF24", bgColor: "#FFFBEB", categoryId: "dairy" },
+          { id: "sub-qatiq",       name: "Qatiq mahsulotlari",   icon: "water",     color: "#3B82F6", bgColor: "#EFF6FF", categoryId: "dairy" },
+          { id: "sub-tuxum",       name: "Tuxum mahsulotlari",   icon: "egg",       color: "#F59E0B", bgColor: "#FFFBEB", categoryId: "dairy" },
+          { id: "sub-yogurt",      name: "Yogurt",               icon: "water",     color: "#8B5CF6", bgColor: "#F5F3FF", categoryId: "dairy" },
         ];
 
         for (const sub of subcats) {
@@ -178,26 +150,9 @@ export class DbStorage implements IStorage {
         console.log("✅ Default categories and subcategories created");
       }
 
-      // Check if admin user exists
-      const existingAdmin = await this.db
-        .select()
-        .from(schema.users)
-        .where(eq(schema.users.role, "admin"))
-        .limit(1);
-
-      if (existingAdmin.length === 0) {
-        const bcrypt = await import('bcryptjs');
-        const hashedPassword = await bcrypt.hash("Odamboy1307", 10);
-        // Create default admin
-        await this.db.insert(schema.users).values({
-          phoneNumber: "+998978562020",
-          password: hashedPassword,
-          role: "admin",
-          name: "Admin"
-        });
-        
-        console.log("✅ Default admin user created");
-      }
+      // NOTE: Admin user is NOT auto-created here.
+      // Run `tsx scripts/seed-admin.ts` with SEED_ADMIN_PHONE and SEED_ADMIN_PASSWORD
+      // env vars set to create an admin account explicitly.
 
       // Create sample products if none exist
       const existingProducts = await this.db.select().from(schema.products);
