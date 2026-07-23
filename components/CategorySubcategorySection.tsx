@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: GAP,
     marginBottom: GAP,
-    paddingHorizontal: H_PAD,
   },
   tile: {
     width: TILE_W,
