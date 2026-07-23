@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "uz.citymarket.app"
+      "bundleIdentifier": "https://city-market.onrender.com"
     },
     "android": {
-      "package": "uz.citymarket.app",
+      "package": "https://city-market.onrender.com",
       "versionCode": 15,
       "adaptiveIcon": {
         "backgroundColor": "#1A9B5C",
