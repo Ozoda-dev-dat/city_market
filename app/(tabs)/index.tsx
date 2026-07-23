@@ -835,11 +835,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginBottom: 22,
     borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    elevation: 6,
   },
   searchIconWrap: {
     width: 32,

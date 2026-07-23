@@ -38,11 +38,6 @@ function ClassicTabLayout() {
           borderRadius: 31,
           paddingHorizontal: 20,
           backgroundColor: isDarkMode ? "#1C1C1E" : "#FFFFFF",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: isDarkMode ? 0.4 : 0.14,
-          shadowRadius: 24,
-          elevation: 16,
           borderTopWidth: 0,
         },
         tabBarBackground: () =>

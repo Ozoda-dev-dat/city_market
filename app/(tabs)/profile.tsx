@@ -1029,7 +1029,6 @@ const s = StyleSheet.create({
   /* stats */
   statsCard: {
     flexDirection: "row", borderRadius: 20, borderWidth: 1, paddingVertical: 14,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 4,
   },
   statItem: { flex: 1, alignItems: "center", gap: 3 },
   statDiv: { width: 1, marginVertical: 6 },
@@ -1097,7 +1096,6 @@ const s = StyleSheet.create({
   /* menu card */
   menuCard: {
     borderRadius: 20, borderWidth: 1, overflow: "hidden",
-    shadowColor: "#000", shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.07, shadowRadius: 12, elevation: 4,
   },
   menuRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 14, gap: 13 },
   menuIcon: { width: 36, height: 36, borderRadius: 11, alignItems: "center", justifyContent: "center" },
