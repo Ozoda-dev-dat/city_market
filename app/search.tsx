@@ -125,23 +125,6 @@ export default function SearchScreen() {
             )}
           </View>
 
-          <Pressable
-            style={[
-              styles.cartBtn,
-              {
-                backgroundColor: isDarkMode ? "rgba(28,28,30,0.75)" : "rgba(255,255,255,0.8)",
-                borderColor: isDarkMode ? "rgba(255,255,255,0.09)" : "rgba(255,255,255,0.9)",
-              },
-            ]}
-            onPress={() => router.push("/(tabs)/cart")}
-          >
-            <Ionicons name="bag-outline" size={20} color={Colors.text} />
-            {cartCount > 0 && (
-              <View style={[styles.cartBadge, { backgroundColor: Colors.primary }]}>
-                <Text style={styles.cartBadgeText}>{cartCount > 9 ? "9+" : cartCount}</Text>
-              </View>
-            )}
-          </Pressable>
         </View>
       </View>
 
