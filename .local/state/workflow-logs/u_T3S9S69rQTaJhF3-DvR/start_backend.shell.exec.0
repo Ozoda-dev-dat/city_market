@@ -1,0 +1,122 @@
+
+> expo-app@1.0.0 server:dev
+> tsx server/index.ts
+
+[1G[0K◇ injected env (0) from .env [2m// tip: ◈ secrets for agents [www.dotenvx.com][0m
+Serving static Expo files with dynamic manifest routing
+Expo routing: Proxying Expo Go requests to Metro on port 8080
+✅ Environment validation passed
+📊 Environment: development
+🌐 Port: 5000
+🔐 Log Level: info
+[WS] WebSocket server attached on /ws
+express server serving on port 5000
+Security features enabled: Basic headers, Rate limiting, CORS, Input validation, XSS protection, SQL injection protection
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "otp_codes" already exists, skipping'[39m,
+  file: [32m'parse_utilcmd.c'[39m,
+  line: [32m'210'[39m,
+  routine: [32m'transformCreateStmt'[39m
+}
+{
+  severity_local: [32m'NOTICE'[39m,
+  severity: [32m'NOTICE'[39m,
+  code: [32m'42P07'[39m,
+  message: [32m'relation "idx_otp_phone" already exists, skipping'[39m,
+  file: [32m'index.c'[39m,
+  line: [32m'880'[39m,
+  routine: [32m'index_create'[39m
+}
+[2026-07-23T07:13:14.174Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:13:14.179Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:13:14.181Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 200 in 33ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-07-23T07:13:14.206Z] [INFO] GET /api/categories - 200 - 27ms - IP: 127.0.0.1
+GET /api/products 200 in 28ms :: [{"id":"apple-1","name":"Qizil olma","category…
+[2026-07-23T07:13:14.208Z] [INFO] GET /api/products - 200 - 27ms - IP: 127.0.0.1
+GET /api/subcategories 200 in 69ms :: [{"id":"sub-mevalar","name":"Mevalar","ic…
+[2026-07-23T07:13:14.241Z] [INFO] GET /api/subcategories - 200 - 67ms - IP: 127.0.0.1
+[2026-07-23T07:14:14.493Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 3ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:14:14.496Z] [INFO] GET /api/categories - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:14:14.498Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:14:14.499Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 2ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:14:14.501Z] [INFO] GET /api/products - 304 - 2ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 4ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:14:14.502Z] [INFO] GET /api/subcategories - 304 - 4ms - IP: 127.0.0.1
+[2026-07-23T07:15:14.806Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:15:14.813Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 12ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-07-23T07:15:14.816Z] [INFO] GET /api/categories - 304 - 10ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 4ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:15:14.817Z] [INFO] GET /api/subcategories - 304 - 4ms - IP: 127.0.0.1
+[2026-07-23T07:15:14.884Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 5ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:15:14.888Z] [INFO] GET /api/products - 304 - 4ms - IP: 127.0.0.1
+[2026-07-23T07:16:16.072Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 3ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:16:16.075Z] [INFO] GET /api/subcategories - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:16:16.158Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 3ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:16:16.161Z] [INFO] GET /api/categories - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:16:16.372Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 2ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:16:16.375Z] [INFO] GET /api/products - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:17:16.425Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 8ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:17:16.433Z] [INFO] GET /api/subcategories - 304 - 8ms - IP: 127.0.0.1
+[2026-07-23T07:17:16.463Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 2ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:17:16.466Z] [INFO] GET /api/categories - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:17:16.645Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 2ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:17:16.647Z] [INFO] GET /api/products - 304 - 2ms - IP: 127.0.0.1
+[2026-07-23T07:18:14.709Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:18:14.713Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:18:14.714Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 13ms :: [{"id":"apple-1","name":"Qizil olma","category…
+[2026-07-23T07:18:14.720Z] [INFO] GET /api/products - 304 - 11ms - IP: 127.0.0.1
+GET /api/categories 304 in 9ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:18:14.722Z] [INFO] GET /api/categories - 304 - 9ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 9ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:18:14.723Z] [INFO] GET /api/subcategories - 304 - 9ms - IP: 127.0.0.1
+[2026-07-23T07:22:37.498Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:22:37.504Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:22:37.507Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/categories 304 in 9ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:22:37.513Z] [INFO] GET /api/categories - 304 - 9ms - IP: 127.0.0.1
+GET /api/products 304 in 7ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:22:37.514Z] [INFO] GET /api/products - 304 - 7ms - IP: 127.0.0.1
+GET /api/subcategories 304 in 19ms :: [{"id":"sub-mevalar","name":"Mevalar","ic…
+[2026-07-23T07:22:37.515Z] [INFO] GET /api/subcategories - 304 - 17ms - IP: 127.0.0.1
+[2026-07-23T07:22:45.021Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:22:45.023Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:22:45.024Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 5ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:22:45.025Z] [INFO] GET /api/subcategories - 304 - 4ms - IP: 127.0.0.1
+GET /api/products 304 in 4ms :: [{"id":"apple-1","name":"Qizil olma","category"…
+[2026-07-23T07:22:45.025Z] [INFO] GET /api/products - 304 - 2ms - IP: 127.0.0.1
+GET /api/categories 304 in 3ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:22:45.026Z] [INFO] GET /api/categories - 304 - 2ms - IP: 127.0.0.1
+[2026-07-23T07:24:30.358Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:24:30.361Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/products 304 in 10ms :: [{"id":"apple-1","name":"Qizil olma","category…
+[2026-07-23T07:24:30.367Z] [INFO] GET /api/products - 304 - 6ms - IP: 127.0.0.1
+GET /api/categories 304 in 11ms :: [{"id":"fruits","name":"Mevalar","icon":"nut…
+[2026-07-23T07:24:30.368Z] [INFO] GET /api/categories - 304 - 10ms - IP: 127.0.0.1
+[2026-07-23T07:24:30.376Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 3ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:24:30.379Z] [INFO] GET /api/subcategories - 304 - 3ms - IP: 127.0.0.1
+[2026-07-23T07:24:50.121Z] GET /api/products - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:24:50.123Z] GET /api/subcategories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+[2026-07-23T07:24:50.125Z] GET /api/categories - IP: 127.0.0.1 - User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+GET /api/subcategories 304 in 6ms :: [{"id":"sub-mevalar","name":"Mevalar","ico…
+[2026-07-23T07:24:50.129Z] [INFO] GET /api/subcategories - 304 - 6ms - IP: 127.0.0.1
+GET /api/categories 304 in 6ms :: [{"id":"fruits","name":"Mevalar","icon":"nutr…
+[2026-07-23T07:24:50.131Z] [INFO] GET /api/categories - 304 - 6ms - IP: 127.0.0.1
+GET /api/products 304 in 10ms :: [{"id":"apple-1","name":"Qizil olma","category…
+[2026-07-23T07:24:50.131Z] [INFO] GET /api/products - 304 - 10ms - IP: 127.0.0.1
